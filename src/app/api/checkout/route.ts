@@ -1,0 +1,64 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ requiresLogin: true }, { status: 401 });
+  }
+
+  const { courseId } = await request.json();
+
+  const { data: course, error } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("id", courseId)
+    .eq("is_published", true)
+    .single();
+
+  if (error || !course) {
+    return NextResponse.json({ error: "কোর্সটি পাওয়া যায়নি" }, { status: 404 });
+  }
+
+  if (course.price === 0) {
+    await supabase.from("enrollments").insert({
+      user_id: user.id,
+      course_id: course.id,
+    });
+    return NextResponse.json({ url: `${appUrl}/dashboard` });
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency: "bdt",
+          product_data: {
+            name: course.title,
+            description: course.description ?? undefined,
+          },
+          unit_amount: Math.round(course.price * 100),
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      courseId: course.id,
+      userId: user.id,
+    },
+    success_url: `${appUrl}/dashboard?payment=success`,
+    cancel_url: `${appUrl}/courses/${course.slug}`,
+  });
+
+  return NextResponse.json({ url: session.url });
+}
