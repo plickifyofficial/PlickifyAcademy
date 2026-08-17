@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toaster";
 import { formatPrice } from "@/lib/format";
 import { previewCoupon } from "@/lib/actions/coupons";
+import { submitManualPayment } from "@/lib/actions/payments";
+
+const BKASH_NUMBER = process.env.NEXT_PUBLIC_BKASH_NUMBER ?? "";
+const NAGAD_NUMBER = process.env.NEXT_PUBLIC_NAGAD_NUMBER ?? "";
 
 type Props = {
   courseId: string;
@@ -18,6 +22,14 @@ export function CheckoutButton({ courseId, price }: Props) {
   const [code, setCode] = useState("");
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [discounted, setDiscounted] = useState<number | null>(null);
+
+  const [step, setStep] = useState<"idle" | "pay" | "done">("idle");
+  const [method, setMethod] = useState<"bkash" | "nagad">("bkash");
+  const [senderNumber, setSenderNumber] = useState("");
+  const [trxId, setTrxId] = useState("");
+
+  const finalPrice = discounted ?? price;
+  const merchantNumber = method === "bkash" ? BKASH_NUMBER : NAGAD_NUMBER;
 
   async function handleApply() {
     if (!code.trim()) return;
@@ -36,31 +48,43 @@ export function CheckoutButton({ courseId, price }: Props) {
     }
   }
 
-  async function handleCheckout() {
+  async function handleSubmitPayment() {
     setPending(true);
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ courseId, couponCode }),
+    const result = await submitManualPayment({
+      courseId,
+      couponCode,
+      method,
+      senderNumber,
+      trxId,
     });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setPending(false);
-      if (data.requiresLogin) {
+    setPending(false);
+
+    if (result.error) {
+      if (result.error === "পেমেন্ট করতে লগইন করুন") {
         router.push("/login");
       } else {
-        showToast(data.error ?? "পেমেন্ট শুরু করা যায়নি", "error");
+        showToast(result.error, "error");
       }
       return;
     }
 
-    const { url } = await res.json();
-    setPending(false);
-    if (url) window.location.href = url;
+    setStep("done");
   }
 
-  const finalPrice = discounted ?? price;
+  if (step === "done") {
+    return (
+      <div className="rounded-xl border border-green-400/40 bg-green-500/15 p-4 text-white">
+        <p className="font-semibold">
+          <i className="fa-solid fa-check-circle mr-1" /> পেমেন্ট জমা হয়েছে!
+        </p>
+        <p className="mt-1 text-sm text-white/80">
+          আপনার TrxID ({trxId}) যাচাই করে কোর্স এনরোল করা হবে। সাধারণত ৫–৩০ মিনিট
+          লাগে। এনরোল হলে আপনি নোটিফিকেশন পাবেন।
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -89,13 +113,76 @@ export function CheckoutButton({ courseId, price }: Props) {
         </div>
       )}
 
-      <button
-        onClick={handleCheckout}
-        disabled={pending}
-        className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
-      >
-        {pending ? "রিডাইরেক্ট হচ্ছে..." : `এখনই কিনুন — ${formatPrice(finalPrice)}`}
-      </button>
+      {step === "idle" && (
+        <button
+          onClick={() => setStep("pay")}
+          disabled={pending}
+          className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
+        >
+          {pending ? "অপেক্ষা করুন..." : `এখনই কিনুন — ${formatPrice(finalPrice)}`}
+        </button>
+      )}
+
+      {step === "pay" && (
+        <div className="rounded-xl border border-white/30 bg-white/10 p-4 text-white">
+          <p className="text-sm font-semibold">পেমেন্ট করুন</p>
+          <p className="mt-1 text-sm text-white/80">
+            ১. নিচের নাম্বারে <b>{formatPrice(finalPrice)}</b> পাঠান
+          </p>
+
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setMethod("bkash")}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                method === "bkash"
+                  ? "bg-pink-600 text-white"
+                  : "border border-white/40 text-white hover:bg-white/20"
+              }`}
+            >
+              bKash
+            </button>
+            <button
+              type="button"
+              onClick={() => setMethod("nagad")}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                method === "nagad"
+                  ? "bg-orange-600 text-white"
+                  : "border border-white/40 text-white hover:bg-white/20"
+              }`}
+            >
+              Nagad
+            </button>
+          </div>
+
+          <div className="mt-3 rounded-lg bg-white/10 px-3 py-2 text-center text-lg font-bold tracking-wider">
+            {merchantNumber || "নাম্বার সেট করা হয়নি"}
+          </div>
+
+          <div className="mt-3 space-y-2">
+            <input
+              value={senderNumber}
+              onChange={(e) => setSenderNumber(e.target.value)}
+              placeholder={`আপনার ${method === "bkash" ? "bKash" : "Nagad"} নাম্বার`}
+              className="w-full rounded-lg border border-white/40 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
+            />
+            <input
+              value={trxId}
+              onChange={(e) => setTrxId(e.target.value)}
+              placeholder="Transaction ID (TrxID)"
+              className="w-full rounded-lg border border-white/40 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
+            />
+          </div>
+
+          <button
+            onClick={handleSubmitPayment}
+            disabled={pending || !trxId.trim() || !senderNumber.trim()}
+            className="mt-3 w-full rounded-lg bg-white px-6 py-2.5 font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
+          >
+            {pending ? "জমা হচ্ছে..." : "পেমেন্ট জমা দিন"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
