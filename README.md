@@ -44,7 +44,10 @@ cp .env.example .env.local   # সব key ভরে নিন
 
 1. [supabase.com](https://supabase.com) এ project তৈরি করুন।
 2. **SQL Editor** খুলে `supabase/schema.sql`-এর পুরোটা পেস্ট করে **Run** করুন।
-3. **Google OAuth চালু করুন:**
+3. **Authentication → URL Configuration:**
+   - Site URL: `https://www.plickifyacademy.com`
+   - Redirect URLs: `https://www.plickifyacademy.com/auth/callback` এবং `http://localhost:3000/auth/callback`
+4. **Google OAuth চালু করুন:**
    - Supabase → Authentication → Providers → **Google** → Enable
    - [Google Cloud Console](https://console.cloud.google.com) → OAuth consent screen → OAuth 2.0 Client IDs (Web application) বানান
    - Authorized redirect URI: `https://<your-supabase-ref>.supabase.co/auth/v1/callback`
@@ -74,4 +77,5 @@ npm run dev
 
 1. Repo push করার পর [vercel.com/new](https://vercel.com/new) থেকে repo import করুন।
 2. Environment variables (`.env.local`-এর সবগুলো) Project Settings → Environment Variables এ দিন।
-3. `NEXT_PUBLIC_APP_URL` = deployed URL দিতে ভুলবেন না।
+3. `NEXT_PUBLIC_APP_URL` = `https://www.plickifyacademy.com` দিন।
+4. Main domain (custom domain) যুক্ত থাকলে Vercel **Deployment Protection** disable করুন — নইলে site-এ প্রবেশ করতে login চাইবে।
