@@ -19,6 +19,9 @@ const menu = [
   { section: "সেলস", items: [
     { href: "/admin/orders", label: "অর্ডারসমূহ", icon: "fa-solid fa-sack-dollar" },
   ]},
+  { section: "কাস্টমাইজ", items: [
+    { href: "/admin/settings", label: "সাইট সেটিংস", icon: "fa-solid fa-gear" },
+  ]},
 ];
 
 export function AdminSidebar() {

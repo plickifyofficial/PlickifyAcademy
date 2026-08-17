@@ -97,7 +97,18 @@ export function AdminCourseTable({
             <Field name="title" label="শিরোনাম" required />
             <Field name="slug" label="Slug" required placeholder="my-course" />
             <Field name="price" label="দাম (৳)" type="number" defaultValue={0} />
-            <Field name="cover_image" label="কভার ইমেজ URL" />
+            <div>
+              <label className="mb-1 block text-xs font-medium text-zinc-600">
+                কভার ইমেজ
+              </label>
+              <input
+                type="file"
+                name="cover_image_file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="w-full rounded border border-zinc-300 px-2.5 py-1.5 text-sm file:mr-2 file:rounded file:border-0 file:bg-indigo-50 file:px-2 file:py-1 file:text-xs file:font-medium file:text-indigo-600"
+              />
+            </div>
+            <Field name="cover_image" label="অথবা ইমেজ URL" />
           </div>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
@@ -219,7 +230,18 @@ export function AdminCourseTable({
                         <Field name="title" label="শিরোনাম" defaultValue={course.title} required />
                         <Field name="slug" label="Slug" defaultValue={course.slug} required />
                         <Field name="price" label="দাম (৳)" type="number" defaultValue={course.price} />
-                        <Field name="cover_image" label="কভার ইমেজ URL" defaultValue={course.cover_image ?? ""} />
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-zinc-600">
+                            নতুন কভার (আপলোড)
+                          </label>
+                          <input
+                            type="file"
+                            name="cover_image_file"
+                            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                            className="w-full rounded border border-zinc-300 px-2.5 py-1.5 text-sm file:mr-2 file:rounded file:border-0 file:bg-indigo-50 file:px-2 file:py-1 file:text-xs file:font-medium file:text-indigo-600"
+                          />
+                        </div>
+                        <Field name="cover_image" label="অথবা ইমেজ URL" defaultValue={course.cover_image ?? ""} />
                         <div className="sm:col-span-2">
                           <label className="mb-1 block text-xs font-medium text-zinc-600">
                             বর্ণনা

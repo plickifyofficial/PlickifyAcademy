@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-async function requireAdmin() {
+export async function requireAdmin() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -25,6 +26,42 @@ async function requireAdmin() {
   return supabase;
 }
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+const ALLOWED_IMAGE_MIME = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/svg+xml",
+];
+
+async function uploadCoverImage(file: File): Promise<string> {
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  const path = `course-${Date.now()}.${ext}`;
+  const admin = createAdminClient();
+  const { error } = await admin.storage
+    .from("course-images")
+    .upload(path, file, { upsert: true, contentType: file.type });
+
+  if (error) throw new Error(error.message);
+
+  const { data } = admin.storage.from("course-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+async function resolveCoverImage(formData: FormData, fallback: string | null) {
+  const file = formData.get("cover_image_file");
+  if (file instanceof File && file.size > 0) {
+    if (file.size > MAX_IMAGE_SIZE)
+      throw new Error("কভার ইমেজ 5MB-এর মধ্যে হতে হবে");
+    if (!ALLOWED_IMAGE_MIME.includes(file.type))
+      throw new Error("PNG/JPG/WebP/SVG ইমেজ দিন");
+    return uploadCoverImage(file);
+  }
+  const url = String(formData.get("cover_image")).trim();
+  return url || fallback;
+}
+
 export async function createCourse(formData: FormData) {
   const supabase = await requireAdmin();
 
@@ -33,7 +70,7 @@ export async function createCourse(formData: FormData) {
   const description = String(formData.get("description")).trim();
   const price = Number(formData.get("price")) || 0;
   const level = String(formData.get("level")) || "beginner";
-  const cover_image = String(formData.get("cover_image")).trim() || null;
+  const cover_image = await resolveCoverImage(formData, null);
 
   await supabase.from("courses").insert({
     title,
@@ -58,7 +95,7 @@ export async function updateCourse(formData: FormData) {
   const description = String(formData.get("description")).trim();
   const price = Number(formData.get("price")) || 0;
   const level = String(formData.get("level")) || "beginner";
-  const cover_image = String(formData.get("cover_image")).trim() || null;
+  const cover_image = await resolveCoverImage(formData, null);
 
   await supabase
     .from("courses")

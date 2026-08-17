@@ -8,15 +8,32 @@ export async function Header() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { data: settings } = await supabase
+    .from("site_settings")
+    .select("site_name, logo_url")
+    .eq("id", 1)
+    .single();
+
+  const siteName = settings?.site_name || "Plickify Academy";
+
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-            P
-          </span>
+          {settings?.logo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={settings.logo_url}
+              alt={siteName}
+              className="h-8 w-auto max-w-[160px] object-contain"
+            />
+          ) : (
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
+              {siteName.charAt(0)}
+            </span>
+          )}
           <span className="text-lg font-bold text-zinc-900">
-            Plickify <span className="text-indigo-600">Academy</span>
+            {siteName}
           </span>
         </Link>
 

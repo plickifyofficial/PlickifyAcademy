@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   },
   description:
     "অনলাইন একাডেমি — কোর্স, লেসন আর কুইজ দিয়ে নিজের দক্ষতা বাড়ান।",
+  icons: {
+    icon: "/api/favicon",
+  },
 };
 
 export default function RootLayout({

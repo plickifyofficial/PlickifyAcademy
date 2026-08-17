@@ -214,6 +214,76 @@ create policy "Users can insert own orders"
   with check (auth.uid() = user_id);
 
 -- ============================================================
+-- SITE SETTINGS (logo, favicon, site name — managed from admin)
+-- ============================================================
+create table if not exists public.site_settings (
+  id integer primary key default 1 check (id = 1),
+  site_name text not null default 'Plickify Academy',
+  tagline text default 'শেখো, বেড়ে উঠো',
+  logo_url text,
+  favicon_url text,
+  updated_at timestamptz not null default now()
+);
+
+insert into public.site_settings (id, site_name) values (1, 'Plickify Academy')
+on conflict (id) do nothing;
+
+alter table public.site_settings enable row level security;
+
+create policy "Site settings are viewable by everyone"
+  on public.site_settings for select
+  using (true);
+
+create policy "Only admins can update site settings"
+  on public.site_settings for update
+  using (public.is_admin());
+
+-- ============================================================
+-- STORAGE BUCKETS (site logo/favicon + course thumbnails)
+-- ============================================================
+insert into storage.buckets (id, name, public)
+values ('site-assets', 'site-assets', true)
+on conflict (id) do nothing;
+
+insert into storage.buckets (id, name, public)
+values ('course-images', 'course-images', true)
+on conflict (id) do nothing;
+
+-- public read for both buckets
+create policy "Public read site-assets"
+  on storage.objects for select
+  using (bucket_id = 'site-assets');
+
+create policy "Public read course-images"
+  on storage.objects for select
+  using (bucket_id = 'course-images');
+
+-- admin-only writes
+create policy "Admins can insert site-assets"
+  on storage.objects for insert
+  with check (bucket_id = 'site-assets' and public.is_admin());
+
+create policy "Admins can update site-assets"
+  on storage.objects for update
+  using (bucket_id = 'site-assets' and public.is_admin());
+
+create policy "Admins can delete site-assets"
+  on storage.objects for delete
+  using (bucket_id = 'site-assets' and public.is_admin());
+
+create policy "Admins can insert course-images"
+  on storage.objects for insert
+  with check (bucket_id = 'course-images' and public.is_admin());
+
+create policy "Admins can update course-images"
+  on storage.objects for update
+  using (bucket_id = 'course-images' and public.is_admin());
+
+create policy "Admins can delete course-images"
+  on storage.objects for delete
+  using (bucket_id = 'course-images' and public.is_admin());
+
+-- ============================================================
 -- HELPER: enroll user into course (used after payment)
 -- ============================================================
 create or replace function public.enroll_course(p_course_id uuid)
