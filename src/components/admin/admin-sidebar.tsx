@@ -24,7 +24,10 @@ const menu = [
   },
   {
     group: "সেলস",
-    items: [{ href: "/admin/orders", label: "অর্ডারসমূহ", icon: "fa-solid fa-cart-shopping" }],
+    items: [
+      { href: "/admin/orders", label: "অর্ডারসমূহ", icon: "fa-solid fa-cart-shopping" },
+      { href: "/admin/enrollments", label: "এনরোলমেন্ট", icon: "fa-solid fa-user-plus" },
+    ],
   },
   {
     group: "মিডিয়া",

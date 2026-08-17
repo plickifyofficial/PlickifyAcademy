@@ -25,7 +25,7 @@ export function CourseCard({ course }: { course: Course }) {
         )}
         {course.price === 0 && (
           <span className="absolute left-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white">
-            à¦«à§à¦°à¦¿
+            ফ্রি
           </span>
         )}
       </div>

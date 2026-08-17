@@ -19,7 +19,7 @@ export function ProfileForm({ currentName }: { currentName: string }) {
     if (result?.error) {
       showToast(result.error, "error");
     } else {
-      showToast("à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦² à¦†à¦ªà¦¡à§‡à¦Ÿ à¦¹à¦¯à¦¼à§‡à¦›à§‡");
+      showToast("প্রোফাইল আপডেট হয়েছে");
     }
   }
 
@@ -28,26 +28,26 @@ export function ProfileForm({ currentName }: { currentName: string }) {
       onSubmit={handleSubmit}
       className="rounded-2xl border border-zinc-200 bg-white p-6"
     >
-      <h2 className="font-semibold text-zinc-900">à¦¨à¦¾à¦® à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨</h2>
+      <h2 className="font-semibold text-zinc-900">নাম পরিবর্তন</h2>
       <label
         htmlFor="full_name"
         className="mt-4 mb-1 block text-sm font-medium text-zinc-700"
       >
-        à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£ à¦¨à¦¾à¦®
+        সম্পূর্ণ নাম
       </label>
       <input
         id="full_name"
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-        placeholder="à¦†à¦ªà¦¨à¦¾à¦° à¦¨à¦¾à¦®"
+        placeholder="আপনার নাম"
       />
       <button
         type="submit"
         disabled={pending}
         className="mt-4 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
       >
-        {pending ? "à¦¸à§‡à¦­ à¦¹à¦šà§à¦›à§‡..." : "à¦¸à§‡à¦­ à¦•à¦°à§à¦¨"}
+        {pending ? "সেভ হচ্ছে..." : "সেভ করুন"}
       </button>
     </form>
   );

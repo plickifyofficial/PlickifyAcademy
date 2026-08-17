@@ -1,15 +1,15 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import type { Course, Lesson } from "@/lib/types";
+import type { Course, CourseSection, Lesson } from "@/lib/types";
 import {
   createCourse,
   updateCourse,
   deleteCourse,
-  createLesson,
-  deleteLesson,
 } from "@/lib/actions/admin";
 import { formatPrice } from "@/lib/format";
+import { useToast } from "@/components/ui/toaster";
+import { CurriculumBuilder } from "@/components/admin/curriculum-builder";
 
 function Field({
   name,
@@ -46,38 +46,73 @@ function Field({
 
 export function AdminCourseTable({
   courses,
-  lessonsByCourse,
+  sectionsByCourse,
+  topicsBySection,
   defaultCreating = false,
 }: {
   courses: Course[];
-  lessonsByCourse: Record<string, Lesson[]>;
+  sectionsByCourse: Record<string, CourseSection[]>;
+  topicsBySection: Record<string, Lesson[]>;
   defaultCreating?: boolean;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(defaultCreating);
-  const [openLessons, setOpenLessons] = useState<string | null>(null);
+  const [openCurriculum, setOpenCurriculum] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const { showToast } = useToast();
+
+  function topicCount(courseId: string): number {
+    const sections = sectionsByCourse[courseId] ?? [];
+    return sections.reduce(
+      (n, s) => n + (topicsBySection[s.id]?.length ?? 0),
+      0,
+    );
+  }
+
+  async function run(action: () => Promise<void>, success: string) {
+    setPending(true);
+    try {
+      await action();
+      showToast(success);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "কিছু একটা সমস্যা হয়েছে", "error");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    await run(async () => {
+      await createCourse(new FormData(e.currentTarget));
+      e.currentTarget.reset();
+      setCreating(false);
+    }, "কোর্স তৈরি হয়েছে");
+  }
+
+  async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    await run(async () => {
+      await updateCourse(new FormData(e.currentTarget));
+      setEditingId(null);
+    }, "কোর্স আপডেট হয়েছে");
+  }
 
   async function handleDelete(course: Course) {
     if (!confirm(`"${course.title}" মুছে ফেলবেন?`)) return;
-    setPending(true);
-    const fd = new FormData();
-    fd.set("id", course.id);
-    await deleteCourse(fd);
-    setPending(false);
+    await run(() => deleteCourse(courseToFormData(course)), "কোর্স মুছে ফেলা হয়েছে");
   }
 
-  async function handleDeleteLesson(id: string) {
-    if (!confirm("লেসন মুছে ফেলবেন?")) return;
+  function courseToFormData(course: Course) {
     const fd = new FormData();
-    fd.set("id", id);
-    await deleteLesson(fd);
+    fd.set("id", course.id);
+    return fd;
   }
 
   return (
     <div className="space-y-4">
       {creating && (
-        <form action={createCourse} className="wp-panel">
+        <form onSubmit={handleCreate} className="wp-panel">
           <div className="wp-panel-header">
             নতুন কোর্স তৈরি করুন
             <button
@@ -126,8 +161,8 @@ export function AdminCourseTable({
                 পাবলিশ
               </label>
             </div>
-            <button type="submit" className="wp-btn wp-btn-primary">
-              <i className="fa-solid fa-plus" /> তৈরি করুন
+            <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
+              <i className="fa-solid fa-plus" /> {pending ? "তৈরি হচ্ছে..." : "তৈরি করুন"}
             </button>
           </div>
         </form>
@@ -148,7 +183,7 @@ export function AdminCourseTable({
                 <th>দাম</th>
                 <th>লেভেল</th>
                 <th>স্ট্যাটাস</th>
-                <th>লেসন</th>
+                <th>টপিক</th>
                 <th className="text-right">অ্যাকশন</th>
               </tr>
             </thead>
@@ -189,11 +224,11 @@ export function AdminCourseTable({
                     <td>
                       <button
                         onClick={() =>
-                          setOpenLessons(openLessons === course.id ? null : course.id)
+                          setOpenCurriculum(openCurriculum === course.id ? null : course.id)
                         }
                         className="text-xs font-medium text-[#2271b1] hover:text-[#135e96] hover:underline"
                       >
-                        {lessonsByCourse[course.id]?.length ?? 0}টি লেসন ▾
+                        {topicCount(course.id)} টপিক ▾
                       </button>
                     </td>
                     <td>
@@ -220,7 +255,7 @@ export function AdminCourseTable({
                   {editingId === course.id && (
                     <tr key={`${course.id}-edit`}>
                       <td colSpan={6} className="bg-[#f6f7f7] px-4 py-4">
-                        <form action={updateCourse} className="wp-panel">
+                        <form onSubmit={handleUpdate} className="wp-panel">
                           <div className="wp-panel-header">কোর্স এডিট করুন</div>
                           <div className="wp-panel-body">
                             <input type="hidden" name="id" value={course.id} />
@@ -272,8 +307,8 @@ export function AdminCourseTable({
                               পাবলিশ
                             </label>
                             <div className="mt-4 flex gap-2">
-                              <button type="submit" className="wp-btn wp-btn-primary">
-                                <i className="fa-solid fa-floppy-disk" /> আপডেট
+                              <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
+                                <i className="fa-solid fa-floppy-disk" /> {pending ? "আপডেট হচ্ছে..." : "আপডেট"}
                               </button>
                               <button
                                 type="button"
@@ -289,95 +324,14 @@ export function AdminCourseTable({
                     </tr>
                   )}
 
-                  {openLessons === course.id && (
-                    <tr key={`${course.id}-lessons`}>
+                  {openCurriculum === course.id && (
+                    <tr key={`${course.id}-curriculum`}>
                       <td colSpan={6} className="bg-[#f6f7f7] px-4 py-4">
-                        <h4 className="mb-3 text-sm font-semibold text-[#1d2327]">
-                          লেসনসমূহ — {course.title}
-                        </h4>
-                        {lessonsByCourse[course.id]?.length > 0 ? (
-                          <div className="mb-4 wp-panel">
-                            <div className="overflow-x-auto">
-                              <table className="wp-table min-w-[520px]">
-                                <thead>
-                                  <tr>
-                                    <th>অর্ডার</th>
-                                    <th>শিরোনাম</th>
-                                    <th>সময়</th>
-                                    <th>ফ্রি</th>
-                                    <th className="text-right">অ্যাকশন</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {lessonsByCourse[course.id].map((lesson) => (
-                                    <tr key={lesson.id}>
-                                      <td className="text-[#646970]">{lesson.order}</td>
-                                      <td className="font-medium text-[#3c434a]">
-                                        {lesson.title}
-                                      </td>
-                                      <td className="text-[#646970]">
-                                        {lesson.duration_minutes} মিনিট
-                                      </td>
-                                      <td>
-                                        {lesson.is_free ? (
-                                          <span className="wp-tag wp-tag-green">
-                                            <i className="fa-solid fa-check" /> ফ্রি
-                                          </span>
-                                        ) : (
-                                          <span className="wp-tag wp-tag-gray">—</span>
-                                        )}
-                                      </td>
-                                      <td className="text-right">
-                                        <button
-                                          onClick={() => handleDeleteLesson(lesson.id)}
-                                          className="wp-btn wp-btn-danger"
-                                        >
-                                          <i className="fa-solid fa-trash" /> মুছুন
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="mb-4 text-sm text-[#646970]">
-                            কোনো লেসন নেই।
-                          </p>
-                        )}
-
-                        <form action={createLesson} className="wp-panel">
-                          <div className="wp-panel-header">+ নতুন লেসন</div>
-                          <div className="wp-panel-body">
-                            <input type="hidden" name="course_id" value={course.id} />
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                              <Field name="title" label="শিরোনাম" required />
-                              <Field name="slug" label="Slug" required placeholder="lesson-1" />
-                              <Field name="video_url" label="ভিডিও URL" placeholder="https://youtu.be/..." />
-                              <Field name="description" label="বর্ণনা" />
-                              <Field name="duration_minutes" label="সময় (মিনিট)" type="number" defaultValue={0} />
-                              <Field name="order" label="অর্ডার" type="number" defaultValue={0} />
-                            </div>
-                            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                              <div>
-                                <label className="wp-label">কনটেন্ট</label>
-                                <textarea
-                                  name="content"
-                                  rows={2}
-                                  className="wp-input"
-                                />
-                              </div>
-                              <label className="flex items-end gap-2 pb-2 text-sm font-medium text-[#3c434a]">
-                                <input type="checkbox" name="is_free" className="h-4 w-4" />
-                                ফ্রি প্রিভিউ
-                              </label>
-                            </div>
-                            <button type="submit" className="wp-btn wp-btn-primary mt-3">
-                              <i className="fa-solid fa-plus" /> লেসন যোগ করুন
-                            </button>
-                          </div>
-                        </form>
+                        <CurriculumBuilder
+                          course={course}
+                          sections={sectionsByCourse[course.id] ?? []}
+                          topics={topicsBySection}
+                        />
                       </td>
                     </tr>
                   )}

@@ -43,7 +43,7 @@ async function uploadCoverImage(file: File): Promise<string> {
     .from("course-images")
     .upload(path, file, { upsert: true, contentType: file.type });
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(`ছবি আপলোড ব্যর্থ: ${error.message}`);
 
   const { data } = admin.storage.from("course-images").getPublicUrl(path);
   return data.publicUrl;
@@ -67,20 +67,36 @@ export async function createCourse(formData: FormData) {
 
   const title = String(formData.get("title")).trim();
   const slug = String(formData.get("slug")).trim();
+  if (!title || !slug) throw new Error("শিরোনাম ও Slug দিন");
+
   const description = String(formData.get("description")).trim();
   const price = Number(formData.get("price")) || 0;
   const level = String(formData.get("level")) || "beginner";
   const cover_image = await resolveCoverImage(formData, null);
 
-  await supabase.from("courses").insert({
-    title,
-    slug,
-    description,
-    price,
-    level,
-    cover_image,
-    is_published: formData.get("is_published") === "on",
-  });
+  const { data: created, error } = await supabase
+    .from("courses")
+    .insert({
+      title,
+      slug,
+      description,
+      price,
+      level,
+      cover_image,
+      is_published: formData.get("is_published") === "on",
+    })
+    .select("id")
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  if (created) {
+    await supabase.from("course_sections").insert({
+      course_id: created.id,
+      title: "Course Content",
+      position: 0,
+    });
+  }
 
   revalidatePath("/admin");
   revalidatePath("/courses");
@@ -92,12 +108,14 @@ export async function updateCourse(formData: FormData) {
   const id = String(formData.get("id"));
   const title = String(formData.get("title")).trim();
   const slug = String(formData.get("slug")).trim();
+  if (!id || !title || !slug) throw new Error("শিরোনাম ও Slug দিন");
+
   const description = String(formData.get("description")).trim();
   const price = Number(formData.get("price")) || 0;
   const level = String(formData.get("level")) || "beginner";
   const cover_image = await resolveCoverImage(formData, null);
 
-  await supabase
+  const { error } = await supabase
     .from("courses")
     .update({
       title,
@@ -111,6 +129,8 @@ export async function updateCourse(formData: FormData) {
     })
     .eq("id", id);
 
+  if (error) throw new Error(error.message);
+
   revalidatePath("/admin");
   revalidatePath("/courses");
 }
@@ -118,10 +138,22 @@ export async function updateCourse(formData: FormData) {
 export async function deleteCourse(formData: FormData) {
   const supabase = await requireAdmin();
   const id = String(formData.get("id"));
+  if (!id) throw new Error("কোর্স ID নেই");
 
-  await supabase.from("lessons").delete().eq("course_id", id);
-  await supabase.from("enrollments").delete().eq("course_id", id);
-  await supabase.from("courses").delete().eq("id", id);
+  const { error: lerr } = await supabase
+    .from("lessons")
+    .delete()
+    .eq("course_id", id);
+  if (lerr) throw new Error(lerr.message);
+
+  const { error: eerr } = await supabase
+    .from("enrollments")
+    .delete()
+    .eq("course_id", id);
+  if (eerr) throw new Error(eerr.message);
+
+  const { error } = await supabase.from("courses").delete().eq("id", id);
+  if (error) throw new Error(error.message);
 
   revalidatePath("/admin");
   revalidatePath("/courses");
@@ -133,6 +165,8 @@ export async function createLesson(formData: FormData) {
   const courseId = String(formData.get("course_id"));
   const title = String(formData.get("title")).trim();
   const slug = String(formData.get("slug")).trim();
+  if (!courseId || !title || !slug) throw new Error("শিরোনাম ও Slug দিন");
+
   const description = String(formData.get("description")).trim();
   const video_url = String(formData.get("video_url")).trim() || null;
   const content = String(formData.get("content")).trim() || null;
@@ -140,7 +174,7 @@ export async function createLesson(formData: FormData) {
   const is_free = formData.get("is_free") === "on";
   const order = Number(formData.get("order")) || 0;
 
-  await supabase.from("lessons").insert({
+  const { error } = await supabase.from("lessons").insert({
     course_id: courseId,
     title,
     slug,
@@ -152,16 +186,237 @@ export async function createLesson(formData: FormData) {
     order,
   });
 
+  if (error) throw new Error(error.message);
+
   revalidatePath("/admin");
 }
 
 export async function deleteLesson(formData: FormData) {
   const supabase = await requireAdmin();
   const id = String(formData.get("id"));
+  if (!id) throw new Error("লেসন ID নেই");
 
-  await supabase.from("lessons").delete().eq("id", id);
+  const { error } = await supabase.from("lessons").delete().eq("id", id);
+  if (error) throw new Error(error.message);
 
   revalidatePath("/admin");
+}
+
+export async function createSection(formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const courseId = String(formData.get("course_id"));
+  const title = String(formData.get("title")).trim();
+  if (!courseId || !title) throw new Error("সেকশনের নাম দিন");
+
+  const { data: last } = await supabase
+    .from("course_sections")
+    .select("position")
+    .eq("course_id", courseId)
+    .order("position", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("course_sections").insert({
+    course_id: courseId,
+    title,
+    position: (last?.position ?? 0) + 1,
+  });
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+}
+
+export async function updateSection(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  const title = String(formData.get("title")).trim();
+  if (!id || !title) throw new Error("সেকশনের নাম দিন");
+
+  const { error } = await supabase
+    .from("course_sections")
+    .update({ title })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+}
+
+export async function deleteSection(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  if (!id) throw new Error("সেকশন ID নেই");
+
+  const { error } = await supabase.from("course_sections").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+}
+
+export async function moveSection(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  const courseId = String(formData.get("course_id"));
+  const direction = Number(formData.get("direction")) || 0;
+  if (!id || !courseId || direction === 0) return;
+
+  const { data: sections } = await supabase
+    .from("course_sections")
+    .select("id, position")
+    .eq("course_id", courseId)
+    .order("position", { ascending: true });
+
+  if (!sections) return;
+  const idx = sections.findIndex((s) => s.id === id);
+  const target = idx + direction;
+  if (idx < 0 || target < 0 || target >= sections.length) return;
+
+  const a = sections[idx];
+  const b = sections[target];
+
+  const { error } = await supabase.from("course_sections").update({ position: b.position }).eq("id", a.id);
+  if (error) throw new Error(error.message);
+  const { error: e2 } = await supabase.from("course_sections").update({ position: a.position }).eq("id", b.id);
+  if (e2) throw new Error(e2.message);
+
+  revalidatePath("/admin");
+}
+
+export async function createTopic(formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const courseId = String(formData.get("course_id"));
+  const sectionId = String(formData.get("section_id"));
+  const title = String(formData.get("title")).trim();
+  const slug = String(formData.get("slug")).trim();
+  const type = String(formData.get("type")) || "lesson";
+  if (!courseId || !sectionId || !title || !slug) throw new Error("শিরোনাম, Slug ও সেকশন দিন");
+
+  const { data: last } = await supabase
+    .from("lessons")
+    .select("order")
+    .eq("section_id", sectionId)
+    .order("order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("lessons").insert({
+    course_id: courseId,
+    section_id: sectionId,
+    type,
+    title,
+    slug,
+    description: String(formData.get("description")).trim() || null,
+    video_url: String(formData.get("video_url")).trim() || null,
+    content: String(formData.get("content")).trim() || null,
+    duration_minutes: Number(formData.get("duration_minutes")) || 0,
+    is_free: formData.get("is_free") === "on",
+    order: (last?.order ?? 0) + 1,
+  });
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+}
+
+export async function updateTopic(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  const title = String(formData.get("title")).trim();
+  const slug = String(formData.get("slug")).trim();
+  if (!id || !title || !slug) throw new Error("শিরোনাম ও Slug দিন");
+
+  const { error } = await supabase
+    .from("lessons")
+    .update({
+      title,
+      slug,
+      type: String(formData.get("type")) || "lesson",
+      description: String(formData.get("description")).trim() || null,
+      video_url: String(formData.get("video_url")).trim() || null,
+      content: String(formData.get("content")).trim() || null,
+      duration_minutes: Number(formData.get("duration_minutes")) || 0,
+      is_free: formData.get("is_free") === "on",
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+}
+
+export async function deleteTopic(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  if (!id) throw new Error("টপিক ID নেই");
+
+  const { error } = await supabase.from("lessons").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+}
+
+export async function moveTopic(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  const sectionId = String(formData.get("section_id"));
+  const direction = Number(formData.get("direction")) || 0;
+  if (!id || !sectionId || direction === 0) return;
+
+  const { data: topics } = await supabase
+    .from("lessons")
+    .select("id, order")
+    .eq("section_id", sectionId)
+    .order("order", { ascending: true });
+
+  if (!topics) return;
+  const idx = topics.findIndex((t) => t.id === id);
+  const target = idx + direction;
+  if (idx < 0 || target < 0 || target >= topics.length) return;
+
+  const a = topics[idx];
+  const b = topics[target];
+
+  const { error } = await supabase.from("lessons").update({ order: b.order }).eq("id", a.id);
+  if (error) throw new Error(error.message);
+  const { error: e2 } = await supabase.from("lessons").update({ order: a.order }).eq("id", b.id);
+  if (e2) throw new Error(e2.message);
+
+  revalidatePath("/admin");
+}
+
+export async function enrollStudent(formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const courseId = String(formData.get("course_id"));
+  const email = String(formData.get("email")).trim().toLowerCase();
+  if (!courseId || !email) throw new Error("কোর্স ও ইমেইল দিন");
+
+  const { data: user } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+  if (!user) throw new Error("এই ইমেইলে কোনো ইউজার নেই");
+
+  const { error } = await supabase.from("enrollments").insert({
+    user_id: user.id,
+    course_id: courseId,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/enrollments");
+}
+
+export async function unenrollStudent(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  if (!id) throw new Error("এনরোলমেন্ট ID নেই");
+
+  const { error } = await supabase.from("enrollments").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/enrollments");
 }
 
 export async function setUserRole(formData: FormData) {
@@ -182,9 +437,14 @@ export async function setUserRole(formData: FormData) {
   const userId = String(formData.get("user_id"));
   const role = String(formData.get("role"));
 
-  if (role !== "admin" && role !== "student") return;
+  if (role !== "admin" && role !== "student")
+    throw new Error("অবৈধ ভূমিকা");
 
-  await supabase.from("profiles").update({ role }).eq("id", userId);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ role })
+    .eq("id", userId);
+  if (error) throw new Error(error.message);
 
   revalidatePath("/admin/students");
 }

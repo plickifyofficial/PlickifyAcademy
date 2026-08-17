@@ -23,6 +23,8 @@ export type Course = {
 export type Lesson = {
   id: string;
   course_id: string;
+  section_id: string | null;
+  type: "lesson" | "quiz" | "assignment" | "video";
   title: string;
   slug: string;
   description: string | null;
@@ -31,6 +33,14 @@ export type Lesson = {
   duration_minutes: number;
   is_free: boolean;
   order: number;
+  created_at: string;
+};
+
+export type CourseSection = {
+  id: string;
+  course_id: string;
+  title: string;
+  position: number;
   created_at: string;
 };
 

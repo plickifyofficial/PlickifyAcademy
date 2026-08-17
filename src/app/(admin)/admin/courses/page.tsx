@@ -17,14 +17,30 @@ export default async function AdminCoursesPage({
     .select("*")
     .order("created_at", { ascending: false });
 
-  const { data: lessons } = await supabase.from("lessons").select("*");
+  const { data: sections } = await supabase
+    .from("course_sections")
+    .select("*")
+    .order("position", { ascending: true });
 
-  const lessonsByCourse: Record<string, NonNullable<typeof lessons>[0][]> = {};
-  for (const lesson of lessons ?? []) {
-    if (lessonsByCourse[lesson.course_id]) {
-      lessonsByCourse[lesson.course_id].push(lesson);
+  const { data: topics } = await supabase.from("lessons").select("*");
+
+  const sectionsByCourse: Record<string, NonNullable<typeof sections>[0][]> = {};
+  for (const section of sections ?? []) {
+    if (sectionsByCourse[section.course_id]) {
+      sectionsByCourse[section.course_id].push(section);
     } else {
-      lessonsByCourse[lesson.course_id] = [lesson];
+      sectionsByCourse[section.course_id] = [section];
+    }
+  }
+
+  const topicsBySection: Record<string, NonNullable<typeof topics>[0][]> = {};
+  for (const topic of topics ?? []) {
+    if (topic.section_id) {
+      if (topicsBySection[topic.section_id]) {
+        topicsBySection[topic.section_id].push(topic);
+      } else {
+        topicsBySection[topic.section_id] = [topic];
+      }
     }
   }
 
@@ -33,7 +49,7 @@ export default async function AdminCoursesPage({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="wp-page-title">কোর্সসমূহ</h1>
-          <p className="wp-subtitle">কোর্স ও লেসন ম্যানেজ করুন</p>
+          <p className="wp-subtitle">কোর্স, সেকশন ও টপিক ম্যানেজ করুন</p>
         </div>
         <Link
           href="/admin/courses?add=1"
@@ -44,7 +60,8 @@ export default async function AdminCoursesPage({
       </div>
       <AdminCourseTable
         courses={courses ?? []}
-        lessonsByCourse={lessonsByCourse}
+        sectionsByCourse={sectionsByCourse}
+        topicsBySection={topicsBySection}
         defaultCreating={add === "1"}
       />
     </div>

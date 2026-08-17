@@ -1,20 +1,13 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 import { SiteNav } from "@/components/layout/site-nav";
-import { UserMenu } from "@/components/layout/user-menu";
+import { AuthSection } from "@/components/layout/auth-section";
 
-export async function Header() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+type Settings = {
+  site_name: string;
+  logo_url: string | null;
+};
 
-  const { data: settings } = await supabase
-    .from("site_settings")
-    .select("site_name, logo_url")
-    .eq("id", 1)
-    .single();
-
+export function Header({ settings }: { settings: Settings | null }) {
   const siteName = settings?.site_name || "Plickify Academy";
 
   return (
@@ -56,24 +49,7 @@ export async function Header() {
             <i className="fa-solid fa-magnifying-glass" />
           </Link>
 
-          {user ? (
-            <UserMenu />
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-full bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-colors hover:bg-brand-700"
-              >
-                Join Now
-              </Link>
-            </>
-          )}
+          <AuthSection />
         </div>
       </div>
     </header>

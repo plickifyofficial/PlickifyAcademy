@@ -29,7 +29,7 @@ export function CheckoutButton({ courseId, price }: Props) {
       if (data.requiresLogin) {
         router.push("/login");
       } else {
-        showToast(data.error ?? "à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦¶à§à¦°à§ à¦•à¦°à¦¾ à¦¯à¦¾à¦¯à¦¼à¦¨à¦¿", "error");
+        showToast(data.error ?? "পেমেন্ট শুরু করা যায়নি", "error");
       }
       return;
     }
@@ -45,7 +45,7 @@ export function CheckoutButton({ courseId, price }: Props) {
       disabled={pending}
       className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
     >
-      {pending ? "à¦°à¦¿à¦¡à¦¾à¦‡à¦°à§‡à¦•à§à¦Ÿ à¦¹à¦šà§à¦›à§‡..." : `à¦à¦–à¦¨à¦‡ à¦•à¦¿à¦¨à§à¦¨ â€” ${formatPrice(price)}`}
+      {pending ? "রিডাইরেক্ট হচ্ছে..." : `এখনই কিনুন — ${formatPrice(price)}`}
     </button>
   );
 }

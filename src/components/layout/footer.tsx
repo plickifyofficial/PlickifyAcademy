@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 
 const quickLinks = [
   { href: "/courses", label: "Courses" },
@@ -24,14 +23,12 @@ const socials = [
   { icon: "fa-brands fa-instagram", href: "#" },
 ];
 
-export async function Footer() {
-  const supabase = await createClient();
-  const { data: settings } = await supabase
-    .from("site_settings")
-    .select("site_name, logo_url")
-    .eq("id", 1)
-    .single();
+type Settings = {
+  site_name: string;
+  logo_url: string | null;
+};
 
+export function Footer({ settings }: { settings: Settings | null }) {
   const siteName = settings?.site_name || "Plickify Academy";
 
   return (

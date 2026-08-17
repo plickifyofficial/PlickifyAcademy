@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { deleteMedia } from "@/lib/actions/media";
+import { MediaDeleteButton } from "@/components/admin/media-delete-button";
 
 export const metadata = { title: "মিডিয়া লাইব্রেরি" };
 export const dynamic = "force-dynamic";
@@ -15,21 +15,25 @@ type MediaFile = {
 };
 
 async function listBucket(bucket: string): Promise<MediaFile[]> {
-  const admin = createAdminClient();
-  const { data } = await admin.storage.from(bucket).list();
-  if (!data) return [];
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin.storage.from(bucket).list();
+    if (!data) return [];
 
-  return data
-    .filter((f) => (f.metadata?.size ?? 0) > 0)
-    .map((f) => ({
-      id: f.id ?? `${f.name}-${Math.random()}`,
-      name: f.name,
-      bucket,
-      url: admin.storage.from(bucket).getPublicUrl(f.name).data.publicUrl,
-      size: f.metadata?.size ?? 0,
-      type: f.metadata?.mimetype ?? "image",
-      created_at: f.created_at ?? "",
-    }));
+    return data
+      .filter((f) => (f.metadata?.size ?? 0) > 0)
+      .map((f) => ({
+        id: f.id ?? `${f.name}-${Math.random()}`,
+        name: f.name,
+        bucket,
+        url: admin.storage.from(bucket).getPublicUrl(f.name).data.publicUrl,
+        size: f.metadata?.size ?? 0,
+        type: f.metadata?.mimetype ?? "image",
+        created_at: f.created_at ?? "",
+      }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function AdminMediaPage() {
@@ -89,20 +93,7 @@ export default async function AdminMediaPage() {
                     >
                       <i className="fa-solid fa-eye" /> দেখুন
                     </a>
-                    <form action={deleteMedia}>
-                      <input type="hidden" name="bucket" value={file.bucket} />
-                      <input type="hidden" name="path" value={file.name} />
-                      <button
-                        className="wp-btn wp-btn-danger"
-                        aria-label="মুছুন"
-                        onClick={(e) => {
-                          if (!confirm(`"${file.name}" মুছে ফেলবেন?`))
-                            e.preventDefault();
-                        }}
-                      >
-                        <i className="fa-solid fa-trash" />
-                      </button>
-                    </form>
+                    <MediaDeleteButton bucket={file.bucket} path={file.name} />
                   </div>
                 </div>
               </div>

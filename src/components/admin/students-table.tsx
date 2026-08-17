@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { setUserRole } from "@/lib/actions/admin";
+import { useToast } from "@/components/ui/toaster";
 
 type Student = {
   id: string;
@@ -17,6 +19,21 @@ export function StudentsTable({
   students: Student[];
   currentUserId: string;
 }) {
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const { showToast } = useToast();
+
+  async function handleRole(e: React.FormEvent<HTMLFormElement>, id: string) {
+    e.preventDefault();
+    setPendingId(id);
+    try {
+      await setUserRole(new FormData(e.currentTarget));
+      showToast("ভূমিকা আপডেট হয়েছে");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "আপডেট করা যায়নি", "error");
+    } finally {
+      setPendingId(null);
+    }
+  }
   return (
     <div className="wp-panel">
       <div className="wp-panel-header">
@@ -67,19 +84,19 @@ export function StudentsTable({
                 <td>
                   {s.id !== currentUserId && (
                     <div className="flex justify-end">
-                      <form action={setUserRole}>
+                      <form onSubmit={(e) => handleRole(e, s.id)}>
                         <input type="hidden" name="user_id" value={s.id} />
                         {s.role === "admin" ? (
                           <>
                             <input type="hidden" name="role" value="student" />
-                            <button className="wp-btn wp-btn-danger">
+                            <button className="wp-btn wp-btn-danger" disabled={pendingId === s.id}>
                               <i className="fa-solid fa-user-slash" /> অ্যাডমিন সরান
                             </button>
                           </>
                         ) : (
                           <>
                             <input type="hidden" name="role" value="admin" />
-                            <button className="wp-btn">
+                            <button className="wp-btn" disabled={pendingId === s.id}>
                               <i className="fa-solid fa-user-shield" /> অ্যাডমিন বানান
                             </button>
                           </>

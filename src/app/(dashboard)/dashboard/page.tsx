@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "à¦¡à§à¦¯à¦¾à¦¶à¦¬à§‹à¦°à§à¦¡" };
+export const metadata = { title: "ড্যাশবোর্ড" };
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -69,20 +69,20 @@ export default async function DashboardPage() {
   const inProgress = enrollments?.length ?? 0;
 
   const stats = [
-    { label: "à¦à¦¨à¦°à§‹à¦²à§à¦¡ à¦•à§‹à¦°à§à¦¸", value: enrollments?.length ?? 0, icon: "fa-solid fa-graduation-cap", color: "bg-brand-50 text-brand-600" },
-    { label: "à¦šà¦²à¦®à¦¾à¦¨ à¦•à§‹à¦°à§à¦¸", value: inProgress - completedCourses, icon: "fa-solid fa-book-open", color: "bg-amber-50 text-amber-600" },
-    { label: "à¦¸à¦®à§à¦ªà¦¨à§à¦¨ à¦•à§‹à¦°à§à¦¸", value: completedCourses, icon: "fa-solid fa-circle-check", color: "bg-green-50 text-green-600" },
-    { label: "à¦¸à¦¾à¦®à¦—à§à¦°à¦¿à¦• à¦…à¦—à§à¦°à¦—à¦¤à¦¿", value: `${totalPct}%`, icon: "fa-solid fa-chart-line", color: "bg-purple-50 text-purple-600" },
+    { label: "এনরোল্ড কোর্স", value: enrollments?.length ?? 0, icon: "fa-solid fa-graduation-cap", color: "bg-brand-50 text-brand-600" },
+    { label: "চলমান কোর্স", value: inProgress - completedCourses, icon: "fa-solid fa-book-open", color: "bg-amber-50 text-amber-600" },
+    { label: "সম্পন্ন কোর্স", value: completedCourses, icon: "fa-solid fa-circle-check", color: "bg-green-50 text-green-600" },
+    { label: "সামগ্রিক অগ্রগতি", value: `${totalPct}%`, icon: "fa-solid fa-chart-line", color: "bg-purple-50 text-purple-600" },
   ];
 
   return (
     <div>
       <div className="rounded-2xl bg-gradient-to-r from-brand-600 to-purple-700 p-6 text-white sm:p-8">
         <h1 className="text-2xl font-bold">
-          à¦¸à§à¦¬à¦¾à¦—à¦¤à¦®, {firstName}!
+          স্বাগতম, {firstName}!
         </h1>
         <p className="mt-1 text-brand-100">
-          à¦†à¦œà¦“ à¦¶à§‡à¦–à¦¾ à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨à¥¤ à¦†à¦ªà¦¨à¦¾à¦° à¦…à¦—à§à¦°à¦—à¦¤à¦¿ à¦¦à§‡à¦–à§à¦¨ à¦¨à¦¿à¦šà§‡à¥¤
+          আজও শেখা চালিয়ে যান। আপনার অগ্রগতি দেখুন নিচে।
         </p>
       </div>
 
@@ -103,12 +103,12 @@ export default async function DashboardPage() {
 
       <div className="mt-8">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-900">à¦†à¦®à¦¾à¦° à¦•à§‹à¦°à§à¦¸</h2>
+          <h2 className="text-lg font-semibold text-zinc-900">আমার কোর্স</h2>
           <Link
             href="/dashboard/courses"
             className="text-sm font-medium text-brand-600 hover:underline"
           >
-            à¦¸à¦¬ à¦¦à§‡à¦–à§à¦¨ â†’
+            সব দেখুন →
           </Link>
         </div>
 
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
                       />
                     </div>
                     <p className="mt-2 text-xs font-medium text-zinc-500">
-                      {pct}% à¦¸à¦®à§à¦ªà¦¨à§à¦¨ ({pc.done}/{pc.total} à¦²à§‡à¦¸à¦¨)
+                      {pct}% সম্পন্ন ({pc.done}/{pc.total} লেসন)
                     </p>
                   </div>
                 </Link>
@@ -152,12 +152,12 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
-            <p className="text-zinc-600">à¦à¦–à¦¨à§‹ à¦•à§‹à¦¨à§‹ à¦•à§‹à¦°à§à¦¸à§‡ à¦à¦¨à¦°à§‹à¦² à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à¦¨à¦¿à¥¤</p>
+            <p className="text-zinc-600">এখনো কোনো কোর্সে এনরোল করা হয়নি।</p>
             <Link
               href="/courses"
               className="mt-4 inline-block rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
             >
-              à¦•à§‹à¦°à§à¦¸ à¦¬à§à¦°à¦¾à¦‰à¦œ à¦•à¦°à§à¦¨
+              কোর্স ব্রাউজ করুন
             </Link>
           </div>
         )}
