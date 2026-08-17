@@ -32,13 +32,9 @@ export default async function AdminStudentsPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-zinc-900">স্টুডেন্টস</h1>
-      <p className="mt-1 text-sm text-zinc-500">
-        সব ব্যবহারকারী
-      </p>
-      <div className="mt-6">
-        <StudentsTable students={rows} currentUserId={user.id} />
-      </div>
+      <h1 className="wp-page-title">স্টুডেন্টস</h1>
+      <p className="wp-subtitle">সব ব্যবহারকারী ও তাদের ভূমিকা</p>
+      <StudentsTable students={rows} currentUserId={user.id} />
     </div>
   );
 }

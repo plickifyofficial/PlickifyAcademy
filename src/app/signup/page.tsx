@@ -1,7 +1,7 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 
-export const metadata = { title: "সাইন আপ" };
+export const metadata = { title: "à¦¸à¦¾à¦‡à¦¨ à¦†à¦ª" };
 
 export default function SignupPage() {
   return (
@@ -9,20 +9,20 @@ export default function SignupPage() {
       <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-zinc-900">
-            নতুন একাউন্ট খুলুন
+            à¦¨à¦¤à§à¦¨ à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦–à§à¦²à§à¦¨
           </h1>
           <p className="mt-1 text-sm text-zinc-500">
-            শেখা শুরু করতে Google একাউন্ট ব্যবহার করুন
+            à¦¶à§‡à¦–à¦¾ à¦¶à§à¦°à§ à¦•à¦°à¦¤à§‡ Google à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨
           </p>
         </div>
-        <GoogleSignInButton label="Google দিয়ে সাইন আপ" />
+        <GoogleSignInButton label="Google à¦¦à¦¿à¦¯à¦¼à§‡ à¦¸à¦¾à¦‡à¦¨ à¦†à¦ª" />
         <p className="mt-6 text-center text-sm text-zinc-500">
-          ইতিমধ্যে একাউন্ট আছে?{" "}
+          à¦‡à¦¤à¦¿à¦®à¦§à§à¦¯à§‡ à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦†à¦›à§‡?{" "}
           <Link
             href="/login"
-            className="font-medium text-indigo-600 hover:underline"
+            className="font-medium text-brand-600 hover:underline"
           >
-            লগইন করুন
+            à¦²à¦—à¦‡à¦¨ à¦•à¦°à§à¦¨
           </Link>
         </p>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ export function CheckoutButton({ courseId, price }: Props) {
       if (data.requiresLogin) {
         router.push("/login");
       } else {
-        showToast(data.error ?? "পেমেন্ট শুরু করা যায়নি", "error");
+        showToast(data.error ?? "à¦ªà§‡à¦®à§‡à¦¨à§à¦Ÿ à¦¶à§à¦°à§ à¦•à¦°à¦¾ à¦¯à¦¾à¦¯à¦¼à¦¨à¦¿", "error");
       }
       return;
     }
@@ -43,9 +43,9 @@ export function CheckoutButton({ courseId, price }: Props) {
     <button
       onClick={handleCheckout}
       disabled={pending}
-      className="rounded-lg bg-white px-6 py-3 font-semibold text-indigo-700 transition-colors hover:bg-indigo-50 disabled:opacity-60"
+      className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
     >
-      {pending ? "রিডাইরেক্ট হচ্ছে..." : `এখনই কিনুন — ${formatPrice(price)}`}
+      {pending ? "à¦°à¦¿à¦¡à¦¾à¦‡à¦°à§‡à¦•à§à¦Ÿ à¦¹à¦šà§à¦›à§‡..." : `à¦à¦–à¦¨à¦‡ à¦•à¦¿à¦¨à§à¦¨ â€” ${formatPrice(price)}`}
     </button>
   );
 }

@@ -46,95 +46,101 @@ export function SiteSettingsForm({ settings }: { settings: Settings }) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid grid-cols-1 gap-6 lg:grid-cols-2"
-    >
-      <div className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5">
-        <h3 className="text-sm font-semibold text-zinc-900">সাধারণ তথ্য</h3>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-zinc-600">
-            সাইটের নাম
-          </label>
-          <input
-            name="site_name"
-            defaultValue={settings.site_name}
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-          />
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="wp-panel">
+        <div className="wp-panel-header">
+          <i className="fa-solid fa-circle-info text-[#2271b1]" /> সাধারণ তথ্য
         </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-zinc-600">
-            ট্যাগলাইন
-          </label>
-          <input
-            name="tagline"
-            defaultValue={settings.tagline}
-            placeholder="শেখো, বেড়ে উঠো"
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-          />
+        <div className="wp-panel-body space-y-4">
+          <div>
+            <label className="wp-label">সাইটের নাম</label>
+            <input
+              name="site_name"
+              defaultValue={settings.site_name}
+              className="wp-input"
+            />
+          </div>
+          <div>
+            <label className="wp-label">ট্যাগলাইন</label>
+            <input
+              name="tagline"
+              defaultValue={settings.tagline}
+              placeholder="শেখো, বেড়ে উঠো"
+              className="wp-input"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5">
-        <h3 className="text-sm font-semibold text-zinc-900">লোগো</h3>
-        <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
-            {logoPreview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={logoPreview}
-                alt="লোগো প্রিভিউ"
-                className="h-full w-full object-contain"
-              />
-            ) : (
-              <i className="fa-solid fa-image text-2xl text-zinc-300" />
-            )}
-          </div>
-          <div className="flex-1">
-            <label className="block cursor-pointer rounded-lg border border-dashed border-zinc-300 px-4 py-3 text-center text-sm font-medium text-zinc-600 hover:border-indigo-400 hover:text-indigo-600">
-              লোগো আপলোড করুন
-              <input
-                type="file"
-                name="logo_file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                className="hidden"
-                onChange={(e) => previewFile(e, setLogoPreview)}
-              />
-            </label>
-            <p className="mt-2 text-xs text-zinc-400">
-              PNG/JPG/WebP/SVG — সর্বোচ্চ 2MB
-            </p>
-          </div>
+      <div className="wp-panel">
+        <div className="wp-panel-header">
+          <i className="fa-solid fa-images text-[#2271b1]" /> লোগো ও ফেভিকন
         </div>
-
-        <h3 className="text-sm font-semibold text-zinc-900">ফেভিকন</h3>
-        <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
-            {faviconPreview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={faviconPreview}
-                alt="ফেভিকন প্রিভিউ"
-                className="h-full w-full object-contain"
-              />
-            ) : (
-              <i className="fa-solid fa-globe text-2xl text-zinc-300" />
-            )}
+        <div className="wp-panel-body space-y-5">
+          <div>
+            <label className="wp-label">লোগো</label>
+            <div className="flex items-center gap-4">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded border border-[#c3c4c7] bg-[#f0f0f1]">
+                {logoPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={logoPreview}
+                    alt="লোগো প্রিভিউ"
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <i className="fa-solid fa-image text-2xl text-[#8c8f94]" />
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="block cursor-pointer rounded border border-dashed border-[#8c8f94] px-4 py-3 text-center text-sm font-medium text-[#2271b1] hover:border-[#2271b1]">
+                  লোগো আপলোড করুন
+                  <input
+                    type="file"
+                    name="logo_file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    className="hidden"
+                    onChange={(e) => previewFile(e, setLogoPreview)}
+                  />
+                </label>
+                <p className="mt-2 text-xs text-[#646970]">
+                  PNG/JPG/WebP/SVG — সর্বোচ্চ 2MB
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex-1">
-            <label className="block cursor-pointer rounded-lg border border-dashed border-zinc-300 px-4 py-3 text-center text-sm font-medium text-zinc-600 hover:border-indigo-400 hover:text-indigo-600">
-              ফেভিকন আপলোড করুন
-              <input
-                type="file"
-                name="favicon_file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon"
-                className="hidden"
-                onChange={(e) => previewFile(e, setFaviconPreview)}
-              />
-            </label>
-            <p className="mt-2 text-xs text-zinc-400">
-              PNG (32×32 বা তার বেশি) / SVG — সর্বোচ্চ 2MB
-            </p>
+
+          <div>
+            <label className="wp-label">ফেভিকন</label>
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded border border-[#c3c4c7] bg-[#f0f0f1]">
+                {faviconPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={faviconPreview}
+                    alt="ফেভিকন প্রিভিউ"
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <i className="fa-solid fa-globe text-2xl text-[#8c8f94]" />
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="block cursor-pointer rounded border border-dashed border-[#8c8f94] px-4 py-3 text-center text-sm font-medium text-[#2271b1] hover:border-[#2271b1]">
+                  ফেভিকন আপলোড করুন
+                  <input
+                    type="file"
+                    name="favicon_file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon"
+                    className="hidden"
+                    onChange={(e) => previewFile(e, setFaviconPreview)}
+                  />
+                </label>
+                <p className="mt-2 text-xs text-[#646970]">
+                  PNG (32×32 বা তার বেশি) / SVG — সর্বোচ্চ 2MB
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -143,8 +149,9 @@ export function SiteSettingsForm({ settings }: { settings: Settings }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+          className="wp-btn wp-btn-primary"
         >
+          <i className="fa-solid fa-floppy-disk" />
           {pending ? "সেভ হচ্ছে..." : "সেভ করুন"}
         </button>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/actions/auth";
 
 const navItems = [
-  { href: "/dashboard", label: "ড্যাশবোর্ড", icon: "fa-solid fa-chart-line" },
-  { href: "/dashboard/courses", label: "আমার কোর্স", icon: "fa-solid fa-graduation-cap" },
-  { href: "/dashboard/profile", label: "প্রোফাইল", icon: "fa-solid fa-user" },
+  { href: "/dashboard", label: "à¦¡à§à¦¯à¦¾à¦¶à¦¬à§‹à¦°à§à¦¡", icon: "fa-solid fa-chart-line" },
+  { href: "/dashboard/courses", label: "à¦†à¦®à¦¾à¦° à¦•à§‹à¦°à§à¦¸", icon: "fa-solid fa-graduation-cap" },
+  { href: "/dashboard/profile", label: "à¦ªà§à¦°à§‹à¦«à¦¾à¦‡à¦²", icon: "fa-solid fa-user" },
 ];
 
 export function DashboardSidebar({
@@ -27,7 +27,7 @@ export function DashboardSidebar({
 
   const items = [
     ...navItems,
-    ...(isAdmin ? [{ href: "/admin", label: "অ্যাডমিন", icon: "fa-solid fa-toolbox" }] : []),
+    ...(isAdmin ? [{ href: "/admin", label: "à¦…à§à¦¯à¦¾à¦¡à¦®à¦¿à¦¨", icon: "fa-solid fa-toolbox" }] : []),
   ];
 
   async function handleSignOut() {
@@ -41,7 +41,7 @@ export function DashboardSidebar({
       <button
         onClick={() => setOpen((v) => !v)}
         className="fixed left-4 top-20 z-40 rounded-lg border border-zinc-200 bg-white p-2 text-zinc-600 shadow-sm md:hidden"
-        aria-label="মেনু"
+        aria-label="à¦®à§‡à¦¨à§"
       >
         <i className="fa-solid fa-bars" />
       </button>
@@ -55,7 +55,7 @@ export function DashboardSidebar({
         <div className="flex flex-col h-full">
           <div className="border-b border-zinc-100 p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-700">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 text-lg font-bold text-brand-700">
                 {name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
@@ -78,7 +78,7 @@ export function DashboardSidebar({
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     active
-                      ? "bg-indigo-600 text-white"
+                      ? "bg-brand-600 text-white"
                       : "text-zinc-600 hover:bg-zinc-100",
                   )}
                 >
@@ -94,7 +94,7 @@ export function DashboardSidebar({
               onClick={handleSignOut}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
             >
-              <span><i className="fa-solid fa-right-from-bracket" /></span> লগআউট
+              <span><i className="fa-solid fa-right-from-bracket" /></span> à¦²à¦—à¦†à¦‰à¦Ÿ
             </button>
           </div>
         </div>

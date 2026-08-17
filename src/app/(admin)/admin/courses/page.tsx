@@ -1,9 +1,15 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { AdminCourseTable } from "@/components/admin/course-table";
 
 export const metadata = { title: "কোর্সসমূহ" };
 
-export default async function AdminCoursesPage() {
+export default async function AdminCoursesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ add?: string }>;
+}) {
+  const { add } = await searchParams;
   const supabase = await createClient();
 
   const { data: courses } = await supabase
@@ -24,16 +30,23 @@ export default async function AdminCoursesPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-zinc-900">কোর্সসমূহ</h1>
-      <p className="mt-1 text-sm text-zinc-500">
-        কোর্স ও লেসন ম্যানেজ করুন
-      </p>
-      <div className="mt-6">
-        <AdminCourseTable
-          courses={courses ?? []}
-          lessonsByCourse={lessonsByCourse}
-        />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="wp-page-title">কোর্সসমূহ</h1>
+          <p className="wp-subtitle">কোর্স ও লেসন ম্যানেজ করুন</p>
+        </div>
+        <Link
+          href="/admin/courses?add=1"
+          className="wp-btn wp-btn-primary mb-5"
+        >
+          <i className="fa-solid fa-plus" /> নতুন কোর্স
+        </Link>
       </div>
+      <AdminCourseTable
+        courses={courses ?? []}
+        lessonsByCourse={lessonsByCourse}
+        defaultCreating={add === "1"}
+      />
     </div>
   );
 }

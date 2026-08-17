@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { signOut } from "@/lib/actions/auth";
 
 export default async function AdminLayout({
   children,
@@ -23,27 +24,65 @@ export default async function AdminLayout({
 
   if (profile?.role !== "admin") redirect("/dashboard");
 
+  const { data: settings } = await supabase
+    .from("site_settings")
+    .select("site_name, logo_url")
+    .eq("id", 1)
+    .single();
+
+  const siteName = settings?.site_name || "Plickify Academy";
+  const adminName = profile?.full_name || user.email;
+
   return (
-    <div className="flex min-h-screen w-full bg-zinc-100">
+    <div className="flex min-h-screen bg-[#f0f0f1]">
       <AdminSidebar />
+
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-200 bg-white px-4 md:px-6">
-          <p className="text-sm font-semibold text-zinc-700">
-            <i className="fa-solid fa-toolbox mr-1" /> অ্যাডমিন প্যানেল
-          </p>
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-black/10 bg-[#1d2327] px-4">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-bold text-zinc-800">
+              {settings?.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={settings.logo_url}
+                  alt={siteName}
+                  className="h-7 w-7 rounded-full object-contain"
+                />
+              ) : (
+                "P"
+              )}
+            </span>
+            <Link href="/admin" className="text-sm font-semibold text-white hover:text-zinc-300">
+              {siteName}
+            </Link>
+          </div>
+
+          <div className="ml-auto flex items-center gap-2">
+            <span className="hidden rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-zinc-200 sm:inline">
+              <i className="fa-solid fa-shield-halved mr-1.5 text-[10px]" />
+              Admin
+            </span>
+            <span className="hidden text-xs font-medium text-zinc-300 md:inline">
+              {adminName}
+            </span>
             <Link
               href="/"
-              className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50"
+              className="rounded border border-white/20 px-2.5 py-1 text-xs font-medium text-zinc-200 hover:bg-white/10"
             >
-              সাইট দেখুন
+              <i className="fa-solid fa-globe mr-1" /> সাইট দেখুন
             </Link>
-            <span className="hidden rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 sm:inline">
-              {profile?.full_name || user.email}
-            </span>
+            <form action={signOut}>
+              <button
+                className="rounded border border-white/20 px-2.5 py-1 text-xs font-medium text-zinc-200 hover:bg-white/10"
+                aria-label="লগআউট"
+              >
+                <i className="fa-solid fa-right-from-bracket" />
+              </button>
+            </form>
           </div>
         </header>
-        <main className="p-4 md:p-6">{children}</main>
+
+        <main className="px-4 py-6 md:px-8">{children}</main>
       </div>
     </div>
   );

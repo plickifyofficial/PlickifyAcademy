@@ -1,9 +1,9 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MarkCompleteButton } from "@/components/lessons/mark-complete-button";
 
-export const metadata = { title: "লেসন" };
+export const metadata = { title: "à¦²à§‡à¦¸à¦¨" };
 
 export default async function LessonPage({
   params,
@@ -58,21 +58,21 @@ export default async function LessonPage({
     return (
       <main className="mx-auto max-w-3xl flex-1 px-4 py-20 text-center">
         <h1 className="text-2xl font-bold text-zinc-900">
-          অ্যাক্সেস নেই <i className="fa-solid fa-lock" />
+          à¦…à§à¦¯à¦¾à¦•à§à¦¸à§‡à¦¸ à¦¨à§‡à¦‡ <i className="fa-solid fa-lock" />
         </h1>
         <p className="mt-3 text-zinc-600">
-          এই লেসনটি দেখতে হলে কোর্সটি কিনতে হবে।{" "}
+          à¦à¦‡ à¦²à§‡à¦¸à¦¨à¦Ÿà¦¿ à¦¦à§‡à¦–à¦¤à§‡ à¦¹à¦²à§‡ à¦•à§‹à¦°à§à¦¸à¦Ÿà¦¿ à¦•à¦¿à¦¨à¦¤à§‡ à¦¹à¦¬à§‡à¥¤{" "}
           {course.price === 0 ? (
-            "কোর্সটি ফ্রি, লগইন করে শুরু করুন।"
+            "à¦•à§‹à¦°à§à¦¸à¦Ÿà¦¿ à¦«à§à¦°à¦¿, à¦²à¦—à¦‡à¦¨ à¦•à¦°à§‡ à¦¶à§à¦°à§ à¦•à¦°à§à¦¨à¥¤"
           ) : (
-            <>কোর্সের দাম {course.price} টাকা।</>
+            <>à¦•à§‹à¦°à§à¦¸à§‡à¦° à¦¦à¦¾à¦® {course.price} à¦Ÿà¦¾à¦•à¦¾à¥¤</>
           )}
         </p>
         <Link
           href={`/courses/${course.slug}`}
-          className="mt-6 inline-block rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700"
+          className="mt-6 inline-block rounded-lg bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700"
         >
-          কোর্স পেজে ফিরে যান
+          à¦•à§‹à¦°à§à¦¸ à¦ªà§‡à¦œà§‡ à¦«à¦¿à¦°à§‡ à¦¯à¦¾à¦¨
         </Link>
       </main>
     );
@@ -86,9 +86,9 @@ export default async function LessonPage({
     <main className="mx-auto max-w-4xl flex-1 px-4 py-10">
       <Link
         href={`/courses/${course.slug}`}
-        className="text-sm font-medium text-indigo-600 hover:underline"
+        className="text-sm font-medium text-brand-600 hover:underline"
       >
-        ← {course.title}
+        â† {course.title}
       </Link>
 
       <h1 className="mt-4 text-2xl font-bold text-zinc-900">{lesson.title}</h1>
@@ -118,7 +118,7 @@ export default async function LessonPage({
             href={`/courses/${course.slug}/lessons/${prevLesson.id}`}
             className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
           >
-            ← আগের লেসন
+            â† à¦†à¦—à§‡à¦° à¦²à§‡à¦¸à¦¨
           </Link>
         ) : (
           <span />
@@ -134,9 +134,9 @@ export default async function LessonPage({
         {nextLesson && (
           <Link
             href={`/courses/${course.slug}/lessons/${nextLesson.id}`}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
           >
-            পরের লেসন →
+            à¦ªà¦°à§‡à¦° à¦²à§‡à¦¸à¦¨ â†’
           </Link>
         )}
       </div>

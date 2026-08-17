@@ -17,7 +17,13 @@ export const metadata: Metadata = {
   description:
     "অনলাইন একাডেমি — কোর্স, লেসন আর কুইজ দিয়ে নিজের দক্ষতা বাড়ান।",
   icons: {
-    icon: "/api/favicon",
+    icon: [
+      { url: "/api/favicon", type: "image/x-icon" },
+      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+    other: [{ rel: "manifest", url: "/site.webmanifest" }],
   },
 };
 

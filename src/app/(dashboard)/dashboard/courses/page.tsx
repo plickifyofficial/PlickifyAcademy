@@ -1,8 +1,8 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "আমার কোর্স" };
+export const metadata = { title: "à¦†à¦®à¦¾à¦° à¦•à§‹à¦°à§à¦¸" };
 
 export default async function MyCoursesPage() {
   const supabase = await createClient();
@@ -43,9 +43,9 @@ export default async function MyCoursesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900">আমার কোর্স</h1>
+      <h1 className="text-2xl font-bold text-zinc-900">à¦†à¦®à¦¾à¦° à¦•à§‹à¦°à§à¦¸</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        আপনি যেসব কোর্সে এনরোল করেছেন
+        à¦†à¦ªà¦¨à¦¿ à¦¯à§‡à¦¸à¦¬ à¦•à§‹à¦°à§à¦¸à§‡ à¦à¦¨à¦°à§‹à¦² à¦•à¦°à§‡à¦›à§‡à¦¨
       </p>
 
       {enrollments && enrollments.length > 0 ? (
@@ -67,11 +67,11 @@ export default async function MyCoursesPage() {
                 key={enrollment.id}
                 className="overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-shadow hover:shadow-md"
               >
-                <div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 text-4xl font-bold text-white">
+                <div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-brand-500 to-purple-600 text-4xl font-bold text-white">
                   {course.title.charAt(0)}
                   {pct === 100 && (
                     <span className="absolute right-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white">
-                      <i className="fa-solid fa-check mr-1" />সম্পন্ন
+                      <i className="fa-solid fa-check mr-1" />à¦¸à¦®à§à¦ªà¦¨à§à¦¨
                     </span>
                   )}
                 </div>
@@ -85,19 +85,19 @@ export default async function MyCoursesPage() {
                   <div className="mt-4">
                     <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
                       <div
-                        className="h-full rounded-full bg-indigo-600 transition-all"
+                        className="h-full rounded-full bg-brand-600 transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
                     <p className="mt-2 text-xs font-medium text-zinc-500">
-                      {pct}% সম্পন্ন ({done}/{total} লেসন)
+                      {pct}% à¦¸à¦®à§à¦ªà¦¨à§à¦¨ ({done}/{total} à¦²à§‡à¦¸à¦¨)
                     </p>
                   </div>
                   <Link
                     href={`/courses/${course.slug}`}
-                    className="mt-4 block rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-700"
+                    className="mt-4 block rounded-lg bg-brand-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-brand-700"
                   >
-                    {pct === 0 ? "শুরু করুন" : pct === 100 ? "রিভিউ করুন" : "চালিয়ে যান"}
+                    {pct === 0 ? "à¦¶à§à¦°à§ à¦•à¦°à§à¦¨" : pct === 100 ? "à¦°à¦¿à¦­à¦¿à¦‰ à¦•à¦°à§à¦¨" : "à¦šà¦¾à¦²à¦¿à¦¯à¦¼à§‡ à¦¯à¦¾à¦¨"}
                   </Link>
                 </div>
               </div>
@@ -106,12 +106,12 @@ export default async function MyCoursesPage() {
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
-          <p className="text-zinc-600">এখনো কোনো কোর্সে এনরোল করা হয়নি।</p>
+          <p className="text-zinc-600">à¦à¦–à¦¨à§‹ à¦•à§‹à¦¨à§‹ à¦•à§‹à¦°à§à¦¸à§‡ à¦à¦¨à¦°à§‹à¦² à¦•à¦°à¦¾ à¦¹à¦¯à¦¼à¦¨à¦¿à¥¤</p>
           <Link
             href="/courses"
-            className="mt-4 inline-block rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+            className="mt-4 inline-block rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
           >
-            কোর্স ব্রাউজ করুন
+            à¦•à§‹à¦°à§à¦¸ à¦¬à§à¦°à¦¾à¦‰à¦œ à¦•à¦°à§à¦¨
           </Link>
         </div>
       )}

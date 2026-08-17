@@ -32,14 +32,12 @@ export default async function AdminSettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-zinc-900">সাইট সেটিংস</h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          লোগো, ফেভিকন ও সাইটের নাম পরিবর্তন করুন — ইনস্ট্যান্ট সব জায়গায়
-          আপডেট হয়।
-        </p>
-      </div>
+    <div className="max-w-4xl">
+      <h1 className="wp-page-title">সাইট সেটিংস</h1>
+      <p className="wp-subtitle">
+        লোগো, ফেভিকন ও সাইটের নাম পরিবর্তন করুন — ইনস্ট্যান্ট সব জায়গায়
+        আপডেট হয়।
+      </p>
 
       <SiteSettingsForm settings={settings ?? defaults} />
     </div>
