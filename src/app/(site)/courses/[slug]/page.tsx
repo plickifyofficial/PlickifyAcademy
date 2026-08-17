@@ -64,15 +64,26 @@ export default async function CourseDetailPage({
   } = await supabase.auth.getUser();
 
   let isEnrolled = false;
+  let enrollmentDate: string | null = null;
+  let lastLessonId: string | null = null;
   let completedIds = new Set<string>();
   if (user) {
     const { data: enrollment } = await supabase
       .from("enrollments")
-      .select("id")
+      .select("id, created_at")
       .eq("user_id", user.id)
       .eq("course_id", course.id)
       .maybeSingle();
     isEnrolled = !!enrollment;
+    enrollmentDate = enrollment?.created_at ?? null;
+
+    const { data: state } = await supabase
+      .from("user_course_state")
+      .select("last_lesson_id")
+      .eq("user_id", user.id)
+      .eq("course_id", course.id)
+      .maybeSingle();
+    lastLessonId = state?.last_lesson_id ?? null;
 
     if (isEnrolled && allTopicIds.length > 0) {
       const { data: progress } = await supabase
@@ -84,6 +95,13 @@ export default async function CourseDetailPage({
     }
   }
 
+  function isDripLocked(topic: Lesson): boolean {
+    if (!isEnrolled || topic.is_free || (topic.release_days ?? 0) <= 0 || !enrollmentDate)
+      return false;
+    const unlock = new Date(new Date(enrollmentDate).getTime() + topic.release_days * 86400000);
+    return new Date() < unlock;
+  }
+
   const completedCount = allTopicIds.filter((id) => completedIds.has(id)).length;
   const progressPct =
     allTopicIds.length > 0
@@ -93,6 +111,8 @@ export default async function CourseDetailPage({
   const isFree = course.price === 0;
   const canAccess = isEnrolled || isFree;
   const firstTopic = allTopics[0];
+  const resumeTopic =
+    allTopics.find((t) => t.id === lastLessonId) ?? firstTopic;
 
   return (
     <main className="flex-1">
@@ -134,12 +154,12 @@ export default async function CourseDetailPage({
               {allTopicIds.length} টি টপিক
             </span>
             {canAccess ? (
-              firstTopic ? (
+              resumeTopic ? (
                 <Link
-                  href={`/courses/${course.slug}/lessons/${firstTopic.id}`}
+                  href={`/courses/${course.slug}/lessons/${resumeTopic.id}`}
                   className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50"
                 >
-                  {isEnrolled ? "শেখা চালিয়ে যান" : "শেখা শুরু করুন"} →
+                  {isEnrolled && lastLessonId ? "শেখা চালিয়ে যান" : "শেখা শুরু করুন"} →
                 </Link>
               ) : null
             ) : (
@@ -175,7 +195,8 @@ export default async function CourseDetailPage({
                   </div>
                   <div className="divide-y divide-zinc-100">
                     {sectionTopics.map((topic, idx) => {
-                      const locked = !canAccess && !topic.is_free;
+                      const locked = (!canAccess && !topic.is_free) || isDripLocked(topic);
+                      const drip = isDripLocked(topic);
                       const done = completedIds.has(topic.id);
                       return (
                         <div
@@ -212,7 +233,10 @@ export default async function CourseDetailPage({
                             </span>
                           )}
                           {locked ? (
-                            <span className="text-zinc-400">
+                            <span
+                              className="text-zinc-400"
+                              title={drip ? "ড্রিপ কনটেন্ট — পরে আনলক হবে" : "এনরোল করুন"}
+                            >
                               <i className="fa-solid fa-lock" />
                             </span>
                           ) : (

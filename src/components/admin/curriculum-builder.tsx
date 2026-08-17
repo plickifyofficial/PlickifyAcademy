@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Course, CourseSection, Lesson } from "@/lib/types";
+import type { Course, CourseSection, Lesson, QuizQuestion } from "@/lib/types";
 import {
   createSection,
   updateSection,
@@ -13,6 +13,7 @@ import {
   moveTopic,
 } from "@/lib/actions/admin";
 import { useToast } from "@/components/ui/toaster";
+import { QuestionsEditor } from "@/components/admin/questions-editor";
 
 const TOPIC_TYPES: { value: Lesson["type"]; label: string; icon: string }[] = [
   { value: "lesson", label: "লেসন", icon: "fa-solid fa-book-open" },
@@ -32,10 +33,12 @@ export function CurriculumBuilder({
   course,
   sections,
   topics,
+  questionsByLesson,
 }: {
   course: Course;
   sections: CourseSection[];
   topics: Record<string, Lesson[]>;
+  questionsByLesson: Record<string, QuizQuestion[]>;
 }) {
   const [pending, setPending] = useState(false);
   const [renamingSection, setRenamingSection] = useState<string | null>(null);
@@ -226,6 +229,7 @@ export function CurriculumBuilder({
                       course={course}
                       sectionId={section.id}
                       topic={sectionTopics.find((t) => t.id === editingTopic)}
+                      questions={questionsByLesson[editingTopic] ?? []}
                       onDone={() => setEditingTopic(null)}
                     />
                   )}
@@ -306,16 +310,19 @@ function TopicForm({
   course,
   sectionId,
   topic,
+  questions,
   onDone,
 }: {
   course: Course;
   sectionId: string;
   topic?: Lesson;
+  questions?: QuizQuestion[];
   onDone: () => void;
 }) {
   const [pending, setPending] = useState(false);
   const { showToast } = useToast();
   const isEdit = !!topic;
+  const isQuiz = (topic?.type ?? "lesson") === "quiz";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -376,6 +383,16 @@ function TopicForm({
           <input name="description" defaultValue={topic?.description ?? ""} className="wp-input" />
         </div>
       </div>
+      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div>
+          <label className="wp-label">কুইজ পাস % (কুইজের জন্য)</label>
+          <input name="pass_percent" type="number" min={0} max={100} defaultValue={topic?.pass_percent ?? 60} className="wp-input" />
+        </div>
+        <div>
+          <label className="wp-label">ড্রিপ রিলিজ (এনরোলের পরে দিন)</label>
+          <input name="release_days" type="number" min={0} defaultValue={topic?.release_days ?? 0} className="wp-input" />
+        </div>
+      </div>
       <div className="mt-2">
         <label className="wp-label">কনটেন্ট (লেসন/অ্যাসাইনমেন্টের জন্য)</label>
         <textarea name="content" rows={2} defaultValue={topic?.content ?? ""} className="wp-input" />
@@ -394,6 +411,10 @@ function TopicForm({
           </button>
         </div>
       </div>
+
+      {isEdit && isQuiz && (
+        <QuestionsEditor lessonId={topic!.id} questions={questions ?? []} />
+      )}
     </form>
   );
 }

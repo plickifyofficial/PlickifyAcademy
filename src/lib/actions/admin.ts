@@ -312,6 +312,8 @@ export async function createTopic(formData: FormData) {
     content: String(formData.get("content")).trim() || null,
     duration_minutes: Number(formData.get("duration_minutes")) || 0,
     is_free: formData.get("is_free") === "on",
+    pass_percent: Number(formData.get("pass_percent")) || 60,
+    release_days: Number(formData.get("release_days")) || 0,
     order: (last?.order ?? 0) + 1,
   });
 
@@ -338,6 +340,8 @@ export async function updateTopic(formData: FormData) {
       content: String(formData.get("content")).trim() || null,
       duration_minutes: Number(formData.get("duration_minutes")) || 0,
       is_free: formData.get("is_free") === "on",
+      pass_percent: Number(formData.get("pass_percent")) || 60,
+      release_days: Number(formData.get("release_days")) || 0,
     })
     .eq("id", id);
   if (error) throw new Error(error.message);
@@ -381,6 +385,85 @@ export async function moveTopic(formData: FormData) {
   if (error) throw new Error(error.message);
   const { error: e2 } = await supabase.from("lessons").update({ order: a.order }).eq("id", b.id);
   if (e2) throw new Error(e2.message);
+
+  revalidatePath("/admin");
+}
+
+export async function createQuizQuestion(formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const lessonId = String(formData.get("lesson_id"));
+  const question = String(formData.get("question")).trim();
+  if (!lessonId || !question) throw new Error("প্রশ্ন লিখুন");
+
+  const options = String(formData.get("options"))
+    .split("\n")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  if (options.length < 2) throw new Error("কমপক্ষে ২টি অপশন দিন");
+
+  const correctIndex = Number(formData.get("correct_index")) || 0;
+  if (correctIndex >= options.length)
+    throw new Error("সঠিক উত্তরের সূচক ভুল");
+
+  const { data: last } = await supabase
+    .from("quiz_questions")
+    .select("position")
+    .eq("lesson_id", lessonId)
+    .order("position", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("quiz_questions").insert({
+    lesson_id: lessonId,
+    question,
+    options,
+    correct_index: correctIndex,
+    explanation: String(formData.get("explanation")).trim() || null,
+    position: (last?.position ?? 0) + 1,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+}
+
+export async function updateQuizQuestion(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  const question = String(formData.get("question")).trim();
+  if (!id || !question) throw new Error("প্রশ্ন লিখুন");
+
+  const options = String(formData.get("options"))
+    .split("\n")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  if (options.length < 2) throw new Error("কমপক্ষে ২টি অপশন দিন");
+
+  const correctIndex = Number(formData.get("correct_index")) || 0;
+  if (correctIndex >= options.length)
+    throw new Error("সঠিক উত্তরের সূচক ভুল");
+
+  const { error } = await supabase
+    .from("quiz_questions")
+    .update({
+      question,
+      options,
+      correct_index: correctIndex,
+      explanation: String(formData.get("explanation")).trim() || null,
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+}
+
+export async function deleteQuizQuestion(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  if (!id) throw new Error("প্রশ্ন ID নেই");
+
+  const { error } = await supabase.from("quiz_questions").delete().eq("id", id);
+  if (error) throw new Error(error.message);
 
   revalidatePath("/admin");
 }

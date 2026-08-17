@@ -33,6 +33,28 @@ export type Lesson = {
   duration_minutes: number;
   is_free: boolean;
   order: number;
+  pass_percent: number;
+  release_days: number;
+  created_at: string;
+};
+
+export type QuizQuestion = {
+  id: string;
+  lesson_id: string;
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string | null;
+  position: number;
+};
+
+export type QuizAttempt = {
+  id: string;
+  lesson_id: string;
+  user_id: string;
+  score: number;
+  total: number;
+  passed: boolean;
   created_at: string;
 };
 

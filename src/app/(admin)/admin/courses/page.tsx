@@ -24,6 +24,11 @@ export default async function AdminCoursesPage({
 
   const { data: topics } = await supabase.from("lessons").select("*");
 
+  const { data: questions } = await supabase
+    .from("quiz_questions")
+    .select("*")
+    .order("position", { ascending: true });
+
   const sectionsByCourse: Record<string, NonNullable<typeof sections>[0][]> = {};
   for (const section of sections ?? []) {
     if (sectionsByCourse[section.course_id]) {
@@ -41,6 +46,15 @@ export default async function AdminCoursesPage({
       } else {
         topicsBySection[topic.section_id] = [topic];
       }
+    }
+  }
+
+  const questionsByLesson: Record<string, NonNullable<typeof questions>[0][]> = {};
+  for (const q of questions ?? []) {
+    if (questionsByLesson[q.lesson_id]) {
+      questionsByLesson[q.lesson_id].push(q);
+    } else {
+      questionsByLesson[q.lesson_id] = [q];
     }
   }
 
@@ -62,6 +76,7 @@ export default async function AdminCoursesPage({
         courses={courses ?? []}
         sectionsByCourse={sectionsByCourse}
         topicsBySection={topicsBySection}
+        questionsByLesson={questionsByLesson}
         defaultCreating={add === "1"}
       />
     </div>
