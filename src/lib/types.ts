@@ -93,6 +93,45 @@ export type Certificate = {
   issued_at: string;
 };
 
+export type WishlistItem = {
+  course_id: string;
+  created_at: string;
+};
+
+export type Coupon = {
+  id: string;
+  code: string;
+  discount_type: "percent" | "flat";
+  value: number;
+  course_id: string | null;
+  max_uses: number;
+  used_count: number;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type Notification = {
+  id: string;
+  user_id: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read: boolean;
+  created_at: string;
+};
+
+export type LiveClass = {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string | null;
+  scheduled_at: string | null;
+  duration_minutes: number;
+  meeting_url: string | null;
+  created_at: string;
+};
+
 export type CourseSection = {
   id: string;
   course_id: string;

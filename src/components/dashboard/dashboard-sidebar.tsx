@@ -9,6 +9,7 @@ import { signOut } from "@/lib/actions/auth";
 const navItems = [
   { href: "/dashboard", label: "ড্যাশবোর্ড", icon: "fa-solid fa-chart-line" },
   { href: "/dashboard/courses", label: "আমার কোর্স", icon: "fa-solid fa-graduation-cap" },
+  { href: "/dashboard/wishlist", label: "পছন্দের তালিকা", icon: "fa-solid fa-heart" },
   { href: "/dashboard/profile", label: "প্রোফাইল", icon: "fa-solid fa-user" },
 ];
 
@@ -16,10 +17,12 @@ export function DashboardSidebar({
   name,
   email,
   isAdmin,
+  isInstructor,
 }: {
   name: string;
   email: string;
   isAdmin: boolean;
+  isInstructor: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -27,6 +30,9 @@ export function DashboardSidebar({
 
   const items = [
     ...navItems,
+    ...(isInstructor
+      ? [{ href: "/admin/courses", label: "আমার কোর্স (ইনস্ট্রাক্টর)", icon: "fa-solid fa-chalkboard-user" }]
+      : []),
     ...(isAdmin ? [{ href: "/admin", label: "অ্যাডমিন", icon: "fa-solid fa-toolbox" }] : []),
   ];
 
@@ -40,7 +46,7 @@ export function DashboardSidebar({
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed left-4 top-20 z-40 rounded-lg border border-zinc-200 bg-white p-2 text-zinc-600 shadow-sm md:hidden"
+        className="fixed left-4 top-[72px] z-40 rounded-lg border border-zinc-200 bg-white p-2 text-zinc-600 shadow-sm md:hidden"
         aria-label="মেনু"
       >
         <i className="fa-solid fa-bars" />

@@ -22,7 +22,10 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "admin") redirect("/dashboard");
+  if (profile?.role !== "admin" && profile?.role !== "instructor")
+    redirect("/dashboard");
+
+  const isInstructor = profile?.role === "instructor";
 
   const { data: settings } = await supabase
     .from("site_settings")
@@ -35,7 +38,7 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-[#f0f0f1]">
-      <AdminSidebar />
+      <AdminSidebar isInstructor={isInstructor} />
 
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-black/10 bg-[#1d2327] px-4">
@@ -60,7 +63,7 @@ export default async function AdminLayout({
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-zinc-200 sm:inline">
               <i className="fa-solid fa-shield-halved mr-1.5 text-[10px]" />
-              Admin
+              {isInstructor ? "Instructor" : "Admin"}
             </span>
             <span className="hidden text-xs font-medium text-zinc-300 md:inline">
               {adminName}

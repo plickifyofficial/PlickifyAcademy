@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe";
+import { applyCoupon } from "@/lib/coupons";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ requiresLogin: true }, { status: 401 });
   }
 
-  const { courseId } = await request.json();
+  const { courseId, couponCode } = await request.json();
 
   const { data: course, error } = await supabase
     .from("courses")
@@ -44,6 +45,34 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: `${appUrl}/dashboard` });
   }
 
+  let unitAmount = Math.round(course.price * 100);
+  let couponId: string | null = null;
+
+  if (couponCode && couponCode.trim()) {
+    try {
+      const { amount, coupon } = await applyCoupon(
+        course.id,
+        course.price,
+        couponCode,
+      );
+      unitAmount = Math.round(amount * 100);
+      couponId = coupon.id;
+    } catch (e) {
+      return NextResponse.json(
+        { error: (e as Error).message },
+        { status: 400 },
+      );
+    }
+  }
+
+  if (unitAmount <= 0) {
+    await supabase.from("enrollments").insert({
+      user_id: user.id,
+      course_id: course.id,
+    });
+    return NextResponse.json({ url: `${appUrl}/dashboard` });
+  }
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
@@ -55,7 +84,7 @@ export async function POST(request: NextRequest) {
             name: course.title,
             description: course.description ?? undefined,
           },
-          unit_amount: Math.round(course.price * 100),
+          unit_amount: unitAmount,
         },
         quantity: 1,
       },
@@ -63,6 +92,7 @@ export async function POST(request: NextRequest) {
     metadata: {
       courseId: course.id,
       userId: user.id,
+      couponId: couponId ?? "",
     },
     success_url: `${appUrl}/dashboard?payment=success`,
     cancel_url: `${appUrl}/courses/${course.slug}`,

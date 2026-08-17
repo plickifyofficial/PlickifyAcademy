@@ -7,6 +7,7 @@ import type {
   Lesson,
   QuizQuestion,
   Announcement,
+  LiveClass,
 } from "@/lib/types";
 import {
   createSection,
@@ -19,6 +20,8 @@ import {
   moveTopic,
   createAnnouncement,
   deleteAnnouncement,
+  createLiveClass,
+  deleteLiveClass,
 } from "@/lib/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 import { QuestionsEditor } from "@/components/admin/questions-editor";
@@ -43,12 +46,14 @@ export function CurriculumBuilder({
   topics,
   questionsByLesson,
   announcements,
+  liveClasses,
 }: {
   course: Course;
   sections: CourseSection[];
   topics: Record<string, Lesson[]>;
   questionsByLesson: Record<string, QuizQuestion[]>;
   announcements: Announcement[];
+  liveClasses: LiveClass[];
 }) {
   const [pending, setPending] = useState(false);
   const [renamingSection, setRenamingSection] = useState<string | null>(null);
@@ -296,6 +301,72 @@ export function CurriculumBuilder({
               <i className="fa-solid fa-plus" /> নতুন সেকশন
             </button>
           )}
+        </div>
+      </div>
+
+      <div className="wp-panel">
+        <div className="wp-panel-header">
+          <span>
+            <i className="fa-solid fa-video mr-1 text-[#2271b1]" />
+            লাইভ ক্লাস ({liveClasses.length})
+          </span>
+        </div>
+        <div className="wp-panel-body space-y-3">
+          {liveClasses.map((c) => (
+            <div
+              key={c.id}
+              className="flex items-center gap-3 rounded-lg border border-[#e2e2e2] bg-[#fafafa] px-3 py-2"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-[#1d2327]">
+                  {c.title}
+                </p>
+                <p className="truncate text-xs text-[#646970]">
+                  {c.scheduled_at
+                    ? new Date(c.scheduled_at).toLocaleString("bn-BD", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })
+                    : "তারিখ নির্ধারিত নয়"}
+                  {c.duration_minutes > 0
+                    ? ` • ${c.duration_minutes} মিনিট`
+                    : ""}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  if (!confirm("লাইভ ক্লাসটি মুছবেন?")) return;
+                  const fd = new FormData();
+                  fd.set("id", c.id);
+                  run(() => deleteLiveClass(fd), "লাইভ ক্লাস মুছে ফেলা হয়েছে");
+                }}
+                className="wp-btn wp-btn-danger !px-2"
+                aria-label="মুছুন"
+              >
+                <i className="fa-solid fa-trash text-xs" />
+              </button>
+            </div>
+          ))}
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await run(async () => {
+                await createLiveClass(new FormData(e.currentTarget));
+                e.currentTarget.reset();
+              }, "লাইভ ক্লাস যোগ হয়েছে");
+            }}
+            className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]"
+          >
+            <input type="hidden" name="course_id" value={course.id} />
+            <input name="title" required placeholder="ক্লাস শিরোনাম" className="wp-input" />
+            <input name="scheduled_at" type="datetime-local" className="wp-input" />
+            <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
+              <i className="fa-solid fa-plus" /> যোগ করুন
+            </button>
+            <input name="description" placeholder="বর্ণনা (ঐচ্ছিক)" className="wp-input sm:col-span-2" />
+            <input name="meeting_url" placeholder="Zoom/Meet লিংক (ঐচ্ছিক)" className="wp-input" />
+            <input name="duration_minutes" type="number" min={1} defaultValue={60} placeholder="সময় (মিনিট)" className="wp-input" />
+          </form>
         </div>
       </div>
 

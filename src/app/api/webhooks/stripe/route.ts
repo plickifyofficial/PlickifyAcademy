@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(request: NextRequest) {
@@ -51,6 +52,19 @@ export async function POST(request: NextRequest) {
           { user_id: userId, course_id: courseId },
           { onConflict: "user_id,course_id" },
         );
+
+      if (session.metadata?.couponId) {
+        await supabase.rpc("increment_coupon_used", {
+          coupon_id: session.metadata.couponId,
+        });
+      }
+
+      await createAdminClient().from("notifications").insert({
+        user_id: userId,
+        title: "পেমেন্ট সফল হয়েছে ✅",
+        body: "আপনার কোর্সটি এনরোল হয়ে গেছে। শেখা শুরু করুন!",
+        link: "/dashboard",
+      });
     }
   }
 

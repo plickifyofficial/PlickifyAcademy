@@ -27,6 +27,7 @@ const menu = [
     items: [
       { href: "/admin/orders", label: "অর্ডারসমূহ", icon: "fa-solid fa-cart-shopping" },
       { href: "/admin/enrollments", label: "এনরোলমেন্ট", icon: "fa-solid fa-user-plus" },
+      { href: "/admin/coupons", label: "কুপনসমূহ", icon: "fa-solid fa-ticket" },
     ],
   },
   {
@@ -39,10 +40,26 @@ const menu = [
   },
 ];
 
-export function AdminSidebar() {
+const instructorMenu = [
+  {
+    group: "কনটেন্ট",
+    items: [
+      { href: "/admin/courses", label: "আমার কোর্স", icon: "fa-solid fa-book-open" },
+      { href: "/admin/courses?add=1", label: "নতুন কোর্স", icon: "fa-solid fa-file-circle-plus" },
+    ],
+  },
+];
+
+type Props = {
+  isInstructor?: boolean;
+};
+
+export function AdminSidebar({ isInstructor = false }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  const visibleMenu = isInstructor ? instructorMenu : menu;
 
   async function handleSignOut() {
     await signOut();
@@ -91,7 +108,7 @@ export function AdminSidebar() {
         </div>
 
         <nav className="flex-1 pb-20 pt-1 lg:pb-4">
-          {menu.map((group) => (
+          {visibleMenu.map((group) => (
             <div key={group.group}>
               <p className="wp-menu-group-title">{group.group}</p>
               {group.items.map((item) => (

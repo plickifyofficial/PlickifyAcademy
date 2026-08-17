@@ -7,6 +7,7 @@ import type {
   Lesson,
   QuizQuestion,
   Announcement,
+  LiveClass,
 } from "@/lib/types";
 import {
   createCourse,
@@ -56,6 +57,7 @@ export function AdminCourseTable({
   topicsBySection,
   questionsByLesson,
   announcementsByCourse,
+  liveClassesByCourse,
   defaultCreating = false,
 }: {
   courses: Course[];
@@ -63,6 +65,7 @@ export function AdminCourseTable({
   topicsBySection: Record<string, Lesson[]>;
   questionsByLesson: Record<string, QuizQuestion[]>;
   announcementsByCourse: Record<string, Announcement[]>;
+  liveClassesByCourse: Record<string, LiveClass[]>;
   defaultCreating?: boolean;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -343,6 +346,7 @@ export function AdminCourseTable({
                           topics={topicsBySection}
                           questionsByLesson={questionsByLesson}
                           announcements={announcementsByCourse[course.id] ?? []}
+                          liveClasses={liveClassesByCourse[course.id] ?? []}
                         />
                       </td>
                     </tr>

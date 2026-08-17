@@ -8,7 +8,7 @@ type Student = {
   id: string;
   full_name: string | null;
   email: string;
-  role: "student" | "admin";
+  role: "student" | "admin" | "instructor";
   created_at: string;
 };
 
@@ -68,10 +68,22 @@ export function StudentsTable({
                 </td>
                 <td className="text-[#3c434a]">{s.email}</td>
                 <td>
-                  <span className={`wp-tag ${s.role === "admin" ? "wp-tag-blue" : "wp-tag-gray"}`}>
+                  <span
+                    className={`wp-tag ${
+                      s.role === "admin"
+                        ? "wp-tag-blue"
+                        : s.role === "instructor"
+                          ? "wp-tag-purple"
+                          : "wp-tag-gray"
+                    }`}
+                  >
                     {s.role === "admin" ? (
                       <>
                         <i className="fa-solid fa-shield-halved text-[10px]" /> অ্যাডমিন
+                      </>
+                    ) : s.role === "instructor" ? (
+                      <>
+                        <i className="fa-solid fa-chalkboard-user text-[10px]" /> ইনস্ট্রাক্টর
                       </>
                     ) : (
                       "স্টুডেন্ট"
@@ -83,7 +95,7 @@ export function StudentsTable({
                 </td>
                 <td>
                   {s.id !== currentUserId && (
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-2">
                       <form onSubmit={(e) => handleRole(e, s.id)}>
                         <input type="hidden" name="user_id" value={s.id} />
                         {s.role === "admin" ? (
@@ -93,8 +105,23 @@ export function StudentsTable({
                               <i className="fa-solid fa-user-slash" /> অ্যাডমিন সরান
                             </button>
                           </>
+                        ) : s.role === "instructor" ? (
+                          <>
+                            <input type="hidden" name="role" value="admin" />
+                            <button className="wp-btn" disabled={pendingId === s.id}>
+                              <i className="fa-solid fa-user-shield" /> অ্যাডমিন বানান
+                            </button>
+                            <input type="hidden" name="role" value="student" />
+                            <button className="wp-btn wp-btn-danger" disabled={pendingId === s.id}>
+                              <i className="fa-solid fa-user-slash" /> ইনস্ট্রাক্টর সরান
+                            </button>
+                          </>
                         ) : (
                           <>
+                            <input type="hidden" name="role" value="instructor" />
+                            <button className="wp-btn" disabled={pendingId === s.id}>
+                              <i className="fa-solid fa-chalkboard-user" /> ইনস্ট্রাক্টর
+                            </button>
                             <input type="hidden" name="role" value="admin" />
                             <button className="wp-btn" disabled={pendingId === s.id}>
                               <i className="fa-solid fa-user-shield" /> অ্যাডমিন বানান

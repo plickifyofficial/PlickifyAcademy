@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { QuizQuestion } from "@/lib/types";
+import { createNotification } from "@/lib/actions/notifications";
 
 export type QuizResult = {
   score: number;
@@ -205,6 +206,15 @@ export async function answerQuestion(qnaId: string, answer: string) {
     .eq("id", qnaId);
   if (error) throw new Error(error.message);
 
+  if (qna.user_id !== user.id) {
+    await createNotification(
+      qna.user_id,
+      "আপনার প্রশ্নের উত্তর এসেছে ✅",
+      "কোর্সের প্রশ্নোত্তরে আপনার প্রশ্নের উত্তর দেওয়া হয়েছে।",
+      `/courses/${await courseSlug(supabase, qna.course_id)}#qna`,
+    );
+  }
+
   revalidatePath(`/courses/${await courseSlug(supabase, qna.course_id)}`);
 }
 
@@ -222,8 +232,69 @@ export async function issueCertificate(
   });
   if (error) throw new Error(error.message);
 
+  if (data) {
+    await createNotification(
+      user.id,
+      "সার্টিফিকেট প্রস্তুত 🎓",
+      "কোর্স সম্পন্ন করার অভিনন্দন! আপনার সার্টিফিকেট ডাউনলোড করুন।",
+      `/certificates/${data}`,
+    );
+  }
+
   revalidatePath(`/courses/${await courseSlug(supabase, courseId)}`);
   revalidatePath("/dashboard");
 
   return data as string | null;
+}
+
+export async function toggleWishlist(courseId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: existing } = await supabase
+    .from("wishlist")
+    .select("course_id")
+    .eq("user_id", user.id)
+    .eq("course_id", courseId)
+    .maybeSingle();
+
+  let saved = false;
+  if (existing) {
+    const { error } = await supabase
+      .from("wishlist")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("course_id", courseId);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase.from("wishlist").insert({
+      user_id: user.id,
+      course_id: courseId,
+    });
+    if (error) throw new Error(error.message);
+    saved = true;
+  }
+
+  revalidatePath(`/courses/${await courseSlug(supabase, courseId)}`);
+  return saved;
+}
+
+export async function removeFromWishlist(courseId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase
+    .from("wishlist")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("course_id", courseId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/dashboard/wishlist");
 }

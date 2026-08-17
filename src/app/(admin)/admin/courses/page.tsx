@@ -12,27 +12,55 @@ export default async function AdminCoursesPage({
   const { add } = await searchParams;
   const supabase = await createClient();
 
-  const { data: courses } = await supabase
-    .from("courses")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data: sections } = await supabase
-    .from("course_sections")
-    .select("*")
-    .order("position", { ascending: true });
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user?.id ?? "")
+    .single();
 
-  const { data: topics } = await supabase.from("lessons").select("*");
+  const isInstructor = profile?.role === "instructor";
 
-  const { data: questions } = await supabase
-    .from("quiz_questions")
-    .select("*")
-    .order("position", { ascending: true });
+  let coursesQuery = supabase.from("courses").select("*");
+  if (isInstructor && user) coursesQuery = coursesQuery.eq("created_by", user.id);
+  const { data: courses } = await coursesQuery.order("created_at", {
+    ascending: false,
+  });
 
-  const { data: announcements } = await supabase
-    .from("course_announcements")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const courseIds = (courses ?? []).map((c) => c.id);
+
+  let sectionsQuery = supabase.from("course_sections").select("*");
+  if (courseIds.length > 0) sectionsQuery = sectionsQuery.in("course_id", courseIds);
+  const { data: sections } = await sectionsQuery.order("position", {
+    ascending: true,
+  });
+
+  let topicsQuery = supabase.from("lessons").select("*");
+  if (courseIds.length > 0) topicsQuery = topicsQuery.in("course_id", courseIds);
+  const { data: topics } = await topicsQuery;
+
+  let questionsQuery = supabase.from("quiz_questions").select("*");
+  if (courseIds.length > 0) questionsQuery = questionsQuery.in("course_id", courseIds);
+  const { data: questions } = await questionsQuery.order("position", {
+    ascending: true,
+  });
+
+  let announcementsQuery = supabase.from("course_announcements").select("*");
+  if (courseIds.length > 0)
+    announcementsQuery = announcementsQuery.in("course_id", courseIds);
+  const { data: announcements } = await announcementsQuery.order("created_at", {
+    ascending: false,
+  });
+
+  let liveClassesQuery = supabase.from("live_classes").select("*");
+  if (courseIds.length > 0)
+    liveClassesQuery = liveClassesQuery.in("course_id", courseIds);
+  const { data: liveClasses } = await liveClassesQuery.order("scheduled_at", {
+    ascending: true,
+  });
 
   const sectionsByCourse: Record<string, NonNullable<typeof sections>[0][]> = {};
   for (const section of sections ?? []) {
@@ -72,6 +100,15 @@ export default async function AdminCoursesPage({
     }
   }
 
+  const liveClassesByCourse: Record<string, NonNullable<typeof liveClasses>[0][]> = {};
+  for (const lc of liveClasses ?? []) {
+    if (liveClassesByCourse[lc.course_id]) {
+      liveClassesByCourse[lc.course_id].push(lc);
+    } else {
+      liveClassesByCourse[lc.course_id] = [lc];
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -92,6 +129,7 @@ export default async function AdminCoursesPage({
         topicsBySection={topicsBySection}
         questionsByLesson={questionsByLesson}
         announcementsByCourse={announcementsByCourse}
+        liveClassesByCourse={liveClassesByCourse}
         defaultCreating={add === "1"}
       />
     </div>

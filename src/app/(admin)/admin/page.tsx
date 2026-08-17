@@ -1,10 +1,23 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "ড্যাশবোর্ড" };
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user?.id ?? "")
+    .single();
+
+  if (profile?.role === "instructor") redirect("/admin/courses");
 
   const [
     { count: courseCount },

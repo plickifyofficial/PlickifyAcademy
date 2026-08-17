@@ -6,7 +6,9 @@ import { CheckoutButton } from "@/components/checkout/checkout-button";
 import { ReviewsSection } from "@/components/courses/reviews-section";
 import { QnaSection } from "@/components/courses/qna-section";
 import { CertificateButton } from "@/components/courses/certificate-button";
-import type { Lesson, Announcement } from "@/lib/types";
+import { WishlistButton } from "@/components/courses/wishlist-button";
+import { LiveClassesSection } from "@/components/courses/live-classes-section";
+import type { Lesson, Announcement, LiveClass } from "@/lib/types";
 
 export const metadata = { title: "কোর্স" };
 
@@ -70,6 +72,7 @@ export default async function CourseDetailPage({
   let enrollmentDate: string | null = null;
   let lastLessonId: string | null = null;
   let isAdmin = false;
+  let wishlisted = false;
   let completedIds = new Set<string>();
   let ownReview: { rating: number; comment: string | null } | null = null;
   let certificateId: string | null = null;
@@ -80,6 +83,14 @@ export default async function CourseDetailPage({
       .eq("id", user.id)
       .maybeSingle();
     isAdmin = profile?.role === "admin";
+
+    const { data: wish } = await supabase
+      .from("wishlist")
+      .select("course_id")
+      .eq("user_id", user.id)
+      .eq("course_id", course.id)
+      .maybeSingle();
+    wishlisted = !!wish;
 
     const { data: enrollment } = await supabase
       .from("enrollments")
@@ -163,6 +174,12 @@ export default async function CourseDetailPage({
     .eq("course_id", course.id)
     .order("created_at", { ascending: false });
 
+  const { data: liveClasses } = await supabase
+    .from("live_classes")
+    .select("*")
+    .eq("course_id", course.id)
+    .order("scheduled_at", { ascending: true });
+
   function isDripLocked(topic: Lesson): boolean {
     if (!isEnrolled || topic.is_free || (topic.release_days ?? 0) <= 0 || !enrollmentDate)
       return false;
@@ -231,7 +248,10 @@ export default async function CourseDetailPage({
                 </Link>
               ) : null
             ) : (
-              <CheckoutButton courseId={course.id} price={course.price} />
+              <>
+                <CheckoutButton courseId={course.id} price={course.price} />
+                <WishlistButton courseId={course.id} initialSaved={wishlisted} />
+              </>
             )}
             {isEnrolled && (
               <CertificateButton
@@ -336,6 +356,15 @@ export default async function CourseDetailPage({
           )}
         </div>
       </section>
+
+      {isEnrolled && (liveClasses as LiveClass[]).length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 py-8">
+          <LiveClassesSection
+            classes={liveClasses as LiveClass[]}
+            isEnrolled={isEnrolled}
+          />
+        </section>
+      )}
 
       {isEnrolled && (announcements ?? []).length > 0 && (
         <section className="mx-auto max-w-6xl px-4">
