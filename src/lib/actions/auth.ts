@@ -4,39 +4,15 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export async function login(formData: FormData) {
+export async function signInWithGoogle() {
   const supabase = await createClient();
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  const email = String(formData.get("email")).trim();
-  const password = String(formData.get("password"));
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  revalidatePath("/", "layout");
-  redirect("/dashboard");
-}
-
-export async function signup(formData: FormData) {
-  const supabase = await createClient();
-
-  const fullName = String(formData.get("full_name")).trim();
-  const email = String(formData.get("email")).trim();
-  const password = String(formData.get("password"));
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
     options: {
-      data: {
-        full_name: fullName,
-      },
+      redirectTo: `${appUrl}/auth/callback`,
     },
   });
 
@@ -44,11 +20,7 @@ export async function signup(formData: FormData) {
     return { error: error.message };
   }
 
-  return {
-    success: true,
-    message:
-      "একাউন্ট তৈরি হয়েছে! আপনার ইমেইলে কনফার্মেশন লিংক পাঠানো হয়েছে।",
-  };
+  redirect(data.url);
 }
 
 export async function signOut() {

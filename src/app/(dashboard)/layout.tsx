@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -22,32 +22,18 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
-  const isAdmin = profile?.role === "admin";
+  const name = profile?.full_name || user.user_metadata?.full_name || "Student";
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-1 gap-8 px-4 py-10">
-      <aside className="hidden w-56 shrink-0 md:block">
-        <div className="sticky top-20 space-y-1">
-          <p className="mb-3 text-sm font-medium text-zinc-400">
-            {profile?.full_name || user.email}
-          </p>
-          <Link
-            href="/dashboard"
-            className="block rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-          >
-            📚 আমার কোর্স
-          </Link>
-          {isAdmin && (
-            <Link
-              href="/admin"
-              className="block rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-            >
-              🛠️ অ্যাডমিন প্যানেল
-            </Link>
-          )}
-        </div>
-      </aside>
-      <div className="min-w-0 flex-1">{children}</div>
+    <main className="mx-auto flex w-full max-w-7xl flex-1">
+      <DashboardSidebar
+        name={name}
+        email={user.email ?? ""}
+        isAdmin={profile?.role === "admin"}
+      />
+      <div className="min-w-0 flex-1 p-4 pt-16 md:pt-8 md:pl-8">
+        {children}
+      </div>
     </main>
   );
 }

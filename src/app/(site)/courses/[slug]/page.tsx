@@ -118,7 +118,9 @@ export default async function CourseDetailPage({
                     </span>
                   )}
                   {locked ? (
-                    <span className="text-zinc-400">🔒</span>
+                    <span className="text-zinc-400">
+                      <i className="fa-solid fa-lock" />
+                    </span>
                   ) : (
                     <Link
                       href={`/courses/${course.slug}/lessons/${lesson.id}`}

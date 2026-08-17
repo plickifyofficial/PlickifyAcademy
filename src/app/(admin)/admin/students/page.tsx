@@ -1,0 +1,44 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { StudentsTable } from "@/components/admin/students-table";
+
+export const metadata = { title: "স্টুডেন্টস" };
+
+export default async function AdminStudentsPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, role, created_at")
+    .order("created_at", { ascending: false });
+
+  const emails: Record<string, string> = {};
+  const admin = createAdminClient();
+  const { data: authUsers } = await admin.auth.admin.listUsers({ perPage: 200 });
+  for (const u of authUsers?.users ?? []) {
+    emails[u.id] = u.email ?? "";
+  }
+
+  const rows = (profiles ?? []).map((p) => ({
+    ...p,
+    email: emails[p.id] ?? "",
+  }));
+
+  return (
+    <div>
+      <h1 className="text-xl font-bold text-zinc-900">স্টুডেন্টস</h1>
+      <p className="mt-1 text-sm text-zinc-500">
+        সব ব্যবহারকারী
+      </p>
+      <div className="mt-6">
+        <StudentsTable students={rows} currentUserId={user.id} />
+      </div>
+    </div>
+  );
+}

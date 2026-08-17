@@ -18,7 +18,7 @@ export default async function HomePage() {
   return (
     <>
       <section className="bg-gradient-to-b from-indigo-50 to-white">
-        <div className="mx-auto max-w-6xl px-4 py-20 text-center sm:py-28">
+        <div className="mx-auto max-w-6xl px-4 py-20 text-center sm:py-28" data-aos="fade-up">
           <span className="inline-block rounded-full bg-indigo-100 px-4 py-1 text-sm font-medium text-indigo-700">
             অনলাইন একাডেমি
           </span>
@@ -48,7 +48,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between" data-aos="fade-up">
           <h2 className="text-2xl font-bold text-zinc-900">জনপ্রিয় কোর্স</h2>
           <Link
             href="/courses"
@@ -75,20 +75,20 @@ export default async function HomePage() {
           <h2 className="text-center text-2xl font-bold text-zinc-900">
             কেন প্লিকিফাই অ্যাকাডেমি?
           </h2>
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3" data-aos="fade-up" data-aos-delay="100">
             {[
               {
-                icon: "🎓",
+                icon: "fa-solid fa-graduation-cap",
                 title: "গুণগত কোর্স",
                 desc: "বাস্তব-জীবনের প্রজেক্ট ভিত্তিক শেখা, অভিজ্ঞ শিক্ষকদের তত্ত্বাবধানে।",
               },
               {
-                icon: "📊",
+                icon: "fa-solid fa-chart-line",
                 title: "প্রগ্রেস ট্র্যাকিং",
                 desc: "প্রতিটি লেসনের অগ্রগতি দেখুন, নিজের গতিতে শিখুন।",
               },
               {
-                icon: "💳",
+                icon: "fa-solid fa-credit-card",
                 title: "সহজ পেমেন্ট",
                 desc: "Stripe দিয়ে নিরাপদ অনলাইন পেমেন্ট, ইনস্ট্যান্ট এনরোলমেন্ট।",
               },
@@ -97,7 +97,9 @@ export default async function HomePage() {
                 key={f.title}
                 className="rounded-2xl border border-zinc-200 bg-white p-6 text-center"
               >
-                <div className="text-4xl">{f.icon}</div>
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-2xl text-indigo-600">
+                  <i className={f.icon} />
+                </div>
                 <h3 className="mt-4 text-lg font-semibold text-zinc-900">
                   {f.title}
                 </h3>

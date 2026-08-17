@@ -1,26 +1,10 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { CourseManager } from "@/components/admin/course-manager";
+import { AdminCourseTable } from "@/components/admin/course-table";
 
-export const metadata = { title: "অ্যাডমিন প্যানেল" };
+export const metadata = { title: "কোর্সসমূহ" };
 
-export default async function AdminPage() {
+export default async function AdminCoursesPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    redirect("/dashboard");
-  }
 
   const { data: courses } = await supabase
     .from("courses")
@@ -28,6 +12,7 @@ export default async function AdminPage() {
     .order("created_at", { ascending: false });
 
   const { data: lessons } = await supabase.from("lessons").select("*");
+
   const lessonsByCourse: Record<string, NonNullable<typeof lessons>[0][]> = {};
   for (const lesson of lessons ?? []) {
     if (lessonsByCourse[lesson.course_id]) {
@@ -39,15 +24,14 @@ export default async function AdminPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900">অ্যাডমিন প্যানেল</h1>
+      <h1 className="text-xl font-bold text-zinc-900">কোর্সসমূহ</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        কোর্স ও লেসন ম্যানেজ করুন।
+        কোর্স ও লেসন ম্যানেজ করুন
       </p>
       <div className="mt-6">
-        <CourseManager
+        <AdminCourseTable
           courses={courses ?? []}
           lessonsByCourse={lessonsByCourse}
-          adminUserId={user.id}
         />
       </div>
     </div>

@@ -57,7 +57,9 @@ export default async function LessonPage({
   if (!canAccess) {
     return (
       <main className="mx-auto max-w-3xl flex-1 px-4 py-20 text-center">
-        <h1 className="text-2xl font-bold text-zinc-900">অ্যাক্সেস নেই 🔒</h1>
+        <h1 className="text-2xl font-bold text-zinc-900">
+          অ্যাক্সেস নেই <i className="fa-solid fa-lock" />
+        </h1>
         <p className="mt-3 text-zinc-600">
           এই লেসনটি দেখতে হলে কোর্সটি কিনতে হবে।{" "}
           {course.price === 0 ? (

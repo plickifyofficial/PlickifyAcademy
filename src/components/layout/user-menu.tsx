@@ -19,10 +19,10 @@ export function UserMenu() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700 transition-colors hover:bg-indigo-200"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 transition-colors hover:bg-indigo-200"
         aria-label="মেনু"
       >
-        👤
+        <i className="fa-solid fa-user" />
       </button>
       {open && (
         <>

@@ -4,11 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "ড্যাশবোর্ড" };
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ payment?: string }>;
-}) {
+export default async function DashboardPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -16,7 +12,14 @@ export default async function DashboardPage({
 
   if (!user) redirect("/login");
 
-  const { payment } = await searchParams;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role")
+    .eq("id", user.id)
+    .single();
+
+  const name = profile?.full_name || user.user_metadata?.full_name || "Student";
+  const firstName = name.split(" ")[0];
 
   const { data: enrollments } = await supabase
     .from("enrollments")
@@ -31,7 +34,6 @@ export default async function DashboardPage({
       .from("lessons")
       .select("id, course_id")
       .in("course_id", courseIds);
-
     for (const lesson of lessons ?? []) {
       courseCounts[lesson.course_id] = (courseCounts[lesson.course_id] ?? 0) + 1;
     }
@@ -42,83 +44,124 @@ export default async function DashboardPage({
     .select("lesson_id, lessons(course_id)")
     .eq("user_id", user.id);
 
+  let totalDone = 0;
+  let totalAvailable = 0;
+  const perCourse: Record<string, { done: number; total: number }> = {};
+
+  for (const row of progressRows ?? []) {
+    totalDone++;
+    const cid = (row.lessons as unknown as { course_id: string }).course_id;
+    perCourse[cid] ??= { done: 0, total: 0 };
+    perCourse[cid].done++;
+  }
+  for (const cid of courseIds) {
+    perCourse[cid] ??= { done: 0, total: 0 };
+    perCourse[cid].total = courseCounts[cid] ?? 0;
+    totalAvailable += courseCounts[cid] ?? 0;
+  }
+
+  const totalPct =
+    totalAvailable > 0 ? Math.round((totalDone / totalAvailable) * 100) : 0;
+
+  const completedCourses = Object.values(perCourse).filter(
+    (c) => c.total > 0 && c.done >= c.total,
+  ).length;
+  const inProgress = enrollments?.length ?? 0;
+
+  const stats = [
+    { label: "এনরোল্ড কোর্স", value: enrollments?.length ?? 0, icon: "fa-solid fa-graduation-cap", color: "bg-indigo-50 text-indigo-600" },
+    { label: "চলমান কোর্স", value: inProgress - completedCourses, icon: "fa-solid fa-book-open", color: "bg-amber-50 text-amber-600" },
+    { label: "সম্পন্ন কোর্স", value: completedCourses, icon: "fa-solid fa-circle-check", color: "bg-green-50 text-green-600" },
+    { label: "সামগ্রিক অগ্রগতি", value: `${totalPct}%`, icon: "fa-solid fa-chart-line", color: "bg-purple-50 text-purple-600" },
+  ];
+
   return (
     <div>
-      {payment === "success" && (
-        <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm font-medium text-green-700">
-          🎉 পেমেন্ট সফল হয়েছে! কোর্সটি আপনার ড্যাশবোর্ডে যোগ হয়েছে।
+      <div className="rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-700 p-6 text-white sm:p-8">
+        <h1 className="text-2xl font-bold">
+          স্বাগতম, {firstName}!
+        </h1>
+        <p className="mt-1 text-indigo-100">
+          আজও শেখা চালিয়ে যান। আপনার অগ্রগতি দেখুন নিচে।
+        </p>
+      </div>
+
+      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-2xl border border-zinc-200 bg-white p-5"
+          >
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg ${s.color}`}>
+              <i className={s.icon} />
+            </div>
+            <p className="mt-3 text-2xl font-bold text-zinc-900">{s.value}</p>
+            <p className="text-sm text-zinc-500">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-zinc-900">আমার কোর্স</h2>
+          <Link
+            href="/dashboard/courses"
+            className="text-sm font-medium text-indigo-600 hover:underline"
+          >
+            সব দেখুন →
+          </Link>
         </div>
-      )}
 
-      <h1 className="text-2xl font-bold text-zinc-900">
-        আমার কোর্স ({enrollments?.length ?? 0})
-      </h1>
+        {enrollments && enrollments.length > 0 ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {enrollments.slice(0, 3).map((enrollment) => {
+              const course = enrollment.courses as unknown as {
+                id: string;
+                title: string;
+                slug: string;
+              };
+              const pc = perCourse[course.id] ?? { done: 0, total: 0 };
+              const pct = pc.total > 0 ? Math.round((pc.done / pc.total) * 100) : 0;
 
-      {enrollments && enrollments.length > 0 ? (
-        <div className="mt-6 space-y-4">
-          {enrollments.map((enrollment) => {
-            const course = enrollment.courses as unknown as {
-              id: string;
-              title: string;
-              slug: string;
-            };
-
-            const courseProgress =
-              progressRows?.filter(
-                (row) =>
-                  (row.lessons as unknown as { course_id: string })
-                    .course_id === course.id,
-              ) ?? [];
-
-            const total = courseCounts[course.id] ?? 0;
-            const done = courseProgress.length;
-            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-
-            return (
-              <div
-                key={enrollment.id}
-                className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-5 sm:flex-row sm:items-center"
-              >
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl font-bold text-white">
-                  {course.title.charAt(0)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h2 className="font-semibold text-zinc-900">
+              return (
+                <Link
+                  key={enrollment.id}
+                  href={`/courses/${course.slug}`}
+                  className="rounded-2xl border border-zinc-200 bg-white p-5 transition-shadow hover:shadow-md"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-xl font-bold text-white">
+                    {course.title.charAt(0)}
+                  </div>
+                  <h3 className="mt-3 font-semibold text-zinc-900">
                     {course.title}
-                  </h2>
-                  <div className="mt-2 flex items-center gap-3">
-                    <div className="h-2 max-w-xs flex-1 overflow-hidden rounded-full bg-zinc-100">
+                  </h3>
+                  <div className="mt-4">
+                    <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
                       <div
                         className="h-full rounded-full bg-indigo-600 transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-xs font-medium text-zinc-500">
-                      {pct}% সম্পন্ন ({done}/{total})
-                    </span>
+                    <p className="mt-2 text-xs font-medium text-zinc-500">
+                      {pct}% সম্পন্ন ({pc.done}/{pc.total} লেসন)
+                    </p>
                   </div>
-                </div>
-                <Link
-                  href={`/courses/${course.slug}`}
-                  className="shrink-0 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-                >
-                  চালিয়ে যান
                 </Link>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="mt-6 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
-          <p className="text-zinc-600">এখনো কোনো কোর্সে এনরোল করা হয়নি।</p>
-          <Link
-            href="/courses"
-            className="mt-4 inline-block rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
-            কোর্স ব্রাউজ করুন
-          </Link>
-        </div>
-      )}
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
+            <p className="text-zinc-600">এখনো কোনো কোর্সে এনরোল করা হয়নি।</p>
+            <Link
+              href="/courses"
+              className="mt-4 inline-block rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+            >
+              কোর্স ব্রাউজ করুন
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

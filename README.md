@@ -1,21 +1,24 @@
 # Plickify Academy
 
-একটি সম্পূর্ণ Academic SaaS — অনলাইন কোর্স, লেসন, এনরোলমেন্ট, প্রগ্রেস ট্র্যাকিং, অ্যাডমিন প্যানেল ও Stripe পেমেন্ট।
+একটি সম্পূর্ণ Academic SaaS — অনলাইন কোর্স, লেসন, এনরোলমেন্ট, প্রগ্রেস ট্র্যাকিং, অ্যাডমিন প্যানেল (WordPress/cPanel-style) ও Stripe পেমেন্ট।
 
 ## টেক স্ট্যাক
 
-- **Framework:** Next.js 16 (App Router, TypeScript)
-- **Styling:** Tailwind CSS 4 + Hind Siliguri (বাংলা font)
-- **Database & Auth:** Supabase (PostgreSQL + RLS)
+- **Framework:** Next.js 16 (App Router, TypeScript, React component-driven)
+- **Styling:** Tailwind CSS 4 (fully responsive) + Hind Siliguri (বাংলা font)
+- **Animation:** AOS (Animate On Scroll) — free version
+- **Icons:** Font Awesome (free icons) + open-source SVG resources
+- **Database & Auth:** Supabase (PostgreSQL + RLS, Google OAuth)
 - **Payment:** Stripe Checkout
+- **Backend:** Node.js (Vercel Serverless Functions)
 - **Hosting:** Vercel
 
 ## ফিচার
 
 - 📚 কোর্স & লেসন (video embed, free preview)
-- 🔐 Authentication (Supabase Auth, email/password)
-- 📊 Student Dashboard (enrollment + progress bar)
-- 🛠️ Admin Panel (course/lesson CRUD)
+- 🔐 Authentication (Supabase Auth — Google only)
+- 📊 Student Dashboard (Tutor LMS-style — enrollment, progress bar, stats)
+- 🛠️ Admin Panel (WordPress/cPanel-style — courses, lessons, students, orders, revenue)
 - 💳 Stripe payment + webhook (auto-enrollment)
 
 ## লোকাল সেটআপ
@@ -31,7 +34,7 @@ cp .env.example .env.local   # সব key ভরে নিন
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | একই জায়গায় anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | service_role key (webhook-এর জন্য) |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role key (admin/webhook-এর জন্য) |
 | `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | publishable key |
 | `STRIPE_WEBHOOK_SECRET` | `stripe listen` দিয়ে যুক্ত করা webhook signing secret |
@@ -41,8 +44,12 @@ cp .env.example .env.local   # সব key ভরে নিন
 
 1. [supabase.com](https://supabase.com) এ project তৈরি করুন।
 2. **SQL Editor** খুলে `supabase/schema.sql`-এর পুরোটা পেস্ট করে **Run** করুন।
-   - এটি সব table, RLS policy, trigger আর `handle_new_user` ফাংশন তৈরি করবে।
-3. এনরোলমেন্টের পরে প্রথম user-কে admin করতে:
+3. **Google OAuth চালু করুন:**
+   - Supabase → Authentication → Providers → **Google** → Enable
+   - [Google Cloud Console](https://console.cloud.google.com) → OAuth consent screen → OAuth 2.0 Client IDs (Web application) বানান
+   - Authorized redirect URI: `https://<your-supabase-ref>.supabase.co/auth/v1/callback`
+   - Client ID ও Secret Supabase-এ বসান
+4. প্রথম user-কে admin বানাতে:
    ```sql
    update public.profiles set role = 'admin'
    where id = '<user-uuid>';
@@ -52,7 +59,6 @@ cp .env.example .env.local   # সব key ভরে নিন
 ## Stripe সেটআপ
 
 ```bash
-# webhook local এ listen করতে:
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ```
 

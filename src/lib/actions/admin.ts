@@ -35,7 +35,7 @@ export async function createCourse(formData: FormData) {
   const level = String(formData.get("level")) || "beginner";
   const cover_image = String(formData.get("cover_image")).trim() || null;
 
-  const { error } = await supabase.from("courses").insert({
+  await supabase.from("courses").insert({
     title,
     slug,
     description,
@@ -45,7 +45,6 @@ export async function createCourse(formData: FormData) {
     is_published: formData.get("is_published") === "on",
   });
 
-  if (error) return { error: error.message };
   revalidatePath("/admin");
   revalidatePath("/courses");
 }
@@ -61,7 +60,7 @@ export async function updateCourse(formData: FormData) {
   const level = String(formData.get("level")) || "beginner";
   const cover_image = String(formData.get("cover_image")).trim() || null;
 
-  const { error } = await supabase
+  await supabase
     .from("courses")
     .update({
       title,
@@ -75,7 +74,6 @@ export async function updateCourse(formData: FormData) {
     })
     .eq("id", id);
 
-  if (error) return { error: error.message };
   revalidatePath("/admin");
   revalidatePath("/courses");
 }
@@ -86,9 +84,8 @@ export async function deleteCourse(formData: FormData) {
 
   await supabase.from("lessons").delete().eq("course_id", id);
   await supabase.from("enrollments").delete().eq("course_id", id);
-  const { error } = await supabase.from("courses").delete().eq("id", id);
+  await supabase.from("courses").delete().eq("id", id);
 
-  if (error) return { error: error.message };
   revalidatePath("/admin");
   revalidatePath("/courses");
 }
@@ -106,7 +103,7 @@ export async function createLesson(formData: FormData) {
   const is_free = formData.get("is_free") === "on";
   const order = Number(formData.get("order")) || 0;
 
-  const { error } = await supabase.from("lessons").insert({
+  await supabase.from("lessons").insert({
     course_id: courseId,
     title,
     slug,
@@ -118,7 +115,6 @@ export async function createLesson(formData: FormData) {
     order,
   });
 
-  if (error) return { error: error.message };
   revalidatePath("/admin");
 }
 
@@ -126,13 +122,12 @@ export async function deleteLesson(formData: FormData) {
   const supabase = await requireAdmin();
   const id = String(formData.get("id"));
 
-  const { error } = await supabase.from("lessons").delete().eq("id", id);
+  await supabase.from("lessons").delete().eq("id", id);
 
-  if (error) return { error: error.message };
   revalidatePath("/admin");
 }
 
-export async function makeAdmin(formData: FormData) {
+export async function setUserRole(formData: FormData) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -145,14 +140,14 @@ export async function makeAdmin(formData: FormData) {
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "admin") return { error: "Forbidden" };
+  if (profile?.role !== "admin") redirect("/dashboard");
 
   const userId = String(formData.get("user_id"));
-  await supabase
-    .from("profiles")
-    .update({ role: "admin" })
-    .eq("id", userId);
+  const role = String(formData.get("role"));
 
-  revalidatePath("/admin");
-  return { success: true };
+  if (role !== "admin" && role !== "student") return;
+
+  await supabase.from("profiles").update({ role }).eq("id", userId);
+
+  revalidatePath("/admin/students");
 }

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { signup } from "@/lib/actions/auth";
-import { AuthForm } from "@/components/auth/auth-form";
+import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 
 export const metadata = { title: "সাইন আপ" };
 
@@ -13,16 +12,10 @@ export default function SignupPage() {
             নতুন একাউন্ট খুলুন
           </h1>
           <p className="mt-1 text-sm text-zinc-500">
-            শেখা শুরু করার জন্য সাইন আপ করুন
+            শেখা শুরু করতে Google একাউন্ট ব্যবহার করুন
           </p>
         </div>
-        <AuthForm
-          mode="signup"
-          action={async (formData) => {
-            "use server";
-            return await signup(formData);
-          }}
-        />
+        <GoogleSignInButton label="Google দিয়ে সাইন আপ" />
         <p className="mt-6 text-center text-sm text-zinc-500">
           ইতিমধ্যে একাউন্ট আছে?{" "}
           <Link
