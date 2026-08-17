@@ -149,6 +149,7 @@ export async function createCourse(formData: FormData) {
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/courses");
   revalidatePath("/courses");
 }
 

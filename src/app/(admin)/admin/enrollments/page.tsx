@@ -6,17 +6,13 @@ export const metadata = { title: "এনরোলমেন্ট" };
 export default async function AdminEnrollmentsPage() {
   const supabase = await createClient();
 
-  const { data: courses } = await supabase
-    .from("courses")
-    .select("id, title")
-    .order("title", { ascending: true });
-
-  const { data: enrollments } = await supabase
-    .from("enrollments")
-    .select(
-      "id, created_at, user_id, course_id, profiles(email), courses(title)",
-    )
-    .order("created_at", { ascending: false });
+  const [{ data: courses }, { data: enrollments }] = await Promise.all([
+    supabase.from("courses").select("id, title").order("title", { ascending: true }),
+    supabase
+      .from("enrollments")
+      .select("id, created_at, user_id, course_id, profiles(email), courses(title)")
+      .order("created_at", { ascending: false }),
+  ]);
 
   return (
     <div>
@@ -27,7 +23,7 @@ export default async function AdminEnrollmentsPage() {
       <EnrollmentsPanel
         courses={courses ?? []}
         enrollments={
-          enrollments as unknown as {
+          (enrollments ?? []) as unknown as {
             id: string;
             created_at: string;
             user_id: string;

@@ -31,36 +31,31 @@ export default async function AdminCoursesPage({
   });
 
   const courseIds = (courses ?? []).map((c) => c.id);
+  const scoped = (
+    table:
+      | "course_sections"
+      | "lessons"
+      | "quiz_questions"
+      | "course_announcements"
+      | "live_classes",
+  ) => {
+    const q = supabase.from(table).select("*");
+    return courseIds.length > 0 ? q.in("course_id", courseIds) : q;
+  };
 
-  let sectionsQuery = supabase.from("course_sections").select("*");
-  if (courseIds.length > 0) sectionsQuery = sectionsQuery.in("course_id", courseIds);
-  const { data: sections } = await sectionsQuery.order("position", {
-    ascending: true,
-  });
-
-  let topicsQuery = supabase.from("lessons").select("*");
-  if (courseIds.length > 0) topicsQuery = topicsQuery.in("course_id", courseIds);
-  const { data: topics } = await topicsQuery;
-
-  let questionsQuery = supabase.from("quiz_questions").select("*");
-  if (courseIds.length > 0) questionsQuery = questionsQuery.in("course_id", courseIds);
-  const { data: questions } = await questionsQuery.order("position", {
-    ascending: true,
-  });
-
-  let announcementsQuery = supabase.from("course_announcements").select("*");
-  if (courseIds.length > 0)
-    announcementsQuery = announcementsQuery.in("course_id", courseIds);
-  const { data: announcements } = await announcementsQuery.order("created_at", {
-    ascending: false,
-  });
-
-  let liveClassesQuery = supabase.from("live_classes").select("*");
-  if (courseIds.length > 0)
-    liveClassesQuery = liveClassesQuery.in("course_id", courseIds);
-  const { data: liveClasses } = await liveClassesQuery.order("scheduled_at", {
-    ascending: true,
-  });
+  const [
+    { data: sections },
+    { data: topics },
+    { data: questions },
+    { data: announcements },
+    { data: liveClasses },
+  ] = await Promise.all([
+    scoped("course_sections").order("position", { ascending: true }),
+    scoped("lessons"),
+    scoped("quiz_questions").order("position", { ascending: true }),
+    scoped("course_announcements").order("created_at", { ascending: false }),
+    scoped("live_classes").order("scheduled_at", { ascending: true }),
+  ]);
 
   const sectionsByCourse: Record<string, NonNullable<typeof sections>[0][]> = {};
   for (const section of sections ?? []) {
