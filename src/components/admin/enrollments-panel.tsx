@@ -27,9 +27,13 @@ export function EnrollmentsPanel({
     e.preventDefault();
     setPending(true);
     try {
-      await enrollStudent(new FormData(e.currentTarget));
-      e.currentTarget.reset();
-      showToast("ছাত্র এনরোল হয়েছে");
+      const result = await enrollStudent(new FormData(e.currentTarget));
+      if (result.error) {
+        showToast(result.error, "error");
+      } else {
+        e.currentTarget.reset();
+        showToast("ছাত্র এনরোল হয়েছে");
+      }
     } catch (err) {
       showToast(err instanceof Error ? err.message : "এনরোল করা যায়নি", "error");
     } finally {
@@ -43,8 +47,12 @@ export function EnrollmentsPanel({
     try {
       const fd = new FormData();
       fd.set("id", id);
-      await unenrollStudent(fd);
-      showToast("এনরোলমেন্ট মুছে ফেলা হয়েছে");
+      const result = await unenrollStudent(fd);
+      if (result.error) {
+        showToast(result.error, "error");
+      } else {
+        showToast("এনরোলমেন্ট মুছে ফেলা হয়েছে");
+      }
     } catch (err) {
       showToast(err instanceof Error ? err.message : "মুছে ফেলা যায়নি", "error");
     } finally {

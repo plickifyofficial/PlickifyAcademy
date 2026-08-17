@@ -604,7 +604,7 @@ export async function deleteAnnouncement(formData: FormData) {
 }
 
 async function slugOf(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createClient>> | ReturnType<typeof createAdminClient>,
   courseId: string,
 ): Promise<string> {
   const { data } = await supabase
@@ -647,53 +647,81 @@ export async function deleteLiveClass(formData: FormData) {
   revalidatePath("/admin");
 }
 
-export async function enrollStudent(formData: FormData) {
-  const supabase = await requireAdmin();
+export async function enrollStudent(
+  formData: FormData,
+): Promise<{ error?: string }> {
+  await requireAdmin();
+  const admin = createAdminClient();
 
-  const courseId = String(formData.get("course_id"));
-  const email = String(formData.get("email")).trim().toLowerCase();
-  if (!courseId || !email) throw new Error("কোর্স ও ইমেইল দিন");
+  try {
+    const courseId = String(formData.get("course_id"));
+    const email = String(formData.get("email")).trim().toLowerCase();
+    if (!courseId || !email) throw new Error("কোর্স ও ইমেইল দিন");
 
-  const { data: user } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("email", email)
-    .maybeSingle();
-  if (!user) throw new Error("এই ইমেইলে কোনো ইউজার নেই");
+    const { data: user } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+    if (!user) return { error: "এই ইমেইলে কোনো ইউজার নেই" };
 
-  const { data: course } = await supabase
-    .from("courses")
-    .select("title")
-    .eq("id", courseId)
-    .single();
+    const { data: course } = await admin
+      .from("courses")
+      .select("title")
+      .eq("id", courseId)
+      .single();
 
-  const { error } = await supabase.from("enrollments").insert({
-    user_id: user.id,
-    course_id: courseId,
-  });
-  if (error) throw new Error(error.message);
+    const { data: existing } = await admin
+      .from("enrollments")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .maybeSingle();
+    if (existing) return { error: "ছাত্রটি ইতিমধ্যে এই কোর্সে এনরোল করা আছে" };
 
-  if (course) {
-    await createNotification(
-      user.id,
-      "কোর্সে এনরোল হয়েছে 🎉",
-      `আপনি "${course.title}" কোর্সে এনরোল হয়েছেন।`,
-      `/courses/${await slugOf(supabase, courseId)}`,
-    );
+    const { error } = await admin.from("enrollments").insert({
+      user_id: user.id,
+      course_id: courseId,
+    });
+    if (error) return { error: error.message };
+
+    if (course) {
+      try {
+        await createNotification(
+          user.id,
+          "কোর্সে এনরোল হয়েছে 🎉",
+          `আপনি "${course.title}" কোর্সে এনরোল হয়েছেন।`,
+          `/courses/${await slugOf(admin, courseId)}`,
+        );
+      } catch {
+        // notification is non-critical
+      }
+    }
+
+    revalidatePath("/admin/enrollments");
+    return {};
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "এনরোল করা যায়নি" };
   }
-
-  revalidatePath("/admin/enrollments");
 }
 
-export async function unenrollStudent(formData: FormData) {
-  const supabase = await requireAdmin();
-  const id = String(formData.get("id"));
-  if (!id) throw new Error("এনরোলমেন্ট ID নেই");
+export async function unenrollStudent(
+  formData: FormData,
+): Promise<{ error?: string }> {
+  await requireAdmin();
+  const admin = createAdminClient();
+  try {
+    const id = String(formData.get("id"));
+    if (!id) return { error: "এনরোলমেন্ট ID নেই" };
 
-  const { error } = await supabase.from("enrollments").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+    const { error } = await admin.from("enrollments").delete().eq("id", id);
+    if (error) return { error: error.message };
 
-  revalidatePath("/admin/enrollments");
+    revalidatePath("/admin/enrollments");
+    return {};
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "মুছে ফেলা যায়নি" };
+  }
 }
 
 export async function setUserRole(formData: FormData) {
