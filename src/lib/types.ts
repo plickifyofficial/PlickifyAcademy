@@ -58,6 +58,41 @@ export type QuizAttempt = {
   created_at: string;
 };
 
+export type Review = {
+  id: string;
+  course_id: string;
+  user_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+};
+
+export type QnaItem = {
+  id: string;
+  course_id: string;
+  user_id: string;
+  question: string;
+  answer: string | null;
+  answered_at: string | null;
+  created_at: string;
+};
+
+export type Announcement = {
+  id: string;
+  course_id: string;
+  title: string;
+  body: string | null;
+  created_at: string;
+};
+
+export type Certificate = {
+  id: string;
+  user_id: string;
+  course_id: string;
+  certificate_number: string;
+  issued_at: string;
+};
+
 export type CourseSection = {
   id: string;
   course_id: string;

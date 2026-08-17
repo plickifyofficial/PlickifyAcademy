@@ -3,7 +3,15 @@ import Image from "next/image";
 import { formatPrice } from "@/lib/format";
 import type { Course } from "@/lib/types";
 
-export function CourseCard({ course }: { course: Course }) {
+export function CourseCard({
+  course,
+  rating,
+  reviewCount,
+}: {
+  course: Course;
+  rating?: number;
+  reviewCount?: number;
+}) {
   return (
     <Link
       href={`/courses/${course.slug}`}
@@ -36,6 +44,19 @@ export function CourseCard({ course }: { course: Course }) {
         <p className="mt-2 line-clamp-2 text-sm text-zinc-600">
           {course.description}
         </p>
+        <div className="mt-3 flex items-center gap-1 text-sm">
+          <span className="font-bold text-amber-400">
+            <i className="fa-solid fa-star" />
+          </span>
+          <span className="font-semibold text-zinc-800">
+            {rating && rating > 0 ? rating.toFixed(1) : "নতুন"}
+          </span>
+          {rating && rating > 0 && (
+            <span className="text-xs text-zinc-500">
+              ({reviewCount ?? 0})
+            </span>
+          )}
+        </div>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-lg font-bold text-brand-600">
             {formatPrice(course.price)}

@@ -1,7 +1,13 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import type { Course, CourseSection, Lesson, QuizQuestion } from "@/lib/types";
+import type {
+  Course,
+  CourseSection,
+  Lesson,
+  QuizQuestion,
+  Announcement,
+} from "@/lib/types";
 import {
   createCourse,
   updateCourse,
@@ -49,12 +55,14 @@ export function AdminCourseTable({
   sectionsByCourse,
   topicsBySection,
   questionsByLesson,
+  announcementsByCourse,
   defaultCreating = false,
 }: {
   courses: Course[];
   sectionsByCourse: Record<string, CourseSection[]>;
   topicsBySection: Record<string, Lesson[]>;
   questionsByLesson: Record<string, QuizQuestion[]>;
+  announcementsByCourse: Record<string, Announcement[]>;
   defaultCreating?: boolean;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -334,6 +342,7 @@ export function AdminCourseTable({
                           sections={sectionsByCourse[course.id] ?? []}
                           topics={topicsBySection}
                           questionsByLesson={questionsByLesson}
+                          announcements={announcementsByCourse[course.id] ?? []}
                         />
                       </td>
                     </tr>

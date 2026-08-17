@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { Course, CourseSection, Lesson, QuizQuestion } from "@/lib/types";
+import type {
+  Course,
+  CourseSection,
+  Lesson,
+  QuizQuestion,
+  Announcement,
+} from "@/lib/types";
 import {
   createSection,
   updateSection,
@@ -11,6 +17,8 @@ import {
   updateTopic,
   deleteTopic,
   moveTopic,
+  createAnnouncement,
+  deleteAnnouncement,
 } from "@/lib/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 import { QuestionsEditor } from "@/components/admin/questions-editor";
@@ -34,11 +42,13 @@ export function CurriculumBuilder({
   sections,
   topics,
   questionsByLesson,
+  announcements,
 }: {
   course: Course;
   sections: CourseSection[];
   topics: Record<string, Lesson[]>;
   questionsByLesson: Record<string, QuizQuestion[]>;
+  announcements: Announcement[];
 }) {
   const [pending, setPending] = useState(false);
   const [renamingSection, setRenamingSection] = useState<string | null>(null);
@@ -286,6 +296,64 @@ export function CurriculumBuilder({
               <i className="fa-solid fa-plus" /> নতুন সেকশন
             </button>
           )}
+        </div>
+      </div>
+
+      <div className="wp-panel">
+        <div className="wp-panel-header">
+          <span>
+            <i className="fa-solid fa-bullhorn mr-1 text-[#2271b1]" />
+            নোটিশ ({announcements.length})
+          </span>
+        </div>
+        <div className="wp-panel-body space-y-3">
+          {announcements.map((a) => (
+            <div
+              key={a.id}
+              className="flex items-center gap-3 rounded-lg border border-[#e2e2e2] bg-[#fafafa] px-3 py-2"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-[#1d2327]">
+                  {a.title}
+                </p>
+                {a.body && (
+                  <p className="truncate text-xs text-[#646970]">{a.body}</p>
+                )}
+              </div>
+              <span className="shrink-0 text-xs text-[#646970]">
+                {new Date(a.created_at).toLocaleDateString("bn-BD")}
+              </span>
+              <button
+                onClick={() => {
+                  if (!confirm("নোটিশটি মুছবেন?")) return;
+                  const fd = new FormData();
+                  fd.set("id", a.id);
+                  run(() => deleteAnnouncement(fd), "নোটিশ মুছে ফেলা হয়েছে");
+                }}
+                className="wp-btn wp-btn-danger !px-2"
+                aria-label="মুছুন"
+              >
+                <i className="fa-solid fa-trash text-xs" />
+              </button>
+            </div>
+          ))}
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await run(async () => {
+                await createAnnouncement(new FormData(e.currentTarget));
+                e.currentTarget.reset();
+              }, "নোটিশ যোগ হয়েছে");
+            }}
+            className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_2fr_auto]"
+          >
+            <input type="hidden" name="course_id" value={course.id} />
+            <input name="title" required placeholder="নোটিশ শিরোনাম" className="wp-input" />
+            <input name="body" placeholder="বিস্তারিত (ঐচ্ছিক)" className="wp-input" />
+            <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
+              <i className="fa-solid fa-plus" /> যোগ করুন
+            </button>
+          </form>
         </div>
       </div>
     </div>

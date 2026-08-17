@@ -97,14 +97,14 @@ export async function submitQuiz(
 
 async function courseSlug(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  lessonId: string,
+  courseId: string,
 ): Promise<string> {
   const { data } = await supabase
-    .from("lessons")
-    .select("course_id, courses(slug)")
-    .eq("id", lessonId)
+    .from("courses")
+    .select("slug")
+    .eq("id", courseId)
     .single();
-  return (data?.courses as unknown as { slug?: string } | null)?.slug ?? "";
+  return data?.slug ?? "";
 }
 
 export async function updateCourseState(courseId: string, lessonId: string) {
@@ -123,4 +123,107 @@ export async function updateCourseState(courseId: string, lessonId: string) {
     },
     { onConflict: "user_id, course_id" },
   );
+}
+
+export async function submitReview(
+  courseId: string,
+  rating: number,
+  comment: string,
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  if (rating < 1 || rating > 5) throw new Error("রেটিং ১-৫ এর মধ্যে দিন");
+
+  const { error } = await supabase.from("reviews").upsert(
+    {
+      course_id: courseId,
+      user_id: user.id,
+      rating,
+      comment: comment.trim() || null,
+    },
+    { onConflict: "course_id, user_id" },
+  );
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/courses/${await courseSlug(supabase, courseId)}`);
+}
+
+export async function askQuestion(courseId: string, question: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  if (!question.trim()) throw new Error("প্রশ্ন লিখুন");
+
+  const { error } = await supabase.from("course_qna").insert({
+    course_id: courseId,
+    user_id: user.id,
+    question: question.trim(),
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/courses/${await courseSlug(supabase, courseId)}`);
+}
+
+export async function answerQuestion(qnaId: string, answer: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  if (!answer.trim()) throw new Error("উত্তর লিখুন");
+
+  const { data: qna } = await supabase
+    .from("course_qna")
+    .select("course_id, user_id")
+    .eq("id", qnaId)
+    .single();
+  if (!qna) throw new Error("প্রশ্ন পাওয়া যায়নি");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin" && qna.user_id !== user.id)
+    throw new Error("শুধু প্রশ্নকর্তা বা অ্যাডমিন উত্তর দিতে পারেন");
+
+  const { error } = await supabase
+    .from("course_qna")
+    .update({
+      answer: answer.trim(),
+      answered_at: new Date().toISOString(),
+    })
+    .eq("id", qnaId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/courses/${await courseSlug(supabase, qna.course_id)}`);
+}
+
+export async function issueCertificate(
+  courseId: string,
+): Promise<string | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data, error } = await supabase.rpc("issue_certificate", {
+    p_course_id: courseId,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/courses/${await courseSlug(supabase, courseId)}`);
+  revalidatePath("/dashboard");
+
+  return data as string | null;
 }

@@ -468,6 +468,56 @@ export async function deleteQuizQuestion(formData: FormData) {
   revalidatePath("/admin");
 }
 
+export async function createAnnouncement(formData: FormData) {
+  const supabase = await requireAdmin();
+  const courseId = String(formData.get("course_id"));
+  const title = String(formData.get("title")).trim();
+  if (!courseId || !title) throw new Error("শিরোনাম দিন");
+
+  const { error } = await supabase.from("course_announcements").insert({
+    course_id: courseId,
+    title,
+    body: String(formData.get("body")).trim() || null,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+  revalidatePath(`/courses/${await slugOf(supabase, courseId)}`);
+}
+
+export async function deleteAnnouncement(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id"));
+  if (!id) throw new Error("ID নেই");
+
+  const { data: ann } = await supabase
+    .from("course_announcements")
+    .select("course_id")
+    .eq("id", id)
+    .single();
+
+  const { error } = await supabase
+    .from("course_announcements")
+    .delete()
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  if (ann) revalidatePath(`/courses/${await slugOf(supabase, ann.course_id)}`);
+  revalidatePath("/admin");
+}
+
+async function slugOf(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  courseId: string,
+): Promise<string> {
+  const { data } = await supabase
+    .from("courses")
+    .select("slug")
+    .eq("id", courseId)
+    .single();
+  return data?.slug ?? "";
+}
+
 export async function enrollStudent(formData: FormData) {
   const supabase = await requireAdmin();
 

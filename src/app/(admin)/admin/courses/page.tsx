@@ -29,6 +29,11 @@ export default async function AdminCoursesPage({
     .select("*")
     .order("position", { ascending: true });
 
+  const { data: announcements } = await supabase
+    .from("course_announcements")
+    .select("*")
+    .order("created_at", { ascending: false });
+
   const sectionsByCourse: Record<string, NonNullable<typeof sections>[0][]> = {};
   for (const section of sections ?? []) {
     if (sectionsByCourse[section.course_id]) {
@@ -58,6 +63,15 @@ export default async function AdminCoursesPage({
     }
   }
 
+  const announcementsByCourse: Record<string, NonNullable<typeof announcements>[0][]> = {};
+  for (const a of announcements ?? []) {
+    if (announcementsByCourse[a.course_id]) {
+      announcementsByCourse[a.course_id].push(a);
+    } else {
+      announcementsByCourse[a.course_id] = [a];
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -77,6 +91,7 @@ export default async function AdminCoursesPage({
         sectionsByCourse={sectionsByCourse}
         topicsBySection={topicsBySection}
         questionsByLesson={questionsByLesson}
+        announcementsByCourse={announcementsByCourse}
         defaultCreating={add === "1"}
       />
     </div>

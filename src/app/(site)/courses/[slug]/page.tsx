@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import { CheckoutButton } from "@/components/checkout/checkout-button";
-import type { Lesson } from "@/lib/types";
+import { ReviewsSection } from "@/components/courses/reviews-section";
+import { QnaSection } from "@/components/courses/qna-section";
+import { CertificateButton } from "@/components/courses/certificate-button";
+import type { Lesson, Announcement } from "@/lib/types";
 
 export const metadata = { title: "কোর্স" };
 
@@ -66,8 +69,18 @@ export default async function CourseDetailPage({
   let isEnrolled = false;
   let enrollmentDate: string | null = null;
   let lastLessonId: string | null = null;
+  let isAdmin = false;
   let completedIds = new Set<string>();
+  let ownReview: { rating: number; comment: string | null } | null = null;
+  let certificateId: string | null = null;
   if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    isAdmin = profile?.role === "admin";
+
     const { data: enrollment } = await supabase
       .from("enrollments")
       .select("id, created_at")
@@ -85,6 +98,22 @@ export default async function CourseDetailPage({
       .maybeSingle();
     lastLessonId = state?.last_lesson_id ?? null;
 
+    const { data: review } = await supabase
+      .from("reviews")
+      .select("rating, comment")
+      .eq("user_id", user.id)
+      .eq("course_id", course.id)
+      .maybeSingle();
+    ownReview = review ?? null;
+
+    const { data: cert } = await supabase
+      .from("certificates")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("course_id", course.id)
+      .maybeSingle();
+    certificateId = cert?.id ?? null;
+
     if (isEnrolled && allTopicIds.length > 0) {
       const { data: progress } = await supabase
         .from("lesson_progress")
@@ -94,6 +123,45 @@ export default async function CourseDetailPage({
       completedIds = new Set((progress ?? []).map((p) => p.lesson_id));
     }
   }
+
+  const { data: reviewsRaw } = await supabase
+    .from("reviews")
+    .select("*, profiles(full_name)")
+    .eq("course_id", course.id)
+    .order("created_at", { ascending: false });
+
+  const reviews = (reviewsRaw ?? []) as unknown as {
+    id: string;
+    rating: number;
+    comment: string | null;
+    created_at: string;
+    profiles: { full_name: string | null } | null;
+  }[];
+  const avg =
+    reviews.length > 0
+      ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+      : 0;
+
+  const { data: qnaRaw } = await supabase
+    .from("course_qna")
+    .select("*, profiles(full_name)")
+    .eq("course_id", course.id)
+    .order("created_at", { ascending: true });
+
+  const qnaItems = (qnaRaw ?? []) as unknown as {
+    id: string;
+    question: string;
+    answer: string | null;
+    answered_at: string | null;
+    created_at: string;
+    profiles: { full_name: string | null } | null;
+  }[];
+
+  const { data: announcements } = await supabase
+    .from("course_announcements")
+    .select("*")
+    .eq("course_id", course.id)
+    .order("created_at", { ascending: false });
 
   function isDripLocked(topic: Lesson): boolean {
     if (!isEnrolled || topic.is_free || (topic.release_days ?? 0) <= 0 || !enrollmentDate)
@@ -164,6 +232,13 @@ export default async function CourseDetailPage({
               ) : null
             ) : (
               <CheckoutButton courseId={course.id} price={course.price} />
+            )}
+            {isEnrolled && (
+              <CertificateButton
+                courseId={course.id}
+                completed={progressPct === 100}
+                certificateId={certificateId}
+              />
             )}
           </div>
         </div>
@@ -260,6 +335,51 @@ export default async function CourseDetailPage({
             </p>
           )}
         </div>
+      </section>
+
+      {isEnrolled && (announcements ?? []).length > 0 && (
+        <section className="mx-auto max-w-6xl px-4">
+          <div className="space-y-3">
+            {(announcements as Announcement[]).map((a) => (
+              <div
+                key={a.id}
+                className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5"
+              >
+                <div className="flex items-center gap-2 text-brand-700">
+                  <i className="fa-solid fa-bullhorn" />
+                  <span className="text-xs font-semibold uppercase tracking-wide">
+                    নোটিশ
+                  </span>
+                  <span className="text-xs text-zinc-500">
+                    {new Date(a.created_at).toLocaleDateString("bn-BD")}
+                  </span>
+                </div>
+                <p className="mt-1.5 font-semibold text-zinc-900">{a.title}</p>
+                {a.body && (
+                  <p className="mt-1 text-sm text-zinc-600">{a.body}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="mx-auto max-w-6xl px-4 pb-16">
+        <ReviewsSection
+          courseId={course.id}
+          isEnrolled={isEnrolled}
+          reviews={reviews}
+          avg={avg}
+          count={reviews.length}
+          ownReview={ownReview}
+        />
+
+        <QnaSection
+          courseId={course.id}
+          isEnrolled={isEnrolled}
+          isAdmin={isAdmin}
+          items={qnaItems}
+        />
       </section>
     </main>
   );
