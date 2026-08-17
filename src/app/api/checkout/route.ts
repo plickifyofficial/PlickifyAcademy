@@ -1,11 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import Stripe from "stripe";
+import { getStripe } from "@/lib/stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export async function POST(request: NextRequest) {
+  const stripe = getStripe();
+
+  if (!stripe) {
+    return NextResponse.json(
+      { error: "পেমেন্ট এখনো চালু হয়নি। কিছুক্ষণ পরে আবার চেষ্টা করুন।" },
+      { status: 503 },
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
