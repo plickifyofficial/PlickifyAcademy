@@ -118,7 +118,10 @@ create policy "Users can delete own notifications"
 
 -- ============================================================
 -- 5. LIVE CLASSES
--- ============================================================create table if not exists public.live_classes (
+-- ============================================================
+-- 5. LIVE CLASSES
+-- ============================================================
+create table if not exists public.live_classes (
   id uuid primary key default gen_random_uuid(),
   course_id uuid not null references public.courses (id) on delete cascade,
   title text not null,
