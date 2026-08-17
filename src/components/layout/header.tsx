@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { SiteNav } from "@/components/layout/site-nav";
 import { UserMenu } from "@/components/layout/user-menu";
 
 export async function Header() {
@@ -17,51 +18,59 @@ export async function Header() {
   const siteName = settings?.site_name || "Plickify Academy";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-40 border-b border-zinc-100 bg-white/90 backdrop-blur">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
           {settings?.logo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={settings.logo_url}
               alt={siteName}
-              className="h-8 w-auto max-w-[160px] object-contain"
+              className="h-9 w-auto max-w-[180px] object-contain"
             />
           ) : (
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-              {siteName.charAt(0)}
-            </span>
+            <>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 shadow-md shadow-brand-500/30">
+                <i className="fa-solid fa-graduation-cap text-white" />
+              </span>
+              <span className="flex flex-col leading-tight">
+                <span className="text-lg font-extrabold tracking-tight text-zinc-900">
+                  Plickify
+                </span>
+                <span className="-mt-0.5 text-[11px] font-semibold uppercase tracking-widest text-brand-600">
+                  Academy
+                </span>
+              </span>
+            </>
           )}
-          <span className="text-lg font-bold text-zinc-900">
-            {siteName}
-          </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-medium text-zinc-600 md:flex">
-          <Link href="/courses" className="hover:text-indigo-600">
-            কোর্সসমূহ
-          </Link>
-          <Link href="/dashboard" className="hover:text-indigo-600">
-            আমার ড্যাশবোর্ড
-          </Link>
-        </nav>
+        <SiteNav />
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <Link
+            href="/courses"
+            aria-label="সার্চ"
+            className="hidden h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-brand-600 md:flex"
+          >
+            <i className="fa-solid fa-magnifying-glass" />
+          </Link>
+
           {user ? (
             <UserMenu />
           ) : (
             <>
               <Link
                 href="/login"
-                className="text-sm font-medium text-zinc-600 hover:text-indigo-600"
+                className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600"
               >
-                লগইন
+                Login
               </Link>
               <Link
                 href="/signup"
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+                className="rounded-full bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-colors hover:bg-brand-700"
               >
-                সাইন আপ
+                Join Now
               </Link>
             </>
           )}

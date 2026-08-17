@@ -18,6 +18,22 @@
   --font-sans: var(--font-hind-siliguri);
 }
 
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-500: #0757d9;
+  --color-brand-600: #0757d9;
+  --color-brand-700: #0748b0;
+  --color-brand-800: #062b78;
+  --color-brand-900: #041d4f;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
