@@ -1,6 +1,7 @@
 import Link from "next/link";
+import type { CtaContent } from "@/lib/content-schema";
 
-export function FinalCta() {
+export function FinalCta({ content }: { content: CtaContent }) {
   return (
     <section className="px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-7xl">
@@ -13,26 +14,26 @@ export function FinalCta() {
 
           <div className="relative grid grid-cols-1 items-center gap-10 lg:grid-cols-[auto_1fr_auto]">
             <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 shadow-lg shadow-brand-500/40 lg:mx-0">
-              <i className="fa-brands fa-telegram text-4xl text-white" />
+              <i className={`${content.icon || "fa-brands fa-telegram"} text-4xl text-white`} />
             </span>
 
             <div className="text-center lg:text-left">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-300">
-                Ready To Start?
+                {content.eyebrow}
               </p>
               <h2 className="mt-3 text-3xl font-extrabold text-white sm:text-4xl">
-                আমাদের AI Journey আজই শুরু করুন!
+                {content.title}
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm text-zinc-300 lg:mx-0">
-                আজ থেকেই নতুন skill শেখা এবং digital career building শুরু করুন।
+                {content.subtitle}
               </p>
             </div>
 
             <Link
-              href="/signup"
+              href={content.buttonLink || "/signup"}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 px-9 py-4 text-base font-bold text-white shadow-lg shadow-brand-500/40 transition-all hover:-translate-y-0.5 hover:bg-brand-500"
             >
-              এখনই শুরু করুন
+              {content.buttonText}
               <i className="fa-solid fa-arrow-right text-sm" />
             </Link>
           </div>

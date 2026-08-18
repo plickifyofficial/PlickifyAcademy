@@ -400,6 +400,30 @@ on conflict (id) do nothing;
 alter table public.site_settings enable row level security;
 
 -- ============================================================
+-- SITE CONTENT (home page / footer / nav editable content)
+-- ============================================================
+create table if not exists public.site_content (
+  key text primary key,
+  value jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.site_content enable row level security;
+
+drop policy if exists "site_content_public_read" on public.site_content;
+create policy "site_content_public_read" on public.site_content
+  for select using (true);
+
+drop policy if exists "site_content_app_admin_write" on public.site_content;
+create policy "site_content_app_admin_write" on public.site_content
+  for insert to authenticated with check (true);
+create policy "site_content_app_admin_update" on public.site_content
+  for update to authenticated using (true) with check (true);
+create policy "site_content_app_admin_delete" on public.site_content
+  for delete to authenticated using (true);
+
+
+-- ============================================================
 -- HELPERS
 -- ============================================================
 create or replace function public.is_admin()

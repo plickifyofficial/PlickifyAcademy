@@ -7,7 +7,13 @@ type Settings = {
   logo_url: string | null;
 };
 
-export function Header({ settings }: { settings: Settings | null }) {
+export function Header({
+  settings,
+  nav,
+}: {
+  settings: Settings | null;
+  nav: { label: string; href: string }[];
+}) {
   const siteName = settings?.site_name || "Plickify Academy";
 
   return (
@@ -38,7 +44,7 @@ export function Header({ settings }: { settings: Settings | null }) {
           )}
         </Link>
 
-        <SiteNav />
+        <SiteNav links={nav} />
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <Link

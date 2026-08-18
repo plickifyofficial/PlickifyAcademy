@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { testimonials } from "@/lib/site-config";
+import type { TestimonialsContent } from "@/lib/content-schema";
 
-export function Testimonials() {
+export function Testimonials({ content }: { content: TestimonialsContent }) {
+  const items = content.items ?? [];
   const [perView, setPerView] = useState(3);
   const [index, setIndex] = useState(0);
 
@@ -15,21 +16,27 @@ export function Testimonials() {
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  const totalPages = Math.ceil(testimonials.length / perView);
+  const totalPages = Math.max(1, Math.ceil(items.length / perView));
+
+  useEffect(() => {
+    if (index >= totalPages) setIndex(0);
+  }, [totalPages, index]);
 
   function move(dir: number) {
     setIndex((i) => (i + dir + totalPages) % totalPages);
   }
+
+  if (items.length === 0) return null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
       <div className="flex items-end justify-between" data-aos="fade-up">
         <div>
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
-            Learner Success
+            {content.eyebrow}
           </span>
           <h2 className="mt-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
-            আমাদের শিক্ষার্থীদের কথা
+            {content.title}
           </h2>
         </div>
         <div className="flex gap-2">
@@ -55,7 +62,7 @@ export function Testimonials() {
           className="flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${index * 100}%)` }}
         >
-          {testimonials.map((t) => (
+          {items.map((t) => (
             <div
               key={t.name}
               className="shrink-0 px-1.5"

@@ -1,14 +1,14 @@
-import { skills } from "@/lib/site-config";
+import type { SkillsContent } from "@/lib/content-schema";
 
-export function Skills() {
+export function Skills({ content }: { content: SkillsContent }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
       <div className="text-center" data-aos="fade-up">
         <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
-          What You Will Learn
+          {content.eyebrow}
         </span>
         <h2 className="mt-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
-          আপনার ভবিষ্যতের জন্য প্রয়োজনীয় সব স্কিল
+          {content.title}
         </h2>
       </div>
 
@@ -17,7 +17,7 @@ export function Skills() {
         data-aos="fade-up"
         data-aos-delay="100"
       >
-        {skills.map((skill) => (
+        {content.items.map((skill) => (
           <div
             key={skill.title}
             className="group rounded-2xl border border-zinc-100 bg-white p-5 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-100"

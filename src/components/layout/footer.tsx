@@ -1,34 +1,18 @@
 import Link from "next/link";
-
-const quickLinks = [
-  { href: "/courses", label: "Courses" },
-  { href: "/#live-batch", label: "Live Batch" },
-  { href: "/#products", label: "Digital Products" },
-  { href: "/#contact", label: "Become Instructor" },
-  { href: "/#contact", label: "Blog" },
-];
-
-const supportLinks = [
-  { href: "/#faq", label: "FAQ" },
-  { href: "/#contact", label: "Contact Us" },
-  { href: "/#contact", label: "Terms & Conditions" },
-  { href: "/#contact", label: "Privacy Policy" },
-  { href: "/#contact", label: "Refund Policy" },
-];
-
-const socials = [
-  { icon: "fa-brands fa-facebook-f", href: "#" },
-  { icon: "fa-brands fa-youtube", href: "#" },
-  { icon: "fa-brands fa-linkedin-in", href: "#" },
-  { icon: "fa-brands fa-instagram", href: "#" },
-];
+import type { FooterContent } from "@/lib/content-schema";
 
 type Settings = {
   site_name: string;
   logo_url: string | null;
 };
 
-export function Footer({ settings }: { settings: Settings | null }) {
+export function Footer({
+  settings,
+  content,
+}: {
+  settings: Settings | null;
+  content: FooterContent;
+}) {
   const siteName = settings?.site_name || "Plickify Academy";
 
   return (
@@ -61,11 +45,10 @@ export function Footer({ settings }: { settings: Settings | null }) {
               )}
             </div>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-zinc-400">
-              AI, Freelancing এবং Digital Skills শেখার জন্য একটি practical
-              learning platform।
+              {content.about}
             </p>
             <div className="mt-6 flex gap-3">
-              {socials.map((s) => (
+              {content.socials.map((s) => (
                 <a
                   key={s.icon}
                   href={s.href}
@@ -80,10 +63,10 @@ export function Footer({ settings }: { settings: Settings | null }) {
 
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wider text-white">
-              Quick Links
+              {content.quickLinksTitle}
             </h4>
             <ul className="mt-5 space-y-3 text-sm">
-              {quickLinks.map((l) => (
+              {content.quickLinks.map((l) => (
                 <li key={l.label}>
                   <Link href={l.href} className="text-zinc-400 transition-colors hover:text-white">
                     {l.label}
@@ -95,10 +78,10 @@ export function Footer({ settings }: { settings: Settings | null }) {
 
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wider text-white">
-              Support
+              {content.supportTitle}
             </h4>
             <ul className="mt-5 space-y-3 text-sm">
-              {supportLinks.map((l) => (
+              {content.supportLinks.map((l) => (
                 <li key={l.label}>
                   <Link href={l.href} className="text-zinc-400 transition-colors hover:text-white">
                     {l.label}
@@ -114,37 +97,37 @@ export function Footer({ settings }: { settings: Settings | null }) {
             </h4>
             <ul className="mt-5 space-y-3 text-sm text-zinc-400">
               <li>
-                <a href="mailto:hello@plickifyacademy.com" className="flex items-center gap-2.5 hover:text-white">
+                <a href={`mailto:${content.email}`} className="flex items-center gap-2.5 hover:text-white">
                   <i className="fa-solid fa-envelope text-brand-400" />
-                  hello@plickifyacademy.com
+                  {content.email}
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <i className="fa-solid fa-phone text-brand-400" />
-                +880 1234-567890
+                {content.phone}
               </li>
               <li className="flex items-center gap-2.5">
                 <i className="fa-solid fa-location-dot text-brand-400" />
-                Dhaka, Bangladesh
+                {content.address}
               </li>
             </ul>
 
             <form className="mt-6" action="/" aria-label="নিউজলেটার">
               <p className="text-sm font-semibold text-white">
-                সর্বশেষ আপডেট পেতে সাবস্ক্রাইব করুন
+                {content.newsletterTitle}
               </p>
               <div className="mt-3 flex overflow-hidden rounded-full border border-white/15 bg-white/5">
                 <input
                   type="email"
                   required
-                  placeholder="আপনার ইমেইল"
+                  placeholder={content.newsletterPlaceholder}
                   className="w-full bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-zinc-400 focus:outline-none"
                 />
                 <button
                   type="submit"
                   className="shrink-0 bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-500"
                 >
-                  সাবস্ক্রাইব
+                  {content.newsletterButton}
                 </button>
               </div>
             </form>
@@ -152,22 +135,16 @@ export function Footer({ settings }: { settings: Settings | null }) {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
-          <p className="text-xs text-zinc-500">
-            © 2026 Plickify Academy. All rights reserved.
-          </p>
+          <p className="text-xs text-zinc-500">{content.copyright}</p>
           <div className="flex items-center gap-2 text-zinc-500">
-            <span className="flex h-7 w-10 items-center justify-center rounded border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-400">
-              VISA
-            </span>
-            <span className="flex h-7 w-10 items-center justify-center rounded border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-400">
-              MC
-            </span>
-            <span className="flex h-7 w-10 items-center justify-center rounded border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-400">
-              BKASH
-            </span>
-            <span className="flex h-7 w-10 items-center justify-center rounded border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-400">
-              NAGAD
-            </span>
+            {content.paymentBadges.map((b) => (
+              <span
+                key={b}
+                className="flex h-7 w-10 items-center justify-center rounded border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-400"
+              >
+                {b}
+              </span>
+            ))}
           </div>
         </div>
       </div>

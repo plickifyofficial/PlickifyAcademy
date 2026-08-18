@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { featuredCourse } from "@/lib/site-config";
+import type { FeaturedContent } from "@/lib/content-schema";
 
-export function FeaturedCourse() {
+export function FeaturedCourse({ content }: { content: FeaturedContent }) {
   return (
     <section className="bg-gradient-to-b from-white via-brand-50/60 to-white px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-7xl" data-aos="fade-up">
@@ -12,35 +12,35 @@ export function FeaturedCourse() {
             <i className="fa-solid fa-robot absolute right-6 top-6 text-6xl text-white/20" />
 
             <span className="absolute right-4 top-4 rounded-full bg-amber-400 px-3 py-1 text-[10px] font-extrabold tracking-wide text-amber-950 shadow">
-              {featuredCourse.badge}
+              {content.badge}
             </span>
 
             <div>
               <p className="text-lg font-black uppercase leading-none tracking-wide text-white sm:text-2xl">
-                AI Income
+                {content.cardTop1}
               </p>
               <p className="text-lg font-black uppercase leading-none tracking-wide text-brand-200 sm:text-2xl">
-                Mastery
+                {content.cardTop2}
               </p>
               <p className="mt-2 text-sm font-bold tracking-[0.4em] text-amber-300">
-                2026
+                {content.cardYear}
               </p>
             </div>
           </div>
 
           <div className="flex flex-col justify-center">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
-              {featuredCourse.tagline}
+              {content.tagline}
             </span>
             <h2 className="mt-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
-              {featuredCourse.title}
+              {content.title}
             </h2>
             <p className="mt-3 text-base text-zinc-600">
-              {featuredCourse.description}
+              {content.description}
             </p>
 
             <ul className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              {featuredCourse.features.map((f) => (
+              {content.features.map((f) => (
                 <li key={f} className="flex items-center gap-2.5 text-sm font-medium text-zinc-700">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-50">
                     <i className="fa-solid fa-check text-[10px] text-brand-600" />
@@ -52,10 +52,10 @@ export function FeaturedCourse() {
 
             <div className="mt-8">
               <Link
-                href="/signup"
+                href={content.buttonLink || "/signup"}
                 className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-700"
               >
-                এখনই ভর্তি করুন
+                {content.buttonText}
                 <i className="fa-solid fa-arrow-right text-xs" />
               </Link>
             </div>
@@ -63,7 +63,7 @@ export function FeaturedCourse() {
 
           <div className="flex flex-col justify-center">
             <div className="space-y-1 rounded-2xl border border-zinc-100 bg-zinc-50/70 p-5">
-              {featuredCourse.info.map((row) => (
+              {content.info.map((row) => (
                 <div
                   key={row.label}
                   className="flex items-center gap-3 border-b border-zinc-100 py-2.5 last:border-0 last:pb-0"

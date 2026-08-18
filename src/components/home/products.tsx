@@ -1,16 +1,16 @@
 import Link from "next/link";
-import { products } from "@/lib/site-config";
+import type { ProductsContent } from "@/lib/content-schema";
 
-export function Products() {
+export function Products({ content }: { content: ProductsContent }) {
   return (
     <section id="products" className="bg-zinc-50/70 px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-7xl">
         <div className="text-center" data-aos="fade-up">
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
-            Learning Products
+            {content.eyebrow}
           </span>
           <h2 className="mt-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
-            প্রিমিয়াম ডিজিটাল রিসোর্স
+            {content.title}
           </h2>
         </div>
 
@@ -19,7 +19,7 @@ export function Products() {
           data-aos="fade-up"
           data-aos-delay="100"
         >
-          {products.map((product) => (
+          {content.items.map((product) => (
             <div
               key={product.name}
               className="group overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-100"
@@ -51,10 +51,10 @@ export function Products() {
 
         <div className="mt-10 text-center" data-aos="fade-up">
           <Link
-            href="/#contact"
+            href={content.viewAllLink || "/#contact"}
             className="inline-flex items-center gap-2 rounded-full border border-brand-300 bg-white px-7 py-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
           >
-            সব রিসোর্স দেখুন
+            {content.viewAllText}
             <i className="fa-solid fa-arrow-right text-xs" />
           </Link>
         </div>

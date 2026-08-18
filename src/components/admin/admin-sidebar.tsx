@@ -14,6 +14,7 @@ const menu = [
   {
     group: "কনটেন্ট",
     items: [
+      { href: "/admin/home", label: "হোম পেজ", icon: "fa-solid fa-house" },
       { href: "/admin/courses", label: "কোর্সসমূহ", icon: "fa-solid fa-book-open" },
       { href: "/admin/courses?add=1", label: "নতুন কোর্স", icon: "fa-solid fa-file-circle-plus" },
     ],

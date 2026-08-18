@@ -3,10 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navLinks } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
-export function SiteNav() {
+export function SiteNav({ links }: { links: { label: string; href: string }[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -16,7 +15,7 @@ export function SiteNav() {
   return (
     <>
       <nav className="hidden items-center gap-7 lg:flex">
-        {navLinks.map((link) => (
+        {links.map((link) => (
           <Link
             key={link.label}
             href={link.href}
@@ -41,7 +40,7 @@ export function SiteNav() {
       {open && (
         <div className="absolute inset-x-0 top-[72px] border-b border-zinc-100 bg-white shadow-lg lg:hidden">
           <nav className="flex flex-col gap-1 px-4 py-4">
-            {navLinks.map((link) => (
+            {links.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}

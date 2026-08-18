@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { faqs } from "@/lib/site-config";
+import type { FaqContent } from "@/lib/content-schema";
 import { cn } from "@/lib/utils";
 
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -39,16 +39,19 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-export function Faq() {
-  const left = faqs.filter((_, i) => i % 2 === 0);
-  const right = faqs.filter((_, i) => i % 2 === 1);
+export function Faq({ content }: { content: FaqContent }) {
+  const items = content.items ?? [];
+  const left = items.filter((_, i) => i % 2 === 0);
+  const right = items.filter((_, i) => i % 2 === 1);
+
+  if (items.length === 0) return null;
 
   return (
     <section id="faq" className="bg-zinc-50/70 px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-5xl">
         <div className="text-center" data-aos="fade-up">
           <h2 className="text-3xl font-extrabold text-zinc-900 sm:text-4xl">
-            সাধারণ কিছু প্রশ্ন
+            {content.title}
           </h2>
         </div>
 

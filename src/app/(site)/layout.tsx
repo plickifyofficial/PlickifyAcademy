@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AosProvider } from "@/components/ui/aos-provider";
+import { getSiteContent } from "@/lib/site-content";
+import { footerDefaults, navDefaults } from "@/lib/content-schema";
 
 const getSiteSettings = unstable_cache(
   async () => {
@@ -23,15 +25,19 @@ export default async function SiteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSiteSettings();
+  const [settings, nav, footer] = await Promise.all([
+    getSiteSettings(),
+    getSiteContent("global.nav", navDefaults),
+    getSiteContent("global.footer", footerDefaults),
+  ]);
 
   return (
     <>
-      <Header settings={settings} />
+      <Header settings={settings} nav={nav.links} />
       <AosProvider>
         <div className="flex flex-1 flex-col">{children}</div>
       </AosProvider>
-      <Footer settings={settings} />
+      <Footer settings={settings} content={footer} />
     </>
   );
 }

@@ -1,6 +1,6 @@
-import { siteStats } from "@/lib/site-config";
+import type { StatsContent } from "@/lib/content-schema";
 
-export function Stats() {
+export function Stats({ content }: { content: StatsContent }) {
   return (
     <section className="bg-white px-4 pb-6 sm:px-6">
       <div
@@ -8,9 +8,9 @@ export function Stats() {
         data-aos="fade-up"
       >
         <div className="grid grid-cols-2 gap-y-10 lg:grid-cols-4">
-          {siteStats.map((stat, i) => (
+          {content.items.map((stat, i) => (
             <div
-              key={stat.label}
+              key={`${stat.label}-${i}`}
               className={`flex flex-col items-center text-center lg:border-white/15 ${
                 i > 0 ? "lg:border-l" : ""
               }`}
