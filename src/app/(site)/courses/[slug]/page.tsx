@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/format";
 import { CheckoutButton } from "@/components/checkout/checkout-button";
 import { ReviewsSection } from "@/components/courses/reviews-section";
@@ -9,15 +10,15 @@ import { QnaSection } from "@/components/courses/qna-section";
 import { CertificateButton } from "@/components/courses/certificate-button";
 import { WishlistButton } from "@/components/courses/wishlist-button";
 import { LiveClassesSection } from "@/components/courses/live-classes-section";
+import { Curriculum, type CurSection } from "@/components/courses/curriculum";
 import type { Lesson, Announcement, LiveClass } from "@/lib/types";
 
 export const metadata = { title: "কোর্স" };
 
-const TYPE_META: Record<Lesson["type"], { icon: string }> = {
-  lesson: { icon: "fa-solid fa-book-open" },
-  video: { icon: "fa-solid fa-video" },
-  quiz: { icon: "fa-solid fa-circle-question" },
-  assignment: { icon: "fa-solid fa-clipboard-check" },
+const LEVEL_LABEL: Record<string, string> = {
+  beginner: "বিগিনার",
+  intermediate: "ইন্টারমিডিয়েট",
+  advanced: "অ্যাডভান্সড",
 };
 
 export default async function CourseDetailPage({
@@ -64,6 +65,24 @@ export default async function CourseDetailPage({
 
   const allTopics = (topics ?? []).filter((t) => t.section_id);
   const allTopicIds = allTopics.map((t) => t.id);
+  const totalMinutes = allTopics.reduce(
+    (s, t) => s + (t.duration_minutes || 0),
+    0,
+  );
+
+  const admin = createAdminClient();
+  const [{ data: studentsRaw }, { data: instructor }] = await Promise.all([
+    admin
+      .from("enrollments")
+      .select("id", { count: "exact", head: true })
+      .eq("course_id", course.id),
+    admin
+      .from("profiles")
+      .select("full_name, avatar_url, role")
+      .eq("id", course.created_by ?? "")
+      .maybeSingle(),
+  ]);
+  const studentsCount = studentsRaw?.length ?? 0;
 
   const {
     data: { user },
@@ -200,235 +219,479 @@ export default async function CourseDetailPage({
   const resumeTopic =
     allTopics.find((t) => t.id === lastLessonId) ?? firstTopic;
 
+  const curriculum: CurSection[] = (sections ?? []).map((section) => ({
+    id: section.id,
+    title: section.title,
+    items: (topicsBySection[section.id] ?? []).map((topic) => ({
+      id: topic.id,
+      title: topic.title,
+      type: topic.type,
+      duration_minutes: topic.duration_minutes,
+      is_free: topic.is_free,
+      done: completedIds.has(topic.id),
+      locked: (!canAccess && !topic.is_free) || isDripLocked(topic),
+      drip: isDripLocked(topic),
+    })),
+  }));
+
+  const whatYouLearn = allTopics.slice(0, 6).map((t) => t.title);
+
+  const includes = [
+    "সম্পূর্ণ ভিডিও লেসন",
+    "লাইভ ক্লাস ও রেকর্ডিং",
+    "প্র্যাকটিক্যাল অ্যাসাইনমেন্ট",
+    "সাপ্তাহিক Q&A সেশন",
+    "ভেরিফায়েড সার্টিফিকেট",
+    "লাইফটাইম অ্যাক্সেস",
+  ];
+
+  const durationText =
+    totalMinutes >= 60
+      ? `${Math.floor(totalMinutes / 60)} ঘণ্টা ${totalMinutes % 60} মিনিট`
+      : `${totalMinutes} মিনিট`;
+
+  const hourMin = (totalMinutes / 60).toFixed(1);
+
   return (
     <main className="flex-1">
-      <section className="bg-gradient-to-br from-brand-600 to-purple-700 py-14 text-white">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 lg:grid-cols-[1fr_400px]">
-          <div>
-            <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium capitalize">
-              {course.level}
-            </span>
-            <h1 className="mt-4 max-w-3xl text-3xl font-bold sm:text-4xl">
-              {course.title}
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg text-brand-100">
-              {course.description}
-            </p>
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-purple-800 py-10 text-white sm:py-14">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand-500/30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" />
 
-            {isEnrolled && (
-              <div className="mt-6 max-w-md">
-                <div className="flex items-center justify-between text-sm text-brand-100">
-                  <span>অগ্রগতি</span>
-                  <span className="font-semibold">{progressPct}%</span>
-                </div>
-                <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/20">
-                  <div
-                    className="h-full rounded-full bg-white transition-all"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
-                <p className="mt-1.5 text-xs text-brand-100">
-                  {completedCount}/{allTopicIds.length} টপিক সম্পন্ন
-                </p>
-              </div>
-            )}
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          <nav className="flex items-center gap-2 text-sm text-brand-200">
+            <Link href="/" className="transition-colors hover:text-white">
+              হোম
+            </Link>
+            <i className="fa-solid fa-chevron-right text-[10px]" />
+            <Link href="/courses" className="transition-colors hover:text-white">
+              কোর্সসমূহ
+            </Link>
+            <i className="fa-solid fa-chevron-right text-[10px]" />
+            <span className="truncate text-white/90">{course.title}</span>
+          </nav>
 
-            <div className="mt-8 flex flex-wrap items-center gap-6">
-              <span className="text-3xl font-bold">
-                {formatPrice(course.price)}
-              </span>
-              <span className="text-sm text-brand-200">
-                {allTopicIds.length} টি টপিক
-              </span>
-              {canAccess ? (
-                resumeTopic ? (
-                  <Link
-                    href={`/courses/${course.slug}/lessons/${resumeTopic.id}`}
-                    className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50"
-                  >
-                    {isEnrolled && lastLessonId ? "শেখা চালিয়ে যান" : "শেখা শুরু করুন"} →
-                  </Link>
-                ) : null
-              ) : (
-                <>
-                  <CheckoutButton courseId={course.id} price={course.price} />
-                  <WishlistButton courseId={course.id} initialSaved={wishlisted} />
-                </>
-              )}
-              {isEnrolled && (
-                <CertificateButton
-                  courseId={course.id}
-                  completed={progressPct === 100}
-                  certificateId={certificateId}
-                />
-              )}
-            </div>
-          </div>
-
-          <div className="relative hidden aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-800 to-purple-900 shadow-2xl shadow-black/20 lg:block">
-            {course.cover_image ? (
-              <Image
-                src={course.cover_image}
-                alt={course.title}
-                fill
-                priority
-                sizes="400px"
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-7xl text-white/30">
-                {course.title.charAt(0)}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="text-2xl font-bold text-zinc-900">
-          কোর্স কারিকুলাম
-        </h2>
-        <div className="mt-6 space-y-6">
-          {(sections ?? []).length > 0 ? (
-            (sections ?? []).map((section, sIdx) => {
-              const sectionTopics = topicsBySection[section.id] ?? [];
-              return (
-                <div
-                  key={section.id}
-                  className="overflow-hidden rounded-2xl border border-zinc-200 bg-white"
-                >
-                  <div className="flex items-center justify-between gap-3 border-b border-zinc-100 bg-zinc-50 px-5 py-3">
-                    <h3 className="flex items-center gap-3 font-semibold text-zinc-900">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
-                        {sIdx + 1}
-                      </span>
-                      {section.title}
-                    </h3>
-                    <span className="text-xs text-zinc-500">
-                      {sectionTopics.length} টি টপিক
+          <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
+            <div>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+                  {LEVEL_LABEL[course.level ?? ""] ?? "কোর্স"}
+                </span>
+                {course.price === 0 && (
+                  <span className="rounded-full bg-green-400 px-3 py-1 text-xs font-bold text-green-950">
+                    সম্পূর্ণ ফ্রি
+                  </span>
+                )}
+                {avg > 0 && (
+                  <span className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                    <span className="text-amber-300">
+                      <i className="fa-solid fa-star" />
                     </span>
-                  </div>
-                  <div className="divide-y divide-zinc-100">
-                    {sectionTopics.map((topic, idx) => {
-                      const locked = (!canAccess && !topic.is_free) || isDripLocked(topic);
-                      const drip = isDripLocked(topic);
-                      const done = completedIds.has(topic.id);
-                      return (
-                        <div
-                          key={topic.id}
-                          className="flex items-center gap-4 px-5 py-3.5"
-                        >
-                          {done ? (
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
-                              <i className="fa-solid fa-check text-xs" />
-                            </span>
-                          ) : (
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
-                              {idx + 1}
-                            </span>
-                          )}
-                          <span className="w-4 text-zinc-400">
-                            <i
-                              className={`${TYPE_META[topic.type].icon} text-sm`}
-                            />
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-zinc-900">
-                              {topic.title}
-                            </p>
-                            {topic.duration_minutes > 0 && (
-                              <p className="text-sm text-zinc-500">
-                                {topic.duration_minutes} মিনিট
-                              </p>
-                            )}
-                          </div>
-                          {topic.is_free && (
-                            <span className="hidden rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 sm:inline">
-                              ফ্রি প্রিভিউ
-                            </span>
-                          )}
-                          {locked ? (
-                            <span
-                              className="text-zinc-400"
-                              title={drip ? "ড্রিপ কনটেন্ট — পরে আনলক হবে" : "এনরোল করুন"}
-                            >
-                              <i className="fa-solid fa-lock" />
-                            </span>
-                          ) : (
-                            <Link
-                              href={`/courses/${course.slug}/lessons/${topic.id}`}
-                              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-                            >
-                              দেখুন
-                            </Link>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <p className="text-zinc-500">
-              এখনো কোনো টপিক যোগ করা হয়নি।
-            </p>
-          )}
-        </div>
-      </section>
-
-      {isEnrolled && ((liveClasses ?? []) as LiveClass[]).length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-8">
-          <LiveClassesSection
-            classes={liveClasses as LiveClass[]}
-            isEnrolled={isEnrolled}
-          />
-        </section>
-      )}
-
-      {isEnrolled && (announcements ?? []).length > 0 && (
-        <section className="mx-auto max-w-6xl px-4">
-          <div className="space-y-3">
-            {(announcements as Announcement[]).map((a) => (
-              <div
-                key={a.id}
-                className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5"
-              >
-                <div className="flex items-center gap-2 text-brand-700">
-                  <i className="fa-solid fa-bullhorn" />
-                  <span className="text-xs font-semibold uppercase tracking-wide">
-                    নোটিশ
+                    {avg.toFixed(1)}
+                    <span className="text-brand-200">({reviews.length} রিভিউ)</span>
                   </span>
-                  <span className="text-xs text-zinc-500">
-                    {new Date(a.created_at).toLocaleDateString("bn-BD")}
-                  </span>
-                </div>
-                <p className="mt-1.5 font-semibold text-zinc-900">{a.title}</p>
-                {a.body && (
-                  <p className="mt-1 text-sm text-zinc-600">{a.body}</p>
                 )}
               </div>
-            ))}
+
+              <h1 className="mt-5 text-3xl font-extrabold leading-tight sm:text-4xl lg:text-[42px]">
+                {course.title}
+              </h1>
+              <p className="mt-4 max-w-2xl text-lg leading-relaxed text-brand-100">
+                {course.description}
+              </p>
+
+              <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-brand-100">
+                <span className="flex items-center gap-2">
+                  <i className="fa-solid fa-play text-white/60" />
+                  {allTopicIds.length}টি লেসন
+                </span>
+                <span className="flex items-center gap-2">
+                  <i className="fa-solid fa-clock text-white/60" />
+                  {durationText}
+                </span>
+                <span className="flex items-center gap-2">
+                  <i className="fa-solid fa-user-group text-white/60" />
+                  {studentsCount}+ শিক্ষার্থী
+                </span>
+                <span className="flex items-center gap-2">
+                  <i className="fa-solid fa-certificate text-white/60" />
+                  সার্টিফিকেট
+                </span>
+              </div>
+
+              {isEnrolled && (
+                <div className="mt-6 max-w-md">
+                  <div className="flex items-center justify-between text-sm text-brand-100">
+                    <span>আপনার অগ্রগতি</span>
+                    <span className="font-semibold">{progressPct}%</span>
+                  </div>
+                  <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/20">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-400 transition-all"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                  <p className="mt-1.5 text-xs text-brand-200">
+                    {completedCount}/{allTopicIds.length} টপিক সম্পন্ন
+                  </p>
+                </div>
+              )}
+
+              {isEnrolled && instructor?.full_name && (
+                <div className="mt-6 flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-sm font-bold">
+                    {instructor.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={instructor.avatar_url}
+                        alt={instructor.full_name}
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      instructor.full_name.charAt(0)
+                    )}
+                  </span>
+                  <div>
+                    <p className="text-xs text-brand-200">ইনস্ট্রাক্টর</p>
+                    <p className="text-sm font-semibold">{instructor.full_name}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="hidden lg:block">
+              <div className="sticky top-24 overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/20">
+                <div className="relative aspect-[16/10] bg-gradient-to-br from-brand-700 to-purple-800">
+                  {course.cover_image ? (
+                    <Image
+                      src={course.cover_image}
+                      alt={course.title}
+                      fill
+                      priority
+                      sizes="360px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-6xl text-white/30">
+                      {course.title.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-3xl font-extrabold text-zinc-900">
+                      {formatPrice(course.price)}
+                    </span>
+                    {course.price > 0 && (
+                      <span className="text-sm text-zinc-400 line-through">
+                        {formatPrice(Math.round(course.price * 1.5))}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    এককালীন ফি · লাইফটাইম অ্যাক্সেস
+                  </p>
+
+                  <div className="mt-5 space-y-2.5">
+                    {canAccess ? (
+                      resumeTopic ? (
+                        <Link
+                          href={`/courses/${course.slug}/lessons/${resumeTopic.id}`}
+                          className="block rounded-xl bg-brand-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-700"
+                        >
+                          <i className="fa-solid fa-play mr-2" />
+                          {isEnrolled && lastLessonId
+                            ? "শেখা চালিয়ে যান"
+                            : "শেখা শুরু করুন"}
+                        </Link>
+                      ) : (
+                        <p className="rounded-xl bg-zinc-100 py-3.5 text-center text-sm font-semibold text-zinc-600">
+                          টপিক যোগ করা হয়নি
+                        </p>
+                      )
+                    ) : (
+                      <CheckoutButton courseId={course.id} price={course.price} />
+                    )}
+                  </div>
+
+                  <div className="mt-3">
+                    {!isEnrolled && (
+                      <WishlistButton courseId={course.id} initialSaved={wishlisted} />
+                    )}
+                  </div>
+
+                  {isEnrolled && (
+                    <div className="mt-4">
+                      <CertificateButton
+                        courseId={course.id}
+                        completed={progressPct === 100}
+                        certificateId={certificateId}
+                      />
+                    </div>
+                  )}
+
+                  <div className="mt-6 border-t border-zinc-100 pt-5">
+                    <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                      এই কোর্সে যা পাবেন
+                    </p>
+                    <ul className="mt-3 space-y-2.5">
+                      {includes.map((item) => (
+                        <li
+                          key={item}
+                          className="flex items-center gap-2.5 text-sm text-zinc-700"
+                        >
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-50">
+                            <i className="fa-solid fa-check text-[10px] text-brand-600" />
+                          </span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-5 space-y-2 border-t border-zinc-100 pt-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">লেভেল</span>
+                      <span className="font-semibold text-zinc-800">
+                        {LEVEL_LABEL[course.level ?? ""] ?? "সব লেভেল"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">লেসন</span>
+                      <span className="font-semibold text-zinc-800">
+                        {allTopicIds.length}টি
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">ডিউরেশন</span>
+                      <span className="font-semibold text-zinc-800">
+                        {durationText}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">শিক্ষার্থী</span>
+                      <span className="font-semibold text-zinc-800">
+                        {studentsCount}+
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">ভাষা</span>
+                      <span className="font-semibold text-zinc-800">বাংলা</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-16">
-        <ReviewsSection
-          courseId={course.id}
-          isEnrolled={isEnrolled}
-          reviews={reviews}
-          avg={avg}
-          count={reviews.length}
-          ownReview={ownReview}
-        />
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px] lg:gap-12">
+          <div className="min-w-0 space-y-14">
+            {whatYouLearn.length > 0 && (
+              <section>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <i className="fa-solid fa-lightbulb" />
+                  </span>
+                  <h2 className="text-2xl font-bold text-zinc-900">
+                    শিখবেন যা যা
+                  </h2>
+                </div>
+                <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {whatYouLearn.map((t) => (
+                    <div
+                      key={t}
+                      className="flex items-start gap-3 rounded-xl border border-zinc-100 bg-white p-4"
+                    >
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-100">
+                        <i className="fa-solid fa-check text-[10px] text-green-700" />
+                      </span>
+                      <span className="text-sm font-medium text-zinc-700">
+                        {t}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-        <QnaSection
-          courseId={course.id}
-          isEnrolled={isEnrolled}
-          isAdmin={isAdmin}
-          items={qnaItems}
-        />
+            <section>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <i className="fa-solid fa-list-ol" />
+                  </span>
+                  <div>
+                    <h2 className="text-2xl font-bold text-zinc-900">
+                      কোর্স কারিকুলাম
+                    </h2>
+                    <p className="text-sm text-zinc-500">
+                      {curriculum.length}টি সেকশন · {allTopicIds.length}টি টপিক ·{" "}
+                      {hourMin} ঘণ্টা
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                {curriculum.length > 0 ? (
+                  <Curriculum sections={curriculum} courseSlug={course.slug} />
+                ) : (
+                  <p className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center text-zinc-500">
+                    এখনো কোনো টপিক যোগ করা হয়নি।
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {isEnrolled && ((liveClasses ?? []) as LiveClass[]).length > 0 && (
+              <section>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <i className="fa-solid fa-calendar-days" />
+                  </span>
+                  <h2 className="text-2xl font-bold text-zinc-900">
+                    লাইভ ক্লাস
+                  </h2>
+                </div>
+                <div className="mt-6">
+                  <LiveClassesSection
+                    classes={liveClasses as LiveClass[]}
+                    isEnrolled={isEnrolled}
+                  />
+                </div>
+              </section>
+            )}
+
+            {isEnrolled && (announcements ?? []).length > 0 && (
+              <section>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <i className="fa-solid fa-bullhorn" />
+                  </span>
+                  <h2 className="text-2xl font-bold text-zinc-900">নোটিশ</h2>
+                </div>
+                <div className="mt-6 space-y-3">
+                  {(announcements as Announcement[]).map((a) => (
+                    <div
+                      key={a.id}
+                      className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5"
+                    >
+                      <div className="flex items-center gap-2 text-brand-700">
+                        <i className="fa-solid fa-bullhorn" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">
+                          নোটিশ
+                        </span>
+                        <span className="text-xs text-zinc-500">
+                          {new Date(a.created_at).toLocaleDateString("bn-BD")}
+                        </span>
+                      </div>
+                      <p className="mt-1.5 font-semibold text-zinc-900">{a.title}</p>
+                      {a.body && (
+                        <p className="mt-1 text-sm text-zinc-600">{a.body}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section>
+              <ReviewsSection
+                courseId={course.id}
+                isEnrolled={isEnrolled}
+                reviews={reviews}
+                avg={avg}
+                count={reviews.length}
+                ownReview={ownReview}
+              />
+            </section>
+
+            <section>
+              <QnaSection
+                courseId={course.id}
+                isEnrolled={isEnrolled}
+                isAdmin={isAdmin}
+                items={qnaItems}
+              />
+            </section>
+          </div>
+
+          <div className="lg:hidden">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-lg shadow-brand-100/50 ring-1 ring-zinc-200">
+              <div className="relative aspect-[16/10] bg-gradient-to-br from-brand-700 to-purple-800">
+                {course.cover_image ? (
+                  <Image
+                    src={course.cover_image}
+                    alt={course.title}
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-6xl text-white/30">
+                    {course.title.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="p-6">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl font-extrabold text-zinc-900">
+                    {formatPrice(course.price)}
+                  </span>
+                  {course.price > 0 && (
+                    <span className="text-sm text-zinc-400 line-through">
+                      {formatPrice(Math.round(course.price * 1.5))}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">
+                  এককালীন ফি · লাইফটাইম অ্যাক্সেস
+                </p>
+
+                <div className="mt-5 space-y-2.5">
+                  {canAccess ? (
+                    resumeTopic ? (
+                      <Link
+                        href={`/courses/${course.slug}/lessons/${resumeTopic.id}`}
+                        className="block rounded-xl bg-brand-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:bg-brand-700"
+                      >
+                        <i className="fa-solid fa-play mr-2" />
+                        {isEnrolled && lastLessonId
+                          ? "শেখা চালিয়ে যান"
+                          : "শেখা শুরু করুন"}
+                      </Link>
+                    ) : (
+                      <p className="rounded-xl bg-zinc-100 py-3.5 text-center text-sm font-semibold text-zinc-600">
+                        টপিক যোগ করা হয়নি
+                      </p>
+                    )
+                  ) : (
+                    <CheckoutButton courseId={course.id} price={course.price} />
+                  )}
+                </div>
+
+                <div className="mt-3">
+                  {!isEnrolled && (
+                    <WishlistButton courseId={course.id} initialSaved={wishlisted} />
+                  )}
+                </div>
+
+                {isEnrolled && (
+                  <div className="mt-4">
+                    <CertificateButton
+                      courseId={course.id}
+                      completed={progressPct === 100}
+                      certificateId={certificateId}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );
