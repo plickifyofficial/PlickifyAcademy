@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MarkCompleteButton } from "@/components/lessons/mark-complete-button";
 import { QuizPlayer } from "@/components/lessons/quiz-player";
 import { ResumeTracker } from "@/components/lessons/resume-tracker";
+import { VideoPlayer } from "@/components/lessons/video-player";
 import type { QuizQuestion } from "@/lib/types";
 
 export const metadata = { title: "লেসন" };
@@ -170,16 +171,16 @@ export default async function LessonPage({
         </div>
       ) : (
         <>
-          {lesson.video_url && (
+          {lesson.video_url || lesson.video_embed ? (
             <div className="mt-6 overflow-hidden rounded-2xl bg-black">
-              <video
-                src={lesson.video_url}
-                controls
-                className="aspect-video w-full"
-                poster={course.cover_image ?? undefined}
+              <VideoPlayer
+                url={lesson.video_url}
+                embed={lesson.video_embed}
+                poster={course.cover_image}
+                title={lesson.title}
               />
             </div>
-          )}
+          ) : null}
 
           {lesson.content && (
             <div className="prose prose-zinc mt-8 max-w-none">

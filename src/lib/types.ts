@@ -11,6 +11,15 @@ export type Course = {
   title: string;
   slug: string;
   description: string | null;
+  subtitle: string | null;
+  category: string | null;
+  language: string | null;
+  original_price: number;
+  is_featured: boolean;
+  certificate: boolean;
+  tags: string[];
+  promo_video_url: string | null;
+  promo_video_embed: string | null;
   cover_image: string | null;
   price: number;
   level: "beginner" | "intermediate" | "advanced" | null;
@@ -29,6 +38,7 @@ export type Lesson = {
   slug: string;
   description: string | null;
   video_url: string | null;
+  video_embed: string | null;
   content: string | null;
   duration_minutes: number;
   is_free: boolean;

@@ -25,6 +25,7 @@ import {
 } from "@/lib/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 import { QuestionsEditor } from "@/components/admin/questions-editor";
+import { VideoSourceFields } from "@/components/admin/video-source-fields";
 
 const TOPIC_TYPES: { value: Lesson["type"]; label: string; icon: string }[] = [
   { value: "lesson", label: "লেসন", icon: "fa-solid fa-book-open" },
@@ -509,18 +510,20 @@ function TopicForm({
         </div>
       </div>
       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-        <div>
-          <label className="wp-label">ভিডিও URL</label>
-          <input name="video_url" defaultValue={topic?.video_url ?? ""} placeholder="https://youtu.be/..." className="wp-input" />
-        </div>
+        <VideoSourceFields
+          prefix="video"
+          initialUrl={topic?.video_url ?? ""}
+          initialEmbed={topic?.video_embed ?? ""}
+          className="sm:col-span-2"
+        />
         <div>
           <label className="wp-label">সময় (মিনিট)</label>
           <input name="duration_minutes" type="number" defaultValue={topic?.duration_minutes ?? 0} className="wp-input" />
         </div>
-        <div>
-          <label className="wp-label">বর্ণনা</label>
-          <input name="description" defaultValue={topic?.description ?? ""} className="wp-input" />
-        </div>
+      </div>
+      <div className="mt-2">
+        <label className="wp-label">বর্ণনা</label>
+        <input name="description" defaultValue={topic?.description ?? ""} className="wp-input" />
       </div>
       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div>

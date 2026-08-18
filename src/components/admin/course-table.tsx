@@ -17,6 +17,7 @@ import {
 import { formatPrice } from "@/lib/format";
 import { useToast } from "@/components/ui/toaster";
 import { CurriculumBuilder } from "@/components/admin/curriculum-builder";
+import { VideoSourceFields } from "@/components/admin/video-source-fields";
 
 function Field({
   name,
@@ -47,6 +48,141 @@ function Field({
         step={type === "number" ? "0.01" : undefined}
         className="wp-input"
       />
+    </div>
+  );
+}
+
+function TextArea({
+  name,
+  label,
+  defaultValue,
+  rows = 3,
+  className = "",
+}: {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  rows?: number;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <label className="wp-label">{label}</label>
+      <textarea name={name} rows={rows} defaultValue={defaultValue} className="wp-input" />
+    </div>
+  );
+}
+
+function Group({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-[#dcdcde] bg-[#f6f7f7] p-3">
+      <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#2271b1]">
+        <i className={`${icon} text-sm`} />
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+function CourseFormFields({ course }: { course?: Course }) {
+  return (
+    <div className="space-y-3">
+      <Group title="মৌলিক তথ্য" icon="fa-solid fa-circle-info">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Field name="title" label="শিরোনাম" required defaultValue={course?.title} />
+          <Field name="slug" label="Slug" required defaultValue={course?.slug} placeholder="my-course" />
+          <Field name="subtitle" label="সাব-টাইটেল / ট্যাগলাইন" defaultValue={course?.subtitle ?? ""} placeholder="যেমন: AI & Digital Income Mastery" />
+          <Field name="category" label="ক্যাটাগরি" defaultValue={course?.category ?? "General"} placeholder="যেমন: AI, Freelancing" />
+        </div>
+        <TextArea name="description" label="বিস্তারিত বর্ণনা" defaultValue={course?.description ?? ""} rows={4} className="mt-3" />
+      </Group>
+
+      <Group title="মূল্য ও ডিসকাউন্ট" icon="fa-solid fa-tags">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field name="price" label="বর্তমান দাম (৳)" type="number" defaultValue={course?.price ?? 0} />
+          <Field name="original_price" label="আগের দাম (৳) — কাটা দাম দেখাতে" type="number" defaultValue={course?.original_price ?? 0} />
+        </div>
+        <p className="mt-2 text-xs text-[#646970]">
+          <i className="fa-solid fa-circle-info mr-1" />
+          আগের দাম 0 রাখলে ডিসকাউন্ট দেখাবে না। উদাহরণ: বর্তমান ৩,৫০০, আগের ৭,০০০।
+        </p>
+      </Group>
+
+      <Group title="কভার ইমেজ" icon="fa-solid fa-image">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label className="wp-label">ছবি আপলোড করুন</label>
+            <input
+              type="file"
+              name="cover_image_file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              className="wp-input file:mr-2 file:rounded file:border-0 file:bg-[#f0f6fc] file:px-2 file:py-1 file:text-xs file:font-medium file:text-[#2271b1]"
+            />
+          </div>
+          <Field name="cover_image" label="অথবা ইমেজ URL" defaultValue={course?.cover_image ?? ""} placeholder="https://..." />
+        </div>
+        {course?.cover_image && (
+          <div className="mt-2 flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={course.cover_image}
+              alt="বর্তমান কভার"
+              className="h-14 w-24 rounded object-cover"
+            />
+            <span className="text-xs text-[#646970]">বর্তমান কভার — নতুন ছবি দিলে প্রতিস্থাপিত হবে</span>
+          </div>
+        )}
+      </Group>
+
+      <Group title="প্রোমো ভিডিও" icon="fa-solid fa-video">
+        <VideoSourceFields
+          prefix="promo_video"
+          initialUrl={course?.promo_video_url ?? ""}
+          initialEmbed={course?.promo_video_embed ?? ""}
+        />
+      </Group>
+
+      <Group title="শ্রেণীবিভাগ ও ভাষা" icon="fa-solid fa-layer-group">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <label className="wp-label">লেভেল</label>
+            <select name="level" defaultValue={course?.level ?? "beginner"} className="wp-input">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <Field name="language" label="ভাষা" defaultValue={course?.language ?? "Bengali"} placeholder="যেমন: Bengali, English" />
+          <Field name="tags" label="ট্যাগ (কমা দিয়ে আলাদা)" defaultValue={course?.tags?.join(", ") ?? ""} placeholder="যেমন: AI, Freelancing, Live" />
+        </div>
+      </Group>
+
+      <Group title="সেটিংস" icon="fa-solid fa-gear">
+        <div className="flex flex-wrap items-center gap-4">
+          <label className="flex items-center gap-2 text-sm font-medium text-[#3c434a]">
+            <input type="checkbox" name="is_published" defaultChecked={course?.is_published ?? false} className="h-4 w-4" />
+            পাবলিশ
+          </label>
+          <label className="flex items-center gap-2 text-sm font-medium text-[#3c434a]">
+            <input type="checkbox" name="is_featured" defaultChecked={course?.is_featured ?? false} className="h-4 w-4" />
+            ফিচার্ড (হোমে দেখানো হবে)
+          </label>
+          <label className="flex items-center gap-2 text-sm font-medium text-[#3c434a]">
+            <input type="hidden" name="certificate" value="off" />
+            <input type="checkbox" name="certificate" value="on" defaultChecked={course?.certificate ?? true} className="h-4 w-4" />
+            সার্টিফিকেট দেওয়া হবে
+          </label>
+        </div>
+      </Group>
     </div>
   );
 }
@@ -113,13 +249,9 @@ export function AdminCourseTable({
 
   async function handleDelete(course: Course) {
     if (!confirm(`"${course.title}" মুছে ফেলবেন?`)) return;
-    await run(() => deleteCourse(courseToFormData(course)), "কোর্স মুছে ফেলা হয়েছে");
-  }
-
-  function courseToFormData(course: Course) {
     const fd = new FormData();
     fd.set("id", course.id);
-    return fd;
+    await run(() => deleteCourse(fd), "কোর্স মুছে ফেলা হয়েছে");
   }
 
   return (
@@ -137,43 +269,7 @@ export function AdminCourseTable({
             </button>
           </div>
           <div className="wp-panel-body space-y-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Field name="title" label="শিরোনাম" required />
-              <Field name="slug" label="Slug" required placeholder="my-course" />
-              <Field name="price" label="দাম (৳)" type="number" defaultValue={0} />
-              <div>
-                <label className="wp-label">কভার ইমেজ</label>
-                <input
-                  type="file"
-                  name="cover_image_file"
-                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                  className="wp-input file:mr-2 file:rounded file:border-0 file:bg-[#f0f6fc] file:px-2 file:py-1 file:text-xs file:font-medium file:text-[#2271b1]"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Field name="cover_image" label="অথবা ইমেজ URL" placeholder="https://..." />
-              <div>
-                <label className="wp-label">বর্ণনা</label>
-                <textarea
-                  name="description"
-                  rows={2}
-                  className="wp-input"
-                />
-              </div>
-              <div>
-                <label className="wp-label">লেভেল</label>
-                <select name="level" className="wp-input">
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                </select>
-              </div>
-              <label className="flex items-end gap-2 pb-2 text-sm font-medium text-[#3c434a]">
-                <input type="checkbox" name="is_published" className="h-4 w-4" />
-                পাবলিশ
-              </label>
-            </div>
+            <CourseFormFields />
             <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
               <i className="fa-solid fa-plus" /> {pending ? "তৈরি হচ্ছে..." : "তৈরি করুন"}
             </button>
@@ -221,9 +317,19 @@ export function AdminCourseTable({
                         <span className="font-semibold text-[#1d2327]">
                           {course.title}
                         </span>
+                        {course.is_featured && (
+                          <span className="wp-tag">ফিচার্ড</span>
+                        )}
                       </div>
                     </td>
-                    <td className="font-medium">{formatPrice(course.price)}</td>
+                    <td className="font-medium">
+                      {formatPrice(course.price)}
+                      {(course.original_price ?? 0) > course.price && (
+                        <span className="ml-1 text-xs text-[#8c8f94] line-through">
+                          {formatPrice(course.original_price)}
+                        </span>
+                      )}
+                    </td>
                     <td className="capitalize text-[#646970]">{course.level}</td>
                     <td>
                       <span
@@ -272,53 +378,7 @@ export function AdminCourseTable({
                           <div className="wp-panel-header">কোর্স এডিট করুন</div>
                           <div className="wp-panel-body">
                             <input type="hidden" name="id" value={course.id} />
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                              <Field name="title" label="শিরোনাম" defaultValue={course.title} required />
-                              <Field name="slug" label="Slug" defaultValue={course.slug} required />
-                              <Field name="price" label="দাম (৳)" type="number" defaultValue={course.price} />
-                              <div>
-                                <label className="wp-label">নতুন কভার (আপলোড)</label>
-                                <input
-                                  type="file"
-                                  name="cover_image_file"
-                                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                                  className="wp-input file:mr-2 file:rounded file:border-0 file:bg-[#f0f6fc] file:px-2 file:py-1 file:text-xs file:font-medium file:text-[#2271b1]"
-                                />
-                              </div>
-                            </div>
-                            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                              <Field name="cover_image" label="অথবা ইমেজ URL" defaultValue={course.cover_image ?? ""} />
-                              <div className="sm:col-span-2">
-                                <label className="wp-label">বর্ণনা</label>
-                                <textarea
-                                  name="description"
-                                  rows={2}
-                                  defaultValue={course.description ?? ""}
-                                  className="wp-input"
-                                />
-                              </div>
-                              <div>
-                                <label className="wp-label">লেভেল</label>
-                                <select
-                                  name="level"
-                                  defaultValue={course.level ?? "beginner"}
-                                  className="wp-input"
-                                >
-                                  <option value="beginner">Beginner</option>
-                                  <option value="intermediate">Intermediate</option>
-                                  <option value="advanced">Advanced</option>
-                                </select>
-                              </div>
-                            </div>
-                            <label className="mt-3 flex items-center gap-2 text-sm font-medium text-[#3c434a]">
-                              <input
-                                type="checkbox"
-                                name="is_published"
-                                defaultChecked={course.is_published}
-                                className="h-4 w-4"
-                              />
-                              পাবলিশ
-                            </label>
+                            <CourseFormFields course={course} />
                             <div className="mt-4 flex gap-2">
                               <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
                                 <i className="fa-solid fa-floppy-disk" /> {pending ? "আপডেট হচ্ছে..." : "আপডেট"}

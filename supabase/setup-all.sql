@@ -68,6 +68,17 @@ alter table public.courses enable row level security;
 alter table public.courses
   add column if not exists created_by uuid references auth.users (id) on delete set null;
 
+alter table public.courses
+  add column if not exists subtitle text,
+  add column if not exists category text default 'General',
+  add column if not exists language text default 'Bengali',
+  add column if not exists original_price numeric(10, 2) default 0,
+  add column if not exists is_featured boolean not null default false,
+  add column if not exists certificate boolean not null default true,
+  add column if not exists tags text[] not null default '{}',
+  add column if not exists promo_video_url text,
+  add column if not exists promo_video_embed text;
+
 -- ============================================================
 -- LESSONS (Topics)
 -- ============================================================
@@ -100,6 +111,9 @@ alter table public.lessons
 
 alter table public.lessons
   add column if not exists release_days integer not null default 0;
+
+alter table public.lessons
+  add column if not exists video_embed text;
 
 create index if not exists lessons_section_id_idx on public.lessons (section_id);
 

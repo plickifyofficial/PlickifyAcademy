@@ -107,6 +107,20 @@ async function resolveCoverImage(formData: FormData, fallback: string | null) {
   return url || fallback;
 }
 
+function optStr(formData: FormData, key: string): string | null {
+  const v = formData.get(key);
+  if (!v) return null;
+  const s = String(v).trim();
+  return s || null;
+}
+
+function tagsFrom(formData: FormData): string[] {
+  return optStr(formData, "tags")
+    ?.split(",")
+    .map((t) => t.trim())
+    .filter(Boolean) ?? [];
+}
+
 export async function createCourse(formData: FormData) {
   const supabase = await requireCourseEditor();
 
@@ -116,6 +130,7 @@ export async function createCourse(formData: FormData) {
 
   const description = String(formData.get("description")).trim();
   const price = Number(formData.get("price")) || 0;
+  const original_price = Number(formData.get("original_price")) || 0;
   const level = String(formData.get("level")) || "beginner";
   const cover_image = await resolveCoverImage(formData, null);
 
@@ -129,9 +144,17 @@ export async function createCourse(formData: FormData) {
       title,
       slug,
       description,
-      price,
+      subtitle: optStr(formData, "subtitle"),
+      category: optStr(formData, "category"),
+      language: optStr(formData, "language"),
+      original_price,
       level,
       cover_image,
+      tags: tagsFrom(formData),
+      is_featured: formData.get("is_featured") === "on",
+      certificate: formData.getAll("certificate").includes("on"),
+      promo_video_url: optStr(formData, "promo_video_url"),
+      promo_video_embed: optStr(formData, "promo_video_embed"),
       created_by: user?.id,
       is_published: formData.get("is_published") === "on",
     })
@@ -163,6 +186,7 @@ export async function updateCourse(formData: FormData) {
 
   const description = String(formData.get("description")).trim();
   const price = Number(formData.get("price")) || 0;
+  const original_price = Number(formData.get("original_price")) || 0;
   const level = String(formData.get("level")) || "beginner";
   const cover_image = await resolveCoverImage(formData, null);
 
@@ -172,9 +196,17 @@ export async function updateCourse(formData: FormData) {
       title,
       slug,
       description,
-      price,
+      subtitle: optStr(formData, "subtitle"),
+      category: optStr(formData, "category"),
+      language: optStr(formData, "language"),
+      original_price,
       level,
       cover_image,
+      tags: tagsFrom(formData),
+      is_featured: formData.get("is_featured") === "on",
+      certificate: formData.getAll("certificate").includes("on"),
+      promo_video_url: optStr(formData, "promo_video_url"),
+      promo_video_embed: optStr(formData, "promo_video_embed"),
       is_published: formData.get("is_published") === "on",
       updated_at: new Date().toISOString(),
     })
@@ -364,9 +396,10 @@ export async function createTopic(formData: FormData) {
     type,
     title,
     slug,
-    description: String(formData.get("description")).trim() || null,
-    video_url: String(formData.get("video_url")).trim() || null,
-    content: String(formData.get("content")).trim() || null,
+    description: optStr(formData, "description"),
+    video_url: optStr(formData, "video_url"),
+    video_embed: optStr(formData, "video_embed"),
+    content: optStr(formData, "content"),
     duration_minutes: Number(formData.get("duration_minutes")) || 0,
     is_free: formData.get("is_free") === "on",
     pass_percent: Number(formData.get("pass_percent")) || 60,
@@ -394,9 +427,10 @@ export async function updateTopic(formData: FormData) {
       title,
       slug,
       type: String(formData.get("type")) || "lesson",
-      description: String(formData.get("description")).trim() || null,
-      video_url: String(formData.get("video_url")).trim() || null,
-      content: String(formData.get("content")).trim() || null,
+      description: optStr(formData, "description"),
+      video_url: optStr(formData, "video_url"),
+      video_embed: optStr(formData, "video_embed"),
+      content: optStr(formData, "content"),
       duration_minutes: Number(formData.get("duration_minutes")) || 0,
       is_free: formData.get("is_free") === "on",
       pass_percent: Number(formData.get("pass_percent")) || 60,

@@ -1,5 +1,4 @@
 ﻿import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -12,6 +11,7 @@ import { QnaSection } from "@/components/courses/qna-section";
 import { CertificateButton } from "@/components/courses/certificate-button";
 import { WishlistButton } from "@/components/courses/wishlist-button";
 import { LiveClassesSection } from "@/components/courses/live-classes-section";
+import { PromoVideo } from "@/components/courses/promo-video";
 import { Curriculum, type CurSection } from "@/components/courses/curriculum";
 import {
   WhatYouLearn,
@@ -258,7 +258,12 @@ export default async function CourseDetailPage({
       ? `${Math.floor(totalMinutes / 60)} ঘণ্টা ${totalMinutes % 60} মিনিট`
       : `${totalMinutes} মিনিট`;
 
-  const originalPrice = course.price > 0 ? course.price * 2 : 0;
+  const originalPrice =
+    (course.original_price ?? 0) > course.price
+      ? course.original_price
+      : course.price > 0
+        ? course.price * 2
+        : 0;
   const instructorImage =
     content.instructorImage || instructor?.avatar_url || null;
 
@@ -310,6 +315,11 @@ export default async function CourseDetailPage({
               <h1 className="mt-5 text-3xl font-extrabold leading-tight sm:text-4xl lg:text-[42px]">
                 {course.title}
               </h1>
+              {course.subtitle && (
+                <p className="mt-4 text-base font-semibold text-amber-300">
+                  {course.subtitle}
+                </p>
+              )}
               <p className="mt-4 max-w-2xl text-lg leading-relaxed text-brand-100">
                 {course.description}
               </p>
@@ -351,21 +361,13 @@ export default async function CourseDetailPage({
             {/* Purchase card */}
             <div className="lg:sticky lg:top-24">
               <div className="overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/30">
-                <div className="relative aspect-[16/10] bg-gradient-to-br from-brand-700 to-purple-800">
-                  {course.cover_image ? (
-                    <Image
-                      src={course.cover_image}
-                      alt={course.title}
-                      fill
-                      priority
-                      sizes="360px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-6xl text-white/30">
-                      {course.title.charAt(0)}
-                    </div>
-                  )}
+                <div className="relative overflow-hidden rounded-t-2xl">
+                  <PromoVideo
+                    coverImage={course.cover_image}
+                    title={course.title}
+                    url={course.promo_video_url}
+                    embed={course.promo_video_embed}
+                  />
                   {course.price > 0 && originalPrice > course.price && (
                     <span className="absolute right-3 top-3 rounded-full bg-amber-400 px-3 py-1 text-xs font-extrabold text-amber-950 shadow">
                       {content.discountLabel}
