@@ -732,7 +732,7 @@ No topics added yet
                   </span>
                 ) : (
                   <a
-                    href={`/courses/${course.slug}`}
+                    href={`/checkout/${course.id}`}
                     className="inline-flex items-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-brand-700 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-50"
                   >
                     Enroll Now
