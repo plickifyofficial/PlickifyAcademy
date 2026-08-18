@@ -247,17 +247,19 @@ export function AdminCourseTable({
 
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     await run(async () => {
-      await createCourse(new FormData(e.currentTarget));
-      e.currentTarget.reset();
+      await createCourse(new FormData(form));
+      form.reset();
       setCreating(false);
     }, "কোর্স তৈরি হয়েছে");
   }
 
   async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     await run(async () => {
-      await updateCourse(new FormData(e.currentTarget));
+      await updateCourse(new FormData(form));
       setEditingId(null);
     }, "কোর্স আপডেট হয়েছে");
   }

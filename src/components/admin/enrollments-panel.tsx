@@ -25,13 +25,14 @@ export function EnrollmentsPanel({
 
   async function handleEnroll(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setPending(true);
     try {
-      const result = await enrollStudent(new FormData(e.currentTarget));
+      const result = await enrollStudent(new FormData(form));
       if (result.error) {
         showToast(result.error, "error");
       } else {
-        e.currentTarget.reset();
+        form.reset();
         showToast("ছাত্র এনরোল হয়েছে");
       }
     } catch (err) {

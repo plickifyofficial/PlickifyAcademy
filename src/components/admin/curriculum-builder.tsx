@@ -111,8 +111,9 @@ export function CurriculumBuilder({
                     <form
                       onSubmit={async (e) => {
                         e.preventDefault();
+                        const form = e.currentTarget;
                         await run(async () => {
-                          await updateSection(new FormData(e.currentTarget));
+                          await updateSection(new FormData(form));
                           setRenamingSection(null);
                         }, "সেকশন আপডেট হয়েছে");
                       }}
@@ -274,9 +275,10 @@ export function CurriculumBuilder({
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
+                const form = e.currentTarget;
                 await run(async () => {
-                  await createSection(new FormData(e.currentTarget));
-                  e.currentTarget.reset();
+                  await createSection(new FormData(form));
+                  form.reset();
                   setAddingSection(false);
                 }, "সেকশন যোগ হয়েছে");
               }}
@@ -351,9 +353,10 @@ export function CurriculumBuilder({
           <form
             onSubmit={async (e) => {
               e.preventDefault();
+              const form = e.currentTarget;
               await run(async () => {
-                await createLiveClass(new FormData(e.currentTarget));
-                e.currentTarget.reset();
+                await createLiveClass(new FormData(form));
+                form.reset();
               }, "লাইভ ক্লাস যোগ হয়েছে");
             }}
             className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]"
@@ -412,9 +415,10 @@ export function CurriculumBuilder({
           <form
             onSubmit={async (e) => {
               e.preventDefault();
+              const form = e.currentTarget;
               await run(async () => {
-                await createAnnouncement(new FormData(e.currentTarget));
-                e.currentTarget.reset();
+                await createAnnouncement(new FormData(form));
+                form.reset();
               }, "নোটিশ যোগ হয়েছে");
             }}
             className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_2fr_auto]"
@@ -466,14 +470,15 @@ function TopicForm({
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setPending(true);
     try {
       if (topic) {
-        await updateTopic(new FormData(e.currentTarget));
+        await updateTopic(new FormData(form));
         showToast("টপিক আপডেট হয়েছে");
       } else {
-        await createTopic(new FormData(e.currentTarget));
-        e.currentTarget.reset();
+        await createTopic(new FormData(form));
+        form.reset();
         showToast("টপিক যোগ হয়েছে");
       }
       onDone();
