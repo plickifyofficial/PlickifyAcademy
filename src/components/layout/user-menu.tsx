@@ -1,13 +1,43 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/lib/actions/auth";
+import { createClient } from "@/lib/supabase/client";
 
 export function UserMenu() {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    const supabase = createClient();
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (active) {
+        setAvatarUrl(
+          profile?.avatar_url ||
+            user.user_metadata?.avatar_url ||
+            user.user_metadata?.picture ||
+            "",
+        );
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   async function handleSignOut() {
     await signOut();
@@ -19,10 +49,19 @@ export function UserMenu() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-brand-700 transition-colors hover:bg-brand-200"
+        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-brand-700 transition-colors hover:bg-brand-200"
         aria-label="Menu"
       >
-        <i className="fa-solid fa-user" />
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt="Profile"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <i className="fa-solid fa-user" />
+        )}
       </button>
       {open && (
         <>
@@ -37,6 +76,13 @@ export function UserMenu() {
               className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
             >
               Dashboard
+            </Link>
+            <Link
+              href="/dashboard/profile"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+            >
+              Profile
             </Link>
             <button
               onClick={handleSignOut}

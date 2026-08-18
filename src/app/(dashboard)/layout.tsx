@@ -19,7 +19,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, full_name")
+    .select("role, full_name, avatar_url")
     .eq("id", user.id)
     .single();
 
@@ -30,6 +30,11 @@ export default async function DashboardLayout({
     .single();
 
   const name = profile?.full_name || user.user_metadata?.full_name || "Student";
+  const avatarUrl =
+    profile?.avatar_url ||
+    user.user_metadata?.avatar_url ||
+    user.user_metadata?.picture ||
+    "";
   const siteName = settings?.site_name || "Plickify Academy";
 
   return (
@@ -85,7 +90,17 @@ export default async function DashboardLayout({
             <i className="fa-solid fa-globe mr-1" /> View Site
           </Link>
           <span className="hidden rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700 lg:inline">
-            {name.split(" ")[0]}
+            <span className="flex items-center gap-2">
+              {avatarUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  className="h-4 w-4 rounded-full object-cover"
+                />
+              )}
+              {name.split(" ")[0]}
+            </span>
           </span>
           <form action={signOut}>
             <button
@@ -102,6 +117,7 @@ export default async function DashboardLayout({
         <DashboardSidebar
           name={name}
           email={user.email ?? ""}
+          avatarUrl={avatarUrl}
           isAdmin={profile?.role === "admin"}
           isInstructor={profile?.role === "instructor"}
         />

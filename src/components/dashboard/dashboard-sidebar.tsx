@@ -17,11 +17,13 @@ const navItems = [
 export function DashboardSidebar({
   name,
   email,
+  avatarUrl,
   isAdmin,
   isInstructor,
 }: {
   name: string;
   email: string;
+  avatarUrl: string;
   isAdmin: boolean;
   isInstructor: boolean;
 }) {
@@ -62,8 +64,17 @@ export function DashboardSidebar({
         <div className="flex flex-col h-full">
           <div className="border-b border-zinc-100 p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 text-lg font-bold text-brand-700">
-                {name.charAt(0).toUpperCase()}
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-lg font-bold text-brand-700">
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarUrl}
+                    alt={name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  name.charAt(0).toUpperCase()
+                )}
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-zinc-900">

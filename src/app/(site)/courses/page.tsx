@@ -4,16 +4,24 @@ import { PageHero } from "@/components/home/page-hero";
 
 export const metadata = { title: "Courses | Plickify Academy" };
 
-export const revalidate = 60;
+export default async function CoursesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const query = q?.trim() ?? "";
 
-export default async function CoursesPage() {
   const supabase = createAdminClient();
-  const { data: courses } = await supabase
+  let db = supabase
     .from("courses")
     .select("*")
     .eq("is_published", true)
-    .eq("visibility", "public")
-    .order("created_at", { ascending: false });
+    .eq("visibility", "public");
+  if (query) {
+    db = db.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
+  }
+  const { data: courses } = await db.order("created_at", { ascending: false });
 
   const { data: reviews } = await supabase
     .from("reviews")
@@ -39,6 +47,13 @@ export default async function CoursesPage() {
       />
 
       <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
+        {query && (
+          <p className="mb-6 text-sm text-zinc-500">
+            {courses?.length || 0}{" "}
+            {(courses?.length ?? 0) === 1 ? "course" : "courses"} found for{" "}
+            <span className="font-semibold text-zinc-800">“{query}”</span>
+          </p>
+        )}
         {courses && courses.length > 0 ? (
           <div
             className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"

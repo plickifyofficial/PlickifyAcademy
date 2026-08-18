@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteNav } from "@/components/layout/site-nav";
 import { AuthSection } from "@/components/layout/auth-section";
+import { SearchModal } from "@/components/layout/search-modal";
 
 type Settings = {
   site_name: string;
@@ -47,13 +48,7 @@ export function Header({
         <SiteNav links={nav} />
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <Link
-            href="/courses"
-            aria-label="Search"
-            className="hidden h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-brand-600 md:flex"
-          >
-            <i className="fa-solid fa-magnifying-glass" />
-          </Link>
+          <SearchModal />
 
           <AuthSection />
         </div>

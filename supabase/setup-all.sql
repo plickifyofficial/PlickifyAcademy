@@ -29,11 +29,26 @@ alter table public.profiles
 alter table public.profiles
   add column if not exists email text;
 
+alter table public.profiles
+  add column if not exists avatar_url text;
+
 update public.profiles p
 set email = u.email
 from auth.users u
 where p.id = u.id
   and (p.email is null or p.email = '');
+
+-- Backfill Google avatars for existing users (Google stores it as
+-- 'avatar_url' in raw_user_meta_data, sometimes 'picture')
+update public.profiles p
+set avatar_url = coalesce(
+  u.raw_user_meta_data->>'avatar_url',
+  u.raw_user_meta_data->>'picture',
+  ''
+)
+from auth.users u
+where p.id = u.id
+  and (p.avatar_url is null or p.avatar_url = '');
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -41,14 +56,16 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, email)
+  insert into public.profiles (id, full_name, email, avatar_url)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', ''),
-    new.email
+    new.email,
+    coalesce(new.raw_user_meta_data->>'avatar_url', new.raw_user_meta_data->>'picture', '')
   )
   on conflict (id) do update
-    set email = excluded.email;
+    set email = excluded.email,
+        avatar_url = coalesce(excluded.avatar_url, profiles.avatar_url);
   return new;
 end;
 $$;
@@ -494,6 +511,10 @@ on conflict (id) do nothing;
 
 insert into storage.buckets (id, name, public)
 values ('course-images', 'course-images', true)
+on conflict (id) do nothing;
+
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
 on conflict (id) do nothing;
 
 -- ============================================================
@@ -1014,6 +1035,35 @@ drop policy if exists "Admins can delete course-images" on storage.objects;
 create policy "Admins can delete course-images"
   on storage.objects for delete
   using (bucket_id = 'course-images' and public.is_admin());
+
+drop policy if exists "Public read avatars" on storage.objects;
+create policy "Public read avatars"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
+
+drop policy if exists "Users can upload own avatars" on storage.objects;
+create policy "Users can upload own avatars"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "Users can update own avatars" on storage.objects;
+create policy "Users can update own avatars"
+  on storage.objects for update
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "Users can delete own avatars" on storage.objects;
+create policy "Users can delete own avatars"
+  on storage.objects for delete
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
 
 -- ============================================================
 -- FKs: user_id -> public.profiles (fixes emails/names everywhere)
