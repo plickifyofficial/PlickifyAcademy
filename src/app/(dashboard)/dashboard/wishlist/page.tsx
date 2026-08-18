@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { WishlistCard } from "@/components/dashboard/wishlist-card";
 
-export const metadata = { title: "পছন্দের তালিকা" };
+export const metadata = { title: "Wishlist" };
 
 type WishlistCourse = {
   id: string;
@@ -34,9 +34,9 @@ export default async function WishlistPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900">পছন্দের তালিকা</h1>
+      <h1 className="text-2xl font-bold text-zinc-900">Wishlist</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        পরে শেখার জন্য যেসব কোর্স সেভ করেছেন
+        Courses you've saved to learn later
       </p>
 
       {courses.length > 0 ? (
@@ -47,12 +47,12 @@ export default async function WishlistPage() {
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
-          <p className="text-zinc-600">পছন্দের তালিকা খালি আছে।</p>
+          <p className="text-zinc-600">Your wishlist is empty.</p>
           <Link
             href="/courses"
             className="mt-4 inline-block rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
           >
-            কোর্স ব্রাউজ করুন
+            Browse Courses
           </Link>
         </div>
       )}

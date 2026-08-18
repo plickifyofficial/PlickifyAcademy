@@ -22,12 +22,12 @@ import { Markdown } from "@/components/ui/markdown";
 import { markdownToText } from "@/lib/markdown";
 import type { Lesson, Announcement, LiveClass } from "@/lib/types";
 
-export const metadata = { title: "কোর্স" };
+export const metadata = { title: "Course" };
 
 const LEVEL_LABEL: Record<string, string> = {
-  beginner: "বিগিনার",
-  intermediate: "ইন্টারমিডিয়েট",
-  advanced: "অ্যাডভান্সড",
+  beginner: "Beginner",
+  intermediate: "Intermediate",
+  advanced: "Advanced",
 };
 
 export default async function CourseDetailPage({
@@ -257,8 +257,8 @@ export default async function CourseDetailPage({
 
   const durationText =
     totalMinutes >= 60
-      ? `${Math.floor(totalMinutes / 60)} ঘণ্টা ${totalMinutes % 60} মিনিট`
-      : `${totalMinutes} মিনিট`;
+      ? `${Math.floor(totalMinutes / 60)} hours ${totalMinutes % 60} min`
+      : `${totalMinutes} min`;
 
   const originalPrice =
     (course.original_price ?? 0) > course.price
@@ -293,9 +293,9 @@ export default async function CourseDetailPage({
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <nav className="flex items-center gap-2 text-sm text-brand-200">
-            <Link href="/" className="transition-colors hover:text-white">হোম</Link>
+            <Link href="/" className="transition-colors hover:text-white">Home</Link>
             <i className="fa-solid fa-chevron-right text-[10px]" />
-            <Link href="/courses" className="transition-colors hover:text-white">কোর্সসমূহ</Link>
+            <Link href="/courses" className="transition-colors hover:text-white">Courses</Link>
             <i className="fa-solid fa-chevron-right text-[10px]" />
             <span className="truncate text-white/90">{course.title}</span>
           </nav>
@@ -304,18 +304,18 @@ export default async function CourseDetailPage({
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-                  {LEVEL_LABEL[course.level ?? ""] ?? "কোর্স"}
+                  {LEVEL_LABEL[course.level ?? ""] ?? "Course"}
                 </span>
                 {course.price === 0 && (
                   <span className="rounded-full bg-green-400 px-3 py-1 text-xs font-bold text-green-950">
-                    সম্পূর্ণ ফ্রি
+                    100% Free
                   </span>
                 )}
                 {avg > 0 && (
                   <span className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
                     <span className="text-amber-300"><i className="fa-solid fa-star" /></span>
                     {avg.toFixed(1)}
-                    <span className="text-brand-200">({reviews.length} রিভিউ)</span>
+                    <span className="text-brand-200">({reviews.length} reviews)</span>
                   </span>
                 )}
               </div>
@@ -334,23 +334,23 @@ export default async function CourseDetailPage({
 
               <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-brand-100">
                 <span className="flex items-center gap-2">
-                  <i className="fa-solid fa-play text-white/60" /> {allTopicIds.length}টি লেসন
+                  <i className="fa-solid fa-play text-white/60" /> {allTopicIds.length} lessons
                 </span>
                 <span className="flex items-center gap-2">
                   <i className="fa-solid fa-clock text-white/60" /> {durationText}
                 </span>
                 <span className="flex items-center gap-2">
-                  <i className="fa-solid fa-user-group text-white/60" /> {studentsCount}+ শিক্ষার্থী
+                  <i className="fa-solid fa-user-group text-white/60" /> {studentsCount}+ students
                 </span>
                 <span className="flex items-center gap-2">
-                  <i className="fa-solid fa-certificate text-white/60" /> সার্টিফিকেট
+                  <i className="fa-solid fa-certificate text-white/60" /> Certificate
                 </span>
               </div>
 
               {isEnrolled && (
                 <div className="mt-6 max-w-md">
                   <div className="flex items-center justify-between text-sm text-brand-100">
-                    <span>আপনার অগ্রগতি</span>
+                    <span>Your Progress</span>
                     <span className="font-semibold">{progressPct}%</span>
                   </div>
                   <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/20">
@@ -360,7 +360,7 @@ export default async function CourseDetailPage({
                     />
                   </div>
                   <p className="mt-1.5 text-xs text-brand-200">
-                    {completedCount}/{allTopicIds.length} টপিক সম্পন্ন
+                    {completedCount}/{allTopicIds.length} topics completed
                   </p>
                 </div>
               )}
@@ -404,11 +404,11 @@ export default async function CourseDetailPage({
                           className="block rounded-xl bg-brand-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-700"
                         >
                           <i className="fa-solid fa-play mr-2" />
-                          {isEnrolled && lastLessonId ? "শেখা চালিয়ে যান" : "শেখা শুরু করুন"}
+                          {isEnrolled && lastLessonId ? "Continue Learning" : "Start Learning"}
                         </Link>
                       ) : (
                         <p className="rounded-xl bg-zinc-100 py-3.5 text-center text-sm font-semibold text-zinc-600">
-                          টপিক যোগ করা হয়নি
+No topics added yet
                         </p>
                       )
                     ) : (
@@ -480,7 +480,7 @@ export default async function CourseDetailPage({
                 What You&apos;ll Learn
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-zinc-600">
-                প্রতিটা মডিউলে প্র্যাকটিক্যাল লেসন — ক্লিক করলে ভেতরের লেসন দেখুন।
+                Practical lessons in every module — click to see the lessons inside.
               </p>
             </div>
             <div className="mt-10">
@@ -496,10 +496,10 @@ export default async function CourseDetailPage({
               Course Curriculum
             </span>
             <h2 className="mt-2 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
-              কোর্স কারিকুলাম
+              Course Curriculum
             </h2>
             <p className="mt-3 text-zinc-600">
-              {curriculum.length}টি মডিউল · {allTopicIds.length}টি লেসন · {durationText}
+              {curriculum.length} modules · {allTopicIds.length} lessons · {durationText}
             </p>
           </div>
 
@@ -508,7 +508,7 @@ export default async function CourseDetailPage({
               <Curriculum sections={curriculum} courseSlug={course.slug} />
             ) : (
               <p className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center text-zinc-500">
-                এখনো কোনো টপিক যোগ করা হয়নি।
+                No topics have been added yet.
               </p>
             )}
           </div>
@@ -516,7 +516,7 @@ export default async function CourseDetailPage({
 
         {isEnrolled && ((liveClasses ?? []) as LiveClass[]).length > 0 && (
           <section className="mt-16" data-aos="fade-up">
-            {sectionTitle("fa-solid fa-calendar-days", "লাইভ ক্লাস")}
+            {sectionTitle("fa-solid fa-calendar-days", "Live Classes")}
             <div className="mt-6">
               <LiveClassesSection
                 classes={liveClasses as LiveClass[]}
@@ -528,13 +528,13 @@ export default async function CourseDetailPage({
 
         {isEnrolled && (announcements ?? []).length > 0 && (
           <section className="mt-16" data-aos="fade-up">
-            {sectionTitle("fa-solid fa-bullhorn", "নোটিশ")}
+            {sectionTitle("fa-solid fa-bullhorn", "Announcements")}
             <div className="mt-6 space-y-3">
               {(announcements as Announcement[]).map((a) => (
                 <div key={a.id} className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5">
                   <div className="flex items-center gap-2 text-brand-700">
                     <i className="fa-solid fa-bullhorn" />
-                    <span className="text-xs font-semibold uppercase tracking-wide">নোটিশ</span>
+                    <span className="text-xs font-semibold uppercase tracking-wide">Announcement</span>
                     <span className="text-xs text-zinc-500">
                       {new Date(a.created_at).toLocaleDateString("bn-BD")}
                     </span>
@@ -554,7 +554,7 @@ export default async function CourseDetailPage({
               Who Is This Course For
             </span>
             <h2 className="mt-2 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
-              এই কোর্সটি কার জন্য?
+              Who Is This Course For?
             </h2>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -612,7 +612,7 @@ export default async function CourseDetailPage({
         {/* 8. INSTRUCTOR */}
         <section className="mt-16" data-aos="fade-up">
           <div className="mx-auto max-w-4xl">
-            <div className="text-center">{sectionTitle("fa-solid fa-chalkboard-user", "আপনার ইনস্ট্রাক্টর")}</div>
+            <div className="text-center">{sectionTitle("fa-solid fa-chalkboard-user", "Your Instructor")}</div>
             <div className="mt-8 flex flex-col items-center gap-6 rounded-2xl border border-zinc-100 bg-white p-8 shadow-sm sm:flex-row sm:gap-8">
               <div className="relative h-28 w-28 shrink-0">
                 <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-600 to-purple-700 text-4xl font-bold text-white shadow-lg shadow-brand-600/30">
@@ -652,7 +652,7 @@ export default async function CourseDetailPage({
                           href={s.href}
                           target="_blank"
                           rel="noreferrer"
-                          aria-label="সোশ্যাল"
+                          aria-label="Social"
                           className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 text-zinc-500 transition-colors hover:border-brand-500 hover:bg-brand-600 hover:text-white"
                         >
                           <i className={`${s.icon} text-sm`} />
@@ -698,7 +698,7 @@ export default async function CourseDetailPage({
                 Limited Time Offer
               </p>
               <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-extrabold text-white sm:text-4xl">
-                {course.title}-এ আজই ভর্তি হন
+                Enroll in {course.title} today
               </h2>
 
               <div className="mt-6 flex items-baseline justify-center gap-4">
@@ -717,14 +717,14 @@ export default async function CourseDetailPage({
                 {canAccess ? (
                   <span className="inline-flex items-center gap-2 rounded-full bg-white px-9 py-4 text-base font-bold text-brand-700 shadow-lg">
                     <i className="fa-solid fa-circle-check text-green-600" />
-                    আপনি ইতিমধ্যে ভর্তি হয়েছেন
+                    You are already enrolled
                   </span>
                 ) : (
                   <a
                     href={`/courses/${course.slug}`}
                     className="inline-flex items-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-brand-700 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-50"
                   >
-                    ভর্তি হন
+                    Enroll Now
                     <i className="fa-solid fa-arrow-right text-sm" />
                   </a>
                 )}
@@ -753,10 +753,10 @@ export default async function CourseDetailPage({
 
             <div className="relative">
               <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-                আপনার AI &amp; Digital Income Journey আজই শুরু করুন 🚀
+                Start Your AI &amp; Digital Income Journey Today 🚀
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-sm text-zinc-300">
-                সিট সংখ্যা সীমিত — আজই ভর্তি হয়ে আপনার ডিজিটাল ক্যারিয়ার শুরু করুন।
+                Seats are limited — enroll today and start your digital career.
               </p>
               <a
                 href="#pricing"

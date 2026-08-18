@@ -57,7 +57,7 @@ export function NotificationBell() {
       <button
         onClick={handleOpen}
         className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
-        aria-label="নোটিফিকেশন"
+        aria-label="Notifications"
       >
         <i className="fa-solid fa-bell" />
         {unread > 0 && (
@@ -73,14 +73,14 @@ export function NotificationBell() {
           <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
               <p className="text-sm font-semibold text-zinc-900">
-                নোটিফিকেশন
+                Notifications
               </p>
               {unread > 0 && (
                 <button
                   onClick={handleMarkAll}
                   className="text-xs font-medium text-brand-600 hover:underline"
                 >
-                  সব পড়া হয়েছে
+                  Mark all as read
                 </button>
               )}
             </div>
@@ -88,12 +88,12 @@ export function NotificationBell() {
             <div className="max-h-96 overflow-y-auto">
               {loading && (
                 <p className="px-4 py-8 text-center text-sm text-zinc-400">
-                  লোড হচ্ছে...
+                  Loading...
                 </p>
               )}
               {!loading && items.length === 0 && (
                 <p className="px-4 py-8 text-center text-sm text-zinc-400">
-                  কোনো নোটিফিকেশন নেই।
+                  No notifications.
                 </p>
               )}
               {items.map((n) => (

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "ড্যাশবোর্ড" };
+export const metadata = { title: "Dashboard" };
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -41,35 +41,35 @@ export default async function AdminDashboardPage() {
 
   const widgets = [
     {
-      label: "কোর্স",
+      label: "Courses",
       value: courseCount ?? 0,
       icon: "fa-solid fa-book-open",
       color: "bg-[#f0f6fc] text-[#2271b1]",
       link: "/admin/courses",
     },
     {
-      label: "লেসন",
+      label: "Lessons",
       value: lessonCount ?? 0,
       icon: "fa-solid fa-file-lines",
       color: "bg-[#fef8ee] text-[#996800]",
       link: "/admin/courses",
     },
     {
-      label: "স্টুডেন্ট",
+      label: "Students",
       value: studentCount ?? 0,
       icon: "fa-solid fa-users",
       color: "bg-[#edfaef] text-[#007017]",
       link: "/admin/students",
     },
     {
-      label: "এনরোলমেন্ট",
+      label: "Enrollments",
       value: enrollmentCount ?? 0,
       icon: "fa-solid fa-user-check",
       color: "bg-[#fcf0f1] text-[#b32d2e]",
       link: "/admin/students",
     },
     {
-      label: "রেভিনিউ",
+      label: "Revenue",
       value: `৳${paidRevenue.toLocaleString("en-IN")}`,
       icon: "fa-solid fa-sack-dollar",
       color: "bg-[#f0f6fc] text-[#2271b1]",
@@ -79,8 +79,8 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className="wp-page-title">ড্যাশবোর্ড</h1>
-      <p className="wp-subtitle">প্লিকিফাই অ্যাকাডেমির সার্বিক অবস্থা</p>
+      <h1 className="wp-page-title">Dashboard</h1>
+      <p className="wp-subtitle">Overall status of Plickify Academy</p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {widgets.map((w) => (
@@ -95,7 +95,7 @@ export default async function AdminDashboardPage() {
                 href={w.link}
                 className="mt-3 inline-block text-xs font-medium text-[#2271b1] hover:text-[#135e96]"
               >
-                আরও দেখুন →
+                View more →
               </Link>
             </div>
           </div>
@@ -105,9 +105,9 @@ export default async function AdminDashboardPage() {
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="wp-panel lg:col-span-2">
           <div className="wp-panel-header">
-            সাম্প্রতিক অর্ডার
+            Recent Orders
             <Link href="/admin/orders" className="text-xs font-medium text-[#2271b1] hover:text-[#135e96]">
-              সব দেখুন →
+              View all →
             </Link>
           </div>
           {orders && orders.length > 0 ? (
@@ -115,9 +115,9 @@ export default async function AdminDashboardPage() {
               <table className="wp-table">
                 <thead>
                   <tr>
-                    <th>স্ট্যাটাস</th>
-                    <th>পরিমাণ</th>
-                    <th>তারিখ</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -134,10 +134,10 @@ export default async function AdminDashboardPage() {
                           }`}
                         >
                           {order.status === "paid"
-                            ? "পেইড"
+                            ? "Paid"
                             : order.status === "failed"
-                              ? "ব্যর্থ"
-                              : "পেন্ডিং"}
+                              ? "Failed"
+                              : "Pending"}
                         </span>
                       </td>
                       <td className="font-semibold text-[#3c434a]">
@@ -153,35 +153,35 @@ export default async function AdminDashboardPage() {
             </div>
           ) : (
             <p className="p-6 text-sm text-[#646970]">
-              এখনো কোনো অর্ডার নেই। Stripe keys set করার পর পেমেন্ট চালু হবে।
+              No orders yet. Payments will be enabled once Stripe keys are set.
             </p>
           )}
         </div>
 
         <div className="wp-panel">
-          <div className="wp-panel-header">দ্রুত অ্যাকশন</div>
+          <div className="wp-panel-header">Quick Actions</div>
           <div className="wp-panel-body space-y-2">
             <Link href="/admin/courses?add=1" className="wp-btn wp-btn-primary w-full">
-              <i className="fa-solid fa-plus" /> নতুন কোর্স
+              <i className="fa-solid fa-plus" /> New Course
             </Link>
             <Link href="/admin/courses" className="wp-btn w-full">
-              <i className="fa-solid fa-book-open" /> কোর্স ম্যানেজ
+              <i className="fa-solid fa-book-open" /> Manage Courses
             </Link>
             <Link href="/admin/students" className="wp-btn w-full">
-              <i className="fa-solid fa-users" /> স্টুডেন্ট ম্যানেজ
+              <i className="fa-solid fa-users" /> Manage Students
             </Link>
             <Link href="/admin/media" className="wp-btn w-full">
-              <i className="fa-solid fa-images" /> মিডিয়া লাইব্রেরি
+              <i className="fa-solid fa-images" /> Media Library
             </Link>
             <Link href="/admin/settings" className="wp-btn w-full">
-              <i className="fa-solid fa-sliders" /> সাইট সেটিংস
+              <i className="fa-solid fa-sliders" /> Site Settings
             </Link>
           </div>
         </div>
       </div>
 
       <div className="mt-6 wp-panel">
-        <div className="wp-panel-header">সাম্প্রতিক এনরোলমেন্ট</div>
+        <div className="wp-panel-header">Recent Enrollments</div>
         {recentEnrollments && recentEnrollments.length > 0 ? (
           <div className="wp-panel-body space-y-3">
             {recentEnrollments.map((e) => (
@@ -190,7 +190,7 @@ export default async function AdminDashboardPage() {
                   <i className="fa-solid fa-user-plus text-xs" />
                 </span>
                 <span className="flex-1 truncate text-[#3c434a]">
-                  নতুন এনরোলমেন্ট
+                  New enrollment
                 </span>
                 <span className="text-xs text-[#646970]">
                   {new Date(e.created_at).toLocaleDateString("bn-BD")}
@@ -199,7 +199,7 @@ export default async function AdminDashboardPage() {
             ))}
           </div>
         ) : (
-          <p className="p-6 text-sm text-[#646970]">এখনো কোনো এনরোলমেন্ট নেই।</p>
+          <p className="p-6 text-sm text-[#646970]">No enrollments yet.</p>
         )}
       </div>
     </div>

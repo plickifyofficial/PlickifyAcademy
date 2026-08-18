@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "@/components/certificates/print-button";
 
-export const metadata = { title: "সার্টিফিকেট" };
+export const metadata = { title: "Certificate" };
 
 export default async function CertificatePage({
   params,
@@ -27,13 +27,13 @@ export default async function CertificatePage({
   if (!user || (user.id !== cert.user_id)) {
     return (
       <main className="mx-auto max-w-3xl flex-1 px-4 py-24 text-center">
-        <h1 className="text-2xl font-bold text-zinc-900">অ্যাক্সেস নেই</h1>
-        <p className="mt-3 text-zinc-600">এই সার্টিফিকেট দেখতে লগইন করুন।</p>
+        <h1 className="text-2xl font-bold text-zinc-900">No Access</h1>
+        <p className="mt-3 text-zinc-600">Log in to view this certificate.</p>
         <Link
           href="/login"
           className="mt-6 inline-block rounded-lg bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700"
         >
-          লগইন করুন
+          Log in
         </Link>
       </main>
     );
@@ -50,7 +50,7 @@ export default async function CertificatePage({
           href="/dashboard/courses"
           className="text-sm font-medium text-brand-600 hover:underline"
         >
-          ← আমার কোর্স
+          ← My Courses
         </Link>
         <PrintButton />
       </div>
@@ -67,15 +67,15 @@ export default async function CertificatePage({
             Plickify Academy
           </p>
           <h1 className="mt-3 text-3xl font-black uppercase tracking-wide text-brand-800 sm:text-4xl">
-            সার্টিফিকেট অফ কমপ্লিশন
+            Certificate of Completion
           </h1>
 
-          <p className="mt-8 text-sm text-zinc-500">এটি প্রমাণ করে যে</p>
+          <p className="mt-8 text-sm text-zinc-500">This is to certify that</p>
           <p className="mt-2 text-3xl font-bold text-zinc-900">
-            {profile?.full_name || "শিক্ষার্থী"}
+            {profile?.full_name || "Student"}
           </p>
           <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-zinc-600">
-            নিচের কোর্সটি সফলভাবে সম্পন্ন করেছে এবং অগ্রগতি পরীক্ষায় পাস করেছে:
+            has successfully completed the following course and passed the progress assessment:
           </p>
           <p className="mt-3 text-2xl font-bold text-brand-700">
             {course?.title}
@@ -83,7 +83,7 @@ export default async function CertificatePage({
 
           <div className="mx-auto mt-10 flex max-w-lg items-end justify-between gap-6">
             <div className="flex-1 border-t border-zinc-400 pt-2">
-              <p className="text-xs text-zinc-500">তারিখ</p>
+              <p className="text-xs text-zinc-500">Date</p>
               <p className="text-sm font-semibold text-zinc-800">
                 {issued.toLocaleDateString("bn-BD", {
                   year: "numeric",
@@ -93,7 +93,7 @@ export default async function CertificatePage({
               </p>
             </div>
             <div className="flex-1 border-t border-zinc-400 pt-2">
-              <p className="text-xs text-zinc-500">সার্টিফিকেট নম্বর</p>
+              <p className="text-xs text-zinc-500">Certificate Number</p>
               <p className="text-sm font-semibold text-zinc-800">
                 {cert.certificate_number}
               </p>
@@ -101,7 +101,7 @@ export default async function CertificatePage({
           </div>
 
           <p className="mx-auto mt-10 max-w-lg text-[11px] leading-relaxed text-zinc-400">
-            এই সার্টিফিকেটটি Plickify Academy-এর প্রশাসন দ্বারা জারি করা হয়েছে।
+            This certificate is issued by the administration of Plickify Academy.
           </p>
         </div>
       </div>

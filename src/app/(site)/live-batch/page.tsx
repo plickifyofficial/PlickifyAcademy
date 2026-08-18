@@ -5,7 +5,7 @@ import { getSiteContent } from "@/lib/site-content";
 import { ctaDefaults, liveBatchDefaults } from "@/lib/content-schema";
 
 export const metadata = {
-  title: "লাইভ ব্যাচ | Plickify Academy",
+  title: "Live Batch | Plickify Academy",
 };
 
 export const revalidate = 60;
@@ -20,8 +20,8 @@ export default async function LiveBatchPage() {
     <>
       <PageHero
         eyebrow="Live Batch"
-        title="লাইভ ক্লাসে সরাসরি শিখুন"
-        subtitle="লাইভ ক্লাস, ক্লাস রেকর্ডিং ও প্র্যাকটিক্যাল সাপোর্ট — সব এক প্ল্যাটফর্মে। এখনই সিট নিশ্চিত করুন।"
+        title="Learn Live in Real-Time Classes"
+        subtitle="Live classes, class recordings, and practical support — all on one platform. Secure your seat now."
       />
       <LiveBatch content={liveBatch} />
       <FinalCta content={cta} />

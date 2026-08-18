@@ -33,7 +33,7 @@ export function CourseCard({
         )}
         {course.price === 0 && (
           <span className="absolute left-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white">
-            ফ্রি
+            Free
           </span>
         )}
       </div>
@@ -49,7 +49,7 @@ export function CourseCard({
             <i className="fa-solid fa-star" />
           </span>
           <span className="font-semibold text-zinc-800">
-            {rating && rating > 0 ? rating.toFixed(1) : "নতুন"}
+            {rating && rating > 0 ? rating.toFixed(1) : "New"}
           </span>
           {rating && rating > 0 && (
             <span className="text-xs text-zinc-500">

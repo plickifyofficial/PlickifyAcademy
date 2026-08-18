@@ -9,45 +9,45 @@ import { signOut } from "@/lib/actions/auth";
 const menu = [
   {
     group: "Dashboard",
-    items: [{ href: "/admin", label: "ড্যাশবোর্ড", icon: "fa-solid fa-gauge" }],
+    items: [{ href: "/admin", label: "Dashboard", icon: "fa-solid fa-gauge" }],
   },
   {
-    group: "কনটেন্ট",
+    group: "Content",
     items: [
-      { href: "/admin/home", label: "হোম পেজ", icon: "fa-solid fa-house" },
-      { href: "/admin/pages", label: "পেজসমূহ", icon: "fa-solid fa-file-lines" },
-      { href: "/admin/courses", label: "কোর্সসমূহ", icon: "fa-solid fa-book-open" },
-      { href: "/admin/courses?add=1", label: "নতুন কোর্স", icon: "fa-solid fa-file-circle-plus" },
+      { href: "/admin/home", label: "Home Page", icon: "fa-solid fa-house" },
+      { href: "/admin/pages", label: "Pages", icon: "fa-solid fa-file-lines" },
+      { href: "/admin/courses", label: "Courses", icon: "fa-solid fa-book-open" },
+      { href: "/admin/courses?add=1", label: "New Course", icon: "fa-solid fa-file-circle-plus" },
     ],
   },
   {
-    group: "ব্যবহারকারী",
-    items: [{ href: "/admin/students", label: "স্টুডেন্টস", icon: "fa-solid fa-users" }],
+    group: "Users",
+    items: [{ href: "/admin/students", label: "Students", icon: "fa-solid fa-users" }],
   },
   {
-    group: "সেলস",
+    group: "Sales",
     items: [
-      { href: "/admin/orders", label: "অর্ডারসমূহ", icon: "fa-solid fa-cart-shopping" },
-      { href: "/admin/enrollments", label: "এনরোলমেন্ট", icon: "fa-solid fa-user-plus" },
-      { href: "/admin/coupons", label: "কুপনসমূহ", icon: "fa-solid fa-ticket" },
+      { href: "/admin/orders", label: "Orders", icon: "fa-solid fa-cart-shopping" },
+      { href: "/admin/enrollments", label: "Enrollments", icon: "fa-solid fa-user-plus" },
+      { href: "/admin/coupons", label: "Coupons", icon: "fa-solid fa-ticket" },
     ],
   },
   {
-    group: "মিডিয়া",
-    items: [{ href: "/admin/media", label: "মিডিয়া লাইব্রেরি", icon: "fa-solid fa-images" }],
+    group: "Media",
+    items: [{ href: "/admin/media", label: "Media Library", icon: "fa-solid fa-images" }],
   },
   {
-    group: "সেটিংস",
-    items: [{ href: "/admin/settings", label: "সাইট সেটিংস", icon: "fa-solid fa-sliders" }],
+    group: "Settings",
+    items: [{ href: "/admin/settings", label: "Site Settings", icon: "fa-solid fa-sliders" }],
   },
 ];
 
 const instructorMenu = [
   {
-    group: "কনটেন্ট",
+    group: "Content",
     items: [
-      { href: "/admin/courses", label: "আমার কোর্স", icon: "fa-solid fa-book-open" },
-      { href: "/admin/courses?add=1", label: "নতুন কোর্স", icon: "fa-solid fa-file-circle-plus" },
+      { href: "/admin/courses", label: "My Courses", icon: "fa-solid fa-book-open" },
+      { href: "/admin/courses?add=1", label: "New Course", icon: "fa-solid fa-file-circle-plus" },
     ],
   },
 ];
@@ -77,7 +77,7 @@ export function AdminSidebar({ isInstructor = false }: Props) {
       <button
         onClick={() => setOpen((v) => !v)}
         className="fixed left-2 top-[52px] z-50 rounded p-2 text-zinc-200 hover:bg-white/10 lg:hidden"
-        aria-label="মেনু"
+        aria-label="Menu"
       >
         <i className="fa-solid fa-bars text-lg" />
       </button>
@@ -102,7 +102,7 @@ export function AdminSidebar({ isInstructor = false }: Props) {
           <span className="text-sm font-semibold text-white">Plickify</span>
           <button
             onClick={() => setOpen(false)}
-            aria-label="বন্ধ করুন"
+            aria-label="Close"
             className="ml-auto text-zinc-400 hover:text-white lg:hidden"
           >
             <i className="fa-solid fa-xmark" />
@@ -127,12 +127,12 @@ export function AdminSidebar({ isInstructor = false }: Props) {
             </div>
           ))}
 
-          <p className="wp-menu-group-title">আমার</p>
+          <p className="wp-menu-group-title">My</p>
           <Link href="/" className="wp-menu-item">
-            <i className="fa-solid fa-globe w-5 text-center" /> সাইট দেখুন
+            <i className="fa-solid fa-globe w-5 text-center" /> View Site
           </Link>
           <button onClick={handleSignOut} className="wp-menu-item w-full text-left">
-            <i className="fa-solid fa-right-from-bracket w-5 text-center" /> লগআউট
+            <i className="fa-solid fa-right-from-bracket w-5 text-center" /> Logout
           </button>
         </nav>
       </aside>

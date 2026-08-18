@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 
-export const metadata = { title: "সাইন আপ" };
+export const metadata = { title: "Sign Up" };
 
 export default function SignupPage() {
   return (
@@ -9,20 +9,20 @@ export default function SignupPage() {
       <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-zinc-900">
-            নতুন একাউন্ট খুলুন
+            Create a new account
           </h1>
           <p className="mt-1 text-sm text-zinc-500">
-            শেখা শুরু করতে Google একাউন্ট ব্যবহার করুন
+            Use your Google account to start learning
           </p>
         </div>
-        <GoogleSignInButton label="Google দিয়ে সাইন আপ" />
+        <GoogleSignInButton label="Sign up with Google" />
         <p className="mt-6 text-center text-sm text-zinc-500">
-          ইতিমধ্যে একাউন্ট আছে?{" "}
+          Already have an account?{" "}
           <Link
             href="/login"
             className="font-medium text-brand-600 hover:underline"
           >
-            লগইন করুন
+            Log in
           </Link>
         </p>
       </div>

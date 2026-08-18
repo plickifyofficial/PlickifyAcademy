@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/actions/auth";
 
 const navItems = [
-  { href: "/dashboard", label: "ড্যাশবোর্ড", icon: "fa-solid fa-chart-line" },
-  { href: "/dashboard/courses", label: "আমার কোর্স", icon: "fa-solid fa-graduation-cap" },
-  { href: "/dashboard/orders", label: "আমার অর্ডার", icon: "fa-solid fa-receipt" },
-  { href: "/dashboard/wishlist", label: "পছন্দের তালিকা", icon: "fa-solid fa-heart" },
-  { href: "/dashboard/profile", label: "প্রোফাইল", icon: "fa-solid fa-user" },
+  { href: "/dashboard", label: "Dashboard", icon: "fa-solid fa-chart-line" },
+  { href: "/dashboard/courses", label: "My Courses", icon: "fa-solid fa-graduation-cap" },
+  { href: "/dashboard/orders", label: "My Orders", icon: "fa-solid fa-receipt" },
+  { href: "/dashboard/wishlist", label: "Wishlist", icon: "fa-solid fa-heart" },
+  { href: "/dashboard/profile", label: "Profile", icon: "fa-solid fa-user" },
 ];
 
 export function DashboardSidebar({
@@ -32,9 +32,9 @@ export function DashboardSidebar({
   const items = [
     ...navItems,
     ...(isInstructor
-      ? [{ href: "/admin/courses", label: "আমার কোর্স (ইনস্ট্রাক্টর)", icon: "fa-solid fa-chalkboard-user" }]
+      ? [{ href: "/admin/courses", label: "My Courses (Instructor)", icon: "fa-solid fa-chalkboard-user" }]
       : []),
-    ...(isAdmin ? [{ href: "/admin", label: "অ্যাডমিন", icon: "fa-solid fa-toolbox" }] : []),
+    ...(isAdmin ? [{ href: "/admin", label: "Admin", icon: "fa-solid fa-toolbox" }] : []),
   ];
 
   async function handleSignOut() {
@@ -48,7 +48,7 @@ export function DashboardSidebar({
       <button
         onClick={() => setOpen((v) => !v)}
         className="fixed left-4 top-[72px] z-40 rounded-lg border border-zinc-200 bg-white p-2 text-zinc-600 shadow-sm md:hidden"
-        aria-label="মেনু"
+        aria-label="Menu"
       >
         <i className="fa-solid fa-bars" />
       </button>
@@ -101,7 +101,7 @@ export function DashboardSidebar({
               onClick={handleSignOut}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
             >
-              <span><i className="fa-solid fa-right-from-bracket" /></span> লগআউট
+              <span><i className="fa-solid fa-right-from-bracket" /></span> Log Out
             </button>
           </div>
         </div>

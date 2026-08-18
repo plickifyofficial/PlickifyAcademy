@@ -22,10 +22,10 @@ export type CurSection = {
 };
 
 const TYPE_META: Record<CurItem["type"], { icon: string; label: string }> = {
-  lesson: { icon: "fa-solid fa-book-open", label: "লেসন" },
-  video: { icon: "fa-solid fa-video", label: "ভিডিও" },
-  quiz: { icon: "fa-solid fa-circle-question", label: "কুইজ" },
-  assignment: { icon: "fa-solid fa-clipboard-check", label: "অ্যাসাইনমেন্ট" },
+  lesson: { icon: "fa-solid fa-book-open", label: "Lesson" },
+  video: { icon: "fa-solid fa-video", label: "Video" },
+  quiz: { icon: "fa-solid fa-circle-question", label: "Quiz" },
+  assignment: { icon: "fa-solid fa-clipboard-check", label: "Assignment" },
 };
 
 export function Curriculum({
@@ -70,12 +70,12 @@ export function Curriculum({
                     {section.title}
                   </p>
                   <p className="text-xs text-zinc-500">
-                    {section.items.length}টি টপিক ·{" "}
+                    {section.items.length} topics ·{" "}
                     {section.items.reduce(
                       (s, t) => s + (t.duration_minutes || 0),
                       0,
                     )}{" "}
-                    মিনিট
+                    min
                   </p>
                 </div>
               </div>
@@ -112,12 +112,12 @@ export function Curriculum({
                       </div>
                       {topic.duration_minutes > 0 && (
                         <span className="hidden text-xs text-zinc-400 sm:inline">
-                          {topic.duration_minutes} মিনিট
+                          {topic.duration_minutes} min
                         </span>
                       )}
                       {topic.is_free && (
                         <span className="hidden rounded-full bg-green-100 px-2.5 py-1 text-[10px] font-semibold text-green-700 sm:inline">
-                          ফ্রি প্রিভিউ
+                          Free Preview
                         </span>
                       )}
                       {topic.locked ? (
@@ -125,8 +125,8 @@ export function Curriculum({
                           className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-400"
                           title={
                             topic.drip
-                              ? "ড্রিপ কনটেন্ট — পরে আনলক হবে"
-                              : "কোর্সে এনরোল করুন"
+                              ? "Drip content — unlocks later"
+                              : "Enroll in the course"
                           }
                         >
                           <i className="fa-solid fa-lock text-xs" />
@@ -136,7 +136,7 @@ export function Curriculum({
                           href={`/courses/${courseSlug}/lessons/${topic.id}`}
                           className="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700"
                         >
-                          {topic.done ? "পুনরায় দেখুন" : "দেখুন"}
+                          {topic.done ? "Watch Again" : "Watch"}
                         </Link>
                       )}
                     </div>

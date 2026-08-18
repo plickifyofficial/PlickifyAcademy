@@ -31,7 +31,7 @@ export function SiteNav({ links }: { links: { label: string; href: string }[] })
 
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label="মেনু"
+        aria-label="Menu"
         className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-700 transition-colors hover:bg-zinc-100 lg:hidden"
       >
         <i className={`fa-solid ${open ? "fa-xmark" : "fa-bars"} text-lg`} />
@@ -60,7 +60,7 @@ export function SiteNav({ links }: { links: { label: string; href: string }[] })
               onClick={() => setOpen(false)}
               className="mt-2 rounded-full bg-brand-600 px-4 py-2.5 text-center text-sm font-semibold text-white lg:hidden"
             >
-              কোর্স দেখুন
+              Browse Courses
             </Link>
           </nav>
         </div>

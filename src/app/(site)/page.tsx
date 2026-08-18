@@ -29,7 +29,7 @@ import {
 } from "@/lib/content-schema";
 
 export const metadata = {
-  title: "Plickify Academy | AI Skills, Freelancing ও ডিজিটাল ক্যারিয়ার",
+  title: "Plickify Academy | AI Skills, Freelancing & Digital Career",
 };
 
 export default async function HomePage() {

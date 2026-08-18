@@ -52,7 +52,7 @@ export function Footer({
                 <a
                   key={s.icon}
                   href={s.href}
-                  aria-label="সোশ্যাল লিংক"
+                  aria-label="Social link"
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-zinc-300 transition-colors hover:bg-brand-600 hover:text-white"
                 >
                   <i className={`${s.icon} text-sm`} />
@@ -112,7 +112,7 @@ export function Footer({
               </li>
             </ul>
 
-            <form className="mt-6" action="/" aria-label="নিউজলেটার">
+            <form className="mt-6" action="/" aria-label="Newsletter">
               <p className="text-sm font-semibold text-white">
                 {content.newsletterTitle}
               </p>

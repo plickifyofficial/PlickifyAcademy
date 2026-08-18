@@ -30,25 +30,25 @@ export default async function AdminPagesEditorPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="wp-page-title">পেজসমূহ (Pages)</h1>
+      <h1 className="wp-page-title">Pages</h1>
       <p className="wp-subtitle">
-        FAQ, Terms & Conditions, Privacy Policy ও Refund Policy পেজের
-        কনটেন্ট এডিট করুন — WordPress-এর মতো। সেভ করার সাথে সাথেই পেজে
-        আপডেট হয়ে যায়।
+        Edit content for the FAQ, Terms & Conditions, Privacy Policy, and
+        Refund Policy pages — like WordPress. Changes update the pages
+        immediately after saving.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
         <a href="/faq" target="_blank" className="wp-btn">
-          <i className="fa-solid fa-globe" /> FAQ দেখুন
+          <i className="fa-solid fa-globe" /> View FAQ
         </a>
         <a href="/terms" target="_blank" className="wp-btn">
-          <i className="fa-solid fa-globe" /> Terms দেখুন
+          <i className="fa-solid fa-globe" /> View Terms
         </a>
         <a href="/privacy" target="_blank" className="wp-btn">
-          <i className="fa-solid fa-globe" /> Privacy দেখুন
+          <i className="fa-solid fa-globe" /> View Privacy
         </a>
         <a href="/refund" target="_blank" className="wp-btn">
-          <i className="fa-solid fa-globe" /> Refund দেখুন
+          <i className="fa-solid fa-globe" /> View Refund
         </a>
       </div>
 

@@ -12,7 +12,7 @@ import {
 } from "@/lib/content-schema";
 
 export const metadata = {
-  title: "আমাদের সম্পর্কে | Plickify Academy",
+  title: "About Us | Plickify Academy",
 };
 
 export const revalidate = 60;
@@ -29,8 +29,8 @@ export default async function AboutPage() {
     <>
       <PageHero
         eyebrow="About Plickify Academy"
-        title="আমাদের গল্প"
-        subtitle="AI, Freelancing এবং Digital Skills শেখার জন্য একটি practical learning platform — যেখানে শেখা মানেই বাস্তব কাজ ও বাস্তব ইনকাম।"
+        title="Our Story"
+        subtitle="A practical learning platform for AI, Freelancing, and Digital Skills — where learning means real work and real income."
       />
       <WhyUs content={why} />
       <Stats content={stats} />

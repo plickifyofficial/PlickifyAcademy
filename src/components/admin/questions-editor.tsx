@@ -27,7 +27,7 @@ export function QuestionsEditor({
       await action();
       showToast(success);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "কিছু একটা সমস্যা হয়েছে", "error");
+      showToast(err instanceof Error ? err.message : "Something went wrong", "error");
     } finally {
       setPending(false);
     }
@@ -38,14 +38,14 @@ export function QuestionsEditor({
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-[#1d2327]">
           <i className="fa-solid fa-circle-question mr-1 text-[#2271b1]" />
-          কুইজ প্রশ্ন ({questions.length})
+          Quiz Questions ({questions.length})
         </p>
         {!adding && (
           <button
             onClick={() => setAdding(true)}
             className="text-xs font-semibold text-[#2271b1] hover:underline"
           >
-            <i className="fa-solid fa-plus" /> প্রশ্ন যোগ করুন
+            <i className="fa-solid fa-plus" /> Add Question
           </button>
         )}
       </div>
@@ -58,7 +58,7 @@ export function QuestionsEditor({
               pending={pending}
               onDone={() => setEditingId(null)}
               onSubmit={(fd) =>
-                run(() => updateQuizQuestion(fd), "প্রশ্ন আপডেট হয়েছে")
+                run(() => updateQuizQuestion(fd), "Question updated")
               }
             />
           ) : (
@@ -85,18 +85,18 @@ export function QuestionsEditor({
                   onClick={() => setEditingId(q.id)}
                   className="wp-btn !px-2"
                 >
-                  <i className="fa-solid fa-pen text-xs" /> এডিট
+                  <i className="fa-solid fa-pen text-xs" /> Edit
                 </button>
                 <button
                   onClick={() => {
-                    if (!confirm("প্রশ্নটি মুছবেন?")) return;
+                    if (!confirm("Delete this question?")) return;
                     const fd = new FormData();
                     fd.set("id", q.id);
-                    run(() => deleteQuizQuestion(fd), "প্রশ্ন মুছে ফেলা হয়েছে");
+                    run(() => deleteQuizQuestion(fd), "Question deleted");
                   }}
                   className="wp-btn wp-btn-danger !px-2"
                 >
-                  <i className="fa-solid fa-trash text-xs" /> মুছুন
+                  <i className="fa-solid fa-trash text-xs" /> Delete
                 </button>
               </div>
             </div>
@@ -110,7 +110,7 @@ export function QuestionsEditor({
           pending={pending}
           onDone={() => setAdding(false)}
           onSubmit={(fd) =>
-            run(() => createQuizQuestion(fd), "প্রশ্ন যোগ হয়েছে")
+            run(() => createQuizQuestion(fd), "Question added")
           }
         />
       )}
@@ -151,23 +151,23 @@ function QuestionForm({
     <form onSubmit={handleSubmit} className="space-y-2">
       <input type="hidden" name="lesson_id" value={question?.lesson_id ?? lessonId} />
       <div>
-        <label className="wp-label">প্রশ্ন</label>
+        <label className="wp-label">Question</label>
         <textarea name="question" rows={2} required defaultValue={question?.question} className="wp-input" />
       </div>
       <div>
-        <label className="wp-label">অপশন (প্রতি লাইনে একটি)</label>
+        <label className="wp-label">Options (one per line)</label>
         <textarea
           rows={3}
           value={optionsText}
           onChange={(e) => setOptionsText(e.target.value)}
           className="wp-input font-mono text-xs"
-          placeholder={"সঠিক উত্তর\nভুল উত্তর ১\nভুল উত্তর ২"}
+          placeholder={"Correct answer\nWrong answer 1\nWrong answer 2"}
         />
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div>
           <label className="wp-label">
-            সঠিক উত্তর নম্বর (০-{Math.max(optionCount - 1, 0)})
+            Correct answer index (0-{Math.max(optionCount - 1, 0)})
           </label>
           <input
             type="number"
@@ -180,17 +180,17 @@ function QuestionForm({
           />
         </div>
         <div>
-          <label className="wp-label">ব্যাখ্যা (ঐচ্ছিক)</label>
+          <label className="wp-label">Explanation (optional)</label>
           <input name="explanation" defaultValue={question?.explanation ?? ""} className="wp-input" />
         </div>
       </div>
       <input type="hidden" name="options" value={optionsText} />
       <div className="flex gap-2">
         <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
-          <i className="fa-solid fa-floppy-disk" /> {pending ? "সেভ হচ্ছে..." : question ? "আপডেট" : "যোগ করুন"}
+          <i className="fa-solid fa-floppy-disk" /> {pending ? "Saving..." : question ? "Update" : "Add"}
         </button>
         <button type="button" onClick={onDone} className="wp-btn">
-          বাতিল
+          Cancel
         </button>
       </div>
     </form>

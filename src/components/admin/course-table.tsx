@@ -99,35 +99,35 @@ function Group({
 function CourseFormFields({ course }: { course?: Course }) {
   return (
     <div className="space-y-3">
-      <Group title="মৌলিক তথ্য" icon="fa-solid fa-circle-info">
+      <Group title="Basic Info" icon="fa-solid fa-circle-info">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field name="title" label="শিরোনাম" required defaultValue={course?.title} />
+          <Field name="title" label="Title" required defaultValue={course?.title} />
           <Field name="slug" label="Slug" required defaultValue={course?.slug} placeholder="my-course" />
-          <Field name="subtitle" label="সাব-টাইটেল / ট্যাগলাইন" defaultValue={course?.subtitle ?? ""} placeholder="যেমন: AI & Digital Income Mastery" />
-          <Field name="category" label="ক্যাটাগরি" defaultValue={course?.category ?? "General"} placeholder="যেমন: AI, Freelancing" />
+          <Field name="subtitle" label="Subtitle / Tagline" defaultValue={course?.subtitle ?? ""} placeholder="e.g., AI & Digital Income Mastery" />
+          <Field name="category" label="Category" defaultValue={course?.category ?? "General"} placeholder="e.g., AI, Freelancing" />
         </div>
-        <TextArea name="description" label="বিস্তারিত বর্ণনা" defaultValue={course?.description ?? ""} rows={6} className="mt-3" />
+        <TextArea name="description" label="Detailed Description" defaultValue={course?.description ?? ""} rows={6} className="mt-3" />
         <p className="mt-1 text-xs text-[#646970]">
           <i className="fa-solid fa-circle-info mr-1" />
-          Markdown সমর্থিত — হেডিং (# / ##), বুলেট (*), বোল্ড (**text**), এমোজি। কোর্স পেজে সুন্দরভাবে দেখাবে।
+          Markdown supported — headings (# / ##), bullets (*), bold (**text**), emoji. It will display nicely on the course page.
         </p>
       </Group>
 
-      <Group title="মূল্য ও ডিসকাউন্ট" icon="fa-solid fa-tags">
+      <Group title="Price & Discount" icon="fa-solid fa-tags">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field name="price" label="বর্তমান দাম (৳)" type="text" inputMode="decimal" defaultValue={course?.price ?? 0} placeholder="যেমন: 3500" />
-          <Field name="original_price" label="আগের দাম (৳) — কাটা দাম দেখাতে" type="text" inputMode="decimal" defaultValue={course?.original_price ?? 0} placeholder="যেমন: 7000" />
+          <Field name="price" label="Current Price (৳)" type="text" inputMode="decimal" defaultValue={course?.price ?? 0} placeholder="e.g., 3500" />
+          <Field name="original_price" label="Previous Price (৳) — to show a crossed-out price" type="text" inputMode="decimal" defaultValue={course?.original_price ?? 0} placeholder="e.g., 7000" />
         </div>
         <p className="mt-2 text-xs text-[#646970]">
           <i className="fa-solid fa-circle-info mr-1" />
-          আগের দাম 0 রাখলে ডিসকাউন্ট দেখাবে না। উদাহরণ: বর্তমান ৩,৫০০, আগের ৭,০০০।
+          If the previous price is 0, no discount will be shown. Example: current 3,500, previous 7,000.
         </p>
       </Group>
 
-      <Group title="কভার ইমেজ" icon="fa-solid fa-image">
+      <Group title="Cover Image" icon="fa-solid fa-image">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="wp-label">ছবি আপলোড করুন</label>
+            <label className="wp-label">Upload Image</label>
             <input
               type="file"
               name="cover_image_file"
@@ -135,22 +135,22 @@ function CourseFormFields({ course }: { course?: Course }) {
               className="wp-input file:mr-2 file:rounded file:border-0 file:bg-[#f0f6fc] file:px-2 file:py-1 file:text-xs file:font-medium file:text-[#2271b1]"
             />
           </div>
-          <Field name="cover_image" label="অথবা ইমেজ URL" defaultValue={course?.cover_image ?? ""} placeholder="https://..." />
+          <Field name="cover_image" label="Or Image URL" defaultValue={course?.cover_image ?? ""} placeholder="https://..." />
         </div>
         {course?.cover_image && (
           <div className="mt-2 flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={course.cover_image}
-              alt="বর্তমান কভার"
+              alt="Current cover"
               className="h-14 w-24 rounded object-cover"
             />
-            <span className="text-xs text-[#646970]">বর্তমান কভার — নতুন ছবি দিলে প্রতিস্থাপিত হবে</span>
+            <span className="text-xs text-[#646970]">Current cover — will be replaced if a new image is uploaded</span>
           </div>
         )}
       </Group>
 
-      <Group title="প্রোমো ভিডিও" icon="fa-solid fa-video">
+      <Group title="Promo Video" icon="fa-solid fa-video">
         <VideoSourceFields
           prefix="promo_video"
           initialUrl={course?.promo_video_url ?? ""}
@@ -158,47 +158,47 @@ function CourseFormFields({ course }: { course?: Course }) {
         />
       </Group>
 
-      <Group title="শ্রেণীবিভাগ ও ভাষা" icon="fa-solid fa-layer-group">
+      <Group title="Classification & Language" icon="fa-solid fa-layer-group">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <label className="wp-label">লেভেল</label>
+            <label className="wp-label">Level</label>
             <select name="level" defaultValue={course?.level ?? "beginner"} className="wp-input">
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
               <option value="advanced">Advanced</option>
             </select>
           </div>
-          <Field name="language" label="ভাষা" defaultValue={course?.language ?? "Bengali"} placeholder="যেমন: Bengali, English" />
-          <Field name="tags" label="ট্যাগ (কমা দিয়ে আলাদা)" defaultValue={course?.tags?.join(", ") ?? ""} placeholder="যেমন: AI, Freelancing, Live" />
+          <Field name="language" label="Language" defaultValue={course?.language ?? "Bengali"} placeholder="e.g., Bengali, English" />
+          <Field name="tags" label="Tags (comma separated)" defaultValue={course?.tags?.join(", ") ?? ""} placeholder="e.g., AI, Freelancing, Live" />
         </div>
       </Group>
 
-      <Group title="সেটিংস" icon="fa-solid fa-gear">
+      <Group title="Settings" icon="fa-solid fa-gear">
         <div className="flex flex-wrap items-center gap-4">
           <label className="flex items-center gap-2 text-sm font-medium text-[#3c434a]">
             <input type="checkbox" name="is_published" defaultChecked={course?.is_published ?? false} className="h-4 w-4" />
-            পাবলিশ
+            Published
           </label>
           <label className="flex items-center gap-2 text-sm font-medium text-[#3c434a]">
             <input type="checkbox" name="is_featured" defaultChecked={course?.is_featured ?? false} className="h-4 w-4" />
-            ফিচার্ড (হোমে দেখানো হবে)
+            Featured (will be shown on home page)
           </label>
           <label className="flex items-center gap-2 text-sm font-medium text-[#3c434a]">
             <input type="hidden" name="certificate" value="off" />
             <input type="checkbox" name="certificate" value="on" defaultChecked={course?.certificate ?? true} className="h-4 w-4" />
-            সার্টিফিকেট দেওয়া হবে
+            Will provide certificate
           </label>
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-[#3c434a]">ভিজিবিলিটি</label>
+            <label className="text-sm font-medium text-[#3c434a]">Visibility</label>
             <select name="visibility" defaultValue={course?.visibility ?? "public"} className="wp-input !w-auto !py-1.5">
-              <option value="public">পাবলিক (সব জায়গায় দেখাবে)</option>
-              <option value="private">প্রাইভেট (শুধু লিংকে দেখাবে)</option>
+              <option value="public">Public (shown everywhere)</option>
+              <option value="private">Private (shown only via link)</option>
             </select>
           </div>
         </div>
         <p className="mt-2 text-xs text-[#646970]">
           <i className="fa-solid fa-circle-info mr-1" />
-          প্রাইভেট: কোর্স তালিকা/হোম পেজে দেখাবে না, তবে সরাসরি কোর্স লিংকে (যেমন /courses/ai-income-mastery) খুলবে।
+          Private: not shown on course list/home page, but accessible directly via course link (e.g., /courses/ai-income-mastery).
         </p>
       </Group>
     </div>
@@ -242,7 +242,7 @@ export function AdminCourseTable({
       await action();
       showToast(success);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "কিছু একটা সমস্যা হয়েছে", "error");
+      showToast(err instanceof Error ? err.message : "Something went wrong", "error");
     } finally {
       setPending(false);
     }
@@ -255,7 +255,7 @@ export function AdminCourseTable({
       await createCourse(new FormData(form));
       form.reset();
       setCreating(false);
-    }, "কোর্স তৈরি হয়েছে");
+    }, "Course created");
   }
 
   async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
@@ -264,14 +264,14 @@ export function AdminCourseTable({
     await run(async () => {
       await updateCourse(new FormData(form));
       setEditingId(null);
-    }, "কোর্স আপডেট হয়েছে");
+    }, "Course updated");
   }
 
   async function handleDelete(course: Course) {
-    if (!confirm(`"${course.title}" মুছে ফেলবেন?`)) return;
+    if (!confirm(`Delete "${course.title}"?`)) return;
     const fd = new FormData();
     fd.set("id", course.id);
-    await run(() => deleteCourse(fd), "কোর্স মুছে ফেলা হয়েছে");
+    await run(() => deleteCourse(fd), "Course deleted");
   }
 
   return (
@@ -279,19 +279,19 @@ export function AdminCourseTable({
       {creating && (
         <form onSubmit={handleCreate} className="wp-panel">
           <div className="wp-panel-header">
-            নতুন কোর্স তৈরি করুন
+            Create New Course
             <button
               type="button"
               onClick={() => setCreating(false)}
               className="text-xs font-medium text-[#646970] hover:text-[#b32d2e]"
             >
-              বাতিল ✕
+              Cancel ✕
             </button>
           </div>
           <div className="wp-panel-body space-y-4">
             <CourseFormFields />
             <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
-              <i className="fa-solid fa-plus" /> {pending ? "তৈরি হচ্ছে..." : "তৈরি করুন"}
+              <i className="fa-solid fa-plus" /> {pending ? "Creating..." : "Create"}
             </button>
           </div>
         </form>
@@ -299,7 +299,7 @@ export function AdminCourseTable({
 
       <div className="wp-panel">
         <div className="wp-panel-header">
-          সব কোর্স
+          All Courses
           <span className="rounded bg-[#f0f6fc] px-2 py-0.5 text-xs font-semibold text-[#2271b1]">
             {courses.length}
           </span>
@@ -308,12 +308,12 @@ export function AdminCourseTable({
           <table className="wp-table min-w-[640px]">
             <thead>
               <tr>
-                <th>কোর্স</th>
-                <th>দাম</th>
-                <th>লেভেল</th>
-                <th>স্ট্যাটাস</th>
-                <th>টপিক</th>
-                <th className="text-right">অ্যাকশন</th>
+                <th>Course</th>
+                <th>Price</th>
+                <th>Level</th>
+                <th>Status</th>
+                <th>Topics</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -338,10 +338,10 @@ export function AdminCourseTable({
                           {course.title}
                         </span>
                         {course.is_featured && (
-                          <span className="wp-tag">ফিচার্ড</span>
+                          <span className="wp-tag">Featured</span>
                         )}
                         {course.visibility === "private" && (
-                          <span className="wp-tag wp-tag-amber">প্রাইভেট</span>
+                          <span className="wp-tag wp-tag-amber">Private</span>
                         )}
                       </div>
                     </td>
@@ -360,7 +360,7 @@ export function AdminCourseTable({
                           course.is_published ? "wp-tag-green" : "wp-tag-amber"
                         }`}
                       >
-                        {course.is_published ? "পাবলিশড" : "ড্রাফট"}
+                        {course.is_published ? "Published" : "Draft"}
                       </span>
                     </td>
                     <td>
@@ -370,7 +370,7 @@ export function AdminCourseTable({
                         }
                         className="text-xs font-medium text-[#2271b1] hover:text-[#135e96] hover:underline"
                       >
-                        {topicCount(course.id)} টপিক ▾
+                        {topicCount(course.id)} Topics ▾
                       </button>
                     </td>
                     <td>
@@ -381,14 +381,14 @@ export function AdminCourseTable({
                           }
                           className="wp-btn"
                         >
-                          <i className="fa-solid fa-pen" /> এডিট
+                          <i className="fa-solid fa-pen" /> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(course)}
                           disabled={pending}
                           className="wp-btn wp-btn-danger"
                         >
-                          <i className="fa-solid fa-trash" /> মুছুন
+                          <i className="fa-solid fa-trash" /> Delete
                         </button>
                       </div>
                     </td>
@@ -398,20 +398,20 @@ export function AdminCourseTable({
                     <tr key={`${course.id}-edit`}>
                       <td colSpan={6} className="bg-[#f6f7f7] px-4 py-4">
                         <form onSubmit={handleUpdate} className="wp-panel">
-                          <div className="wp-panel-header">কোর্স এডিট করুন</div>
+                          <div className="wp-panel-header">Edit Course</div>
                           <div className="wp-panel-body">
                             <input type="hidden" name="id" value={course.id} />
                             <CourseFormFields course={course} />
                             <div className="mt-4 flex gap-2">
                               <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
-                                <i className="fa-solid fa-floppy-disk" /> {pending ? "আপডেট হচ্ছে..." : "আপডেট"}
+                                <i className="fa-solid fa-floppy-disk" /> {pending ? "Updating..." : "Update"}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setEditingId(null)}
                                 className="wp-btn"
                               >
-                                বাতিল
+                                Cancel
                               </button>
                             </div>
                           </div>
@@ -439,7 +439,7 @@ export function AdminCourseTable({
               {courses.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-10 text-center text-[#646970]">
-                    কোনো কোর্স নেই। নতুন কোর্স চেপে শুরু করুন।
+                    No courses. Click new course to get started.
                   </td>
                 </tr>
               )}

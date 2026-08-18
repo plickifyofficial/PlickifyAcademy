@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { AdminCourseTable } from "@/components/admin/course-table";
 
-export const metadata = { title: "কোর্সসমূহ" };
+export const metadata = { title: "Courses" };
 
 export default async function AdminCoursesPage({
   searchParams,
@@ -108,14 +108,14 @@ export default async function AdminCoursesPage({
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="wp-page-title">কোর্সসমূহ</h1>
-          <p className="wp-subtitle">কোর্স, সেকশন ও টপিক ম্যানেজ করুন</p>
+          <h1 className="wp-page-title">Courses</h1>
+          <p className="wp-subtitle">Manage courses, sections, and topics</p>
         </div>
         <Link
           href="/admin/courses?add=1"
           className="wp-btn wp-btn-primary mb-5"
         >
-          <i className="fa-solid fa-plus" /> নতুন কোর্স
+          <i className="fa-solid fa-plus" /> New Course
         </Link>
       </div>
       <AdminCourseTable

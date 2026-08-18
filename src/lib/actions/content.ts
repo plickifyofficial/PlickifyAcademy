@@ -15,7 +15,7 @@ const ALLOWED_IMAGE = [
 
 export async function saveSectionContent(key: string, value: unknown) {
   await requireAdmin();
-  if (!key) throw new Error("সেকশন কী নেই");
+  if (!key) throw new Error("Section key is missing");
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -37,11 +37,11 @@ export async function uploadContentImage(formData: FormData) {
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0)
-    throw new Error("ফাইল সিলেক্ট করুন");
+    throw new Error("Please select a file");
 
-  if (file.size > MAX_IMAGE) throw new Error("ইমেজ 2MB-এর মধ্যে হতে হবে");
+  if (file.size > MAX_IMAGE) throw new Error("Image must be within 2MB");
   if (!ALLOWED_IMAGE.includes(file.type))
-    throw new Error("PNG/JPG/WebP/SVG/GIF ইমেজ দিন");
+    throw new Error("Please provide a PNG/JPG/WebP/SVG/GIF image");
 
   const ext = (file.name.split(".").pop() || "png").toLowerCase();
   const path = `content-${Date.now()}.${ext}`;

@@ -31,7 +31,7 @@ export function PromoVideo({
       type="button"
       onClick={() => hasVideo && setPlaying(true)}
       className="relative block h-full w-full cursor-pointer"
-      aria-label={hasVideo ? "প্রোমো ভিডিও দেখুন" : undefined}
+      aria-label={hasVideo ? "Watch promo video" : undefined}
     >
       <div className="relative aspect-[16/10] w-full bg-gradient-to-br from-brand-700 to-purple-800">
         {coverImage ? (

@@ -30,19 +30,19 @@ export default async function AdminHomeEditorPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="wp-page-title">হোম পেজ ও সাইট কনটেন্ট</h1>
+      <h1 className="wp-page-title">Home Page & Site Content</h1>
       <p className="wp-subtitle">
-        WordPress-এর মতো প্রতিটা সেকশন এডিট করুন — হিরো, স্ট্যাটস, ফিচার্ড
-        কোর্স, FAQ, ফুটার, নেভিগেশন সবকিছু। সেভ করার সাথে সাথেই ওয়েবসাইটে
-        আপডেট হয়ে যায়।
+        Edit every section like WordPress — hero, stats, featured courses,
+        FAQ, footer, navigation, everything. Changes update the website
+        immediately after saving.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
         <a href="/" target="_blank" className="wp-btn">
-          <i className="fa-solid fa-globe" /> সাইট প্রিভিউ
+          <i className="fa-solid fa-globe" /> Preview Site
         </a>
         <a href="/admin/media" className="wp-btn">
-          <i className="fa-solid fa-images" /> মিডিয়া লাইব্রেরি
+          <i className="fa-solid fa-images" /> Media Library
         </a>
       </div>
 

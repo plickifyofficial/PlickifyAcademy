@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { CourseCard } from "@/components/courses/course-card";
 import { PageHero } from "@/components/home/page-hero";
 
-export const metadata = { title: "কোর্সসমূহ | Plickify Academy" };
+export const metadata = { title: "Courses | Plickify Academy" };
 
 export const revalidate = 60;
 
@@ -34,8 +34,8 @@ export default async function CoursesPage() {
     <main className="flex-1">
       <PageHero
         eyebrow="All Courses"
-        title="সব কোর্স"
-        subtitle="নিজের পছন্দের কোর্স বেছে নিন এবং শেখা শুরু করুন — সব কোর্সে লাইভ সাপোর্ট ও সার্টিফিকেট।"
+        title="All Courses"
+        subtitle="Choose the course you love and start learning — every course includes live support and a certificate."
       />
 
       <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
@@ -55,7 +55,7 @@ export default async function CoursesPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-12 text-center">
-            <p className="text-zinc-600">এখনো কোনো কোর্স পাবলিশ করা হয়নি।</p>
+            <p className="text-zinc-600">No courses have been published yet.</p>
           </div>
         )}
       </section>

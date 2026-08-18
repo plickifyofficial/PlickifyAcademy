@@ -10,7 +10,7 @@ export async function deleteMedia(formData: FormData) {
   const bucket = String(formData.get("bucket"));
   const path = String(formData.get("path"));
 
-  if (!bucket || !path) throw new Error("ফাইল পাথ নেই");
+  if (!bucket || !path) throw new Error("File path missing");
 
   const admin = createAdminClient();
   const { error } = await admin.storage.from(bucket).remove([path]);

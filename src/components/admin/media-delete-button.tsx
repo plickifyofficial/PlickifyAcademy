@@ -15,16 +15,16 @@ export function MediaDeleteButton({
   const { showToast } = useToast();
 
   async function handleDelete() {
-    if (!confirm(`"${path}" মুছে ফেলবেন?`)) return;
+    if (!confirm(`Delete "${path}"?`)) return;
     setPending(true);
     try {
       const fd = new FormData();
       fd.set("bucket", bucket);
       fd.set("path", path);
       await deleteMedia(fd);
-      showToast("ফাইল মুছে ফেলা হয়েছে");
+      showToast("File deleted");
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "মুছে ফেলা যায়নি", "error");
+      showToast(err instanceof Error ? err.message : "Could not delete", "error");
     } finally {
       setPending(false);
     }
@@ -37,7 +37,7 @@ export function MediaDeleteButton({
       disabled={pending}
       className="wp-btn wp-btn-danger"
     >
-      <i className="fa-solid fa-trash-can" /> {pending ? "মুছছে..." : "মুছুন"}
+      <i className="fa-solid fa-trash-can" /> {pending ? "Deleting..." : "Delete"}
     </button>
   );
 }

@@ -33,17 +33,17 @@ export function EnrollmentsPanel({
         showToast(result.error, "error");
       } else {
         form.reset();
-        showToast("ছাত্র এনরোল হয়েছে");
+        showToast("Student enrolled");
       }
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "এনরোল করা যায়নি", "error");
+      showToast(err instanceof Error ? err.message : "Could not enroll", "error");
     } finally {
       setPending(false);
     }
   }
 
   async function handleUnenroll(id: string) {
-    if (!confirm("এনরোলমেন্ট মুছে ফেলবেন?")) return;
+    if (!confirm("Delete this enrollment?")) return;
     setPending(true);
     try {
       const fd = new FormData();
@@ -52,10 +52,10 @@ export function EnrollmentsPanel({
       if (result.error) {
         showToast(result.error, "error");
       } else {
-        showToast("এনরোলমেন্ট মুছে ফেলা হয়েছে");
+        showToast("Enrollment deleted");
       }
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "মুছে ফেলা যায়নি", "error");
+      showToast(err instanceof Error ? err.message : "Could not delete", "error");
     } finally {
       setPending(false);
     }
@@ -65,14 +65,14 @@ export function EnrollmentsPanel({
     <div className="mt-5 space-y-4">
       <form onSubmit={handleEnroll} className="wp-panel">
         <div className="wp-panel-header">
-          নতুন এনরোলমেন্ট
+          New Enrollment
         </div>
         <div className="wp-panel-body">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="wp-label">কোর্স</label>
+              <label className="wp-label">Course</label>
               <select name="course_id" required className="wp-input">
-                <option value="">— কোর্স বেছে নিন —</option>
+                <option value="">— Select a course —</option>
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.title}
@@ -81,7 +81,7 @@ export function EnrollmentsPanel({
               </select>
             </div>
             <div>
-              <label className="wp-label">ছাত্রের ইমেইল</label>
+              <label className="wp-label">Student Email</label>
               <input
                 name="email"
                 type="email"
@@ -92,14 +92,14 @@ export function EnrollmentsPanel({
             </div>
           </div>
           <button type="submit" className="wp-btn wp-btn-primary mt-3" disabled={pending}>
-            <i className="fa-solid fa-user-plus" /> {pending ? "এনরোল হচ্ছে..." : "এনরোল করুন"}
+            <i className="fa-solid fa-user-plus" /> {pending ? "Enrolling..." : "Enroll"}
           </button>
         </div>
       </form>
 
       <div className="wp-panel">
         <div className="wp-panel-header">
-          সব এনরোলমেন্ট
+          All Enrollments
           <span className="rounded bg-[#f0f6fc] px-2 py-0.5 text-xs font-semibold text-[#2271b1]">
             {enrollments.length}
           </span>
@@ -108,17 +108,17 @@ export function EnrollmentsPanel({
           <table className="wp-table min-w-[560px]">
             <thead>
               <tr>
-                <th>ছাত্র</th>
-                <th>কোর্স</th>
-                <th>তারিখ</th>
-                <th className="text-right">অ্যাকশন</th>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Date</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {enrollments.length === 0 && (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-[#646970]">
-                    এখনো কোনো এনরোলমেন্ট নেই।
+                    No enrollments yet.
                   </td>
                 </tr>
               )}
@@ -137,7 +137,7 @@ export function EnrollmentsPanel({
                       disabled={pending}
                       className="wp-btn wp-btn-danger"
                     >
-                      <i className="fa-solid fa-user-minus" /> আনএনরোল
+                      <i className="fa-solid fa-user-minus" /> Unenroll
                     </button>
                   </td>
                 </tr>

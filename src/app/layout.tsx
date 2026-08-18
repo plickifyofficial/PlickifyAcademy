@@ -11,11 +11,11 @@ const hindSiliguri = Hind_Siliguri({
 
 export const metadata: Metadata = {
   title: {
-    default: "Plickify Academy | শেখো, বেড়ে উঠো",
+    default: "Plickify Academy | Learn, Grow",
     template: "%s | Plickify Academy",
   },
   description:
-    "অনলাইন একাডেমি — কোর্স, লেসন আর কুইজ দিয়ে নিজের দক্ষতা বাড়ান।",
+    "An online academy — build your skills with courses, lessons, and quizzes.",
   icons: {
     icon: [
       { url: "/api/favicon", type: "image/x-icon" },
@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="bn" className={`${hindSiliguri.variable} h-full antialiased`}>
+    <html lang="en" className={`${hindSiliguri.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <ToastProvider>{children}</ToastProvider>
       </body>

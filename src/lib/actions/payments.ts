@@ -18,16 +18,16 @@ export async function submitManualPayment(input: {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { error: "পেমেন্ট করতে লগইন করুন" };
+  if (!user) return { error: "Please login to make a payment" };
 
   const courseId = input.courseId;
   const method = input.method === "nagad" ? "nagad" : "bkash";
   const senderNumber = input.senderNumber.trim();
   const trxId = input.trxId.trim().toUpperCase();
 
-  if (!courseId) return { error: "কোর্স পাওয়া যায়নি" };
+  if (!courseId) return { error: "Course not found" };
   if (!senderNumber || !trxId)
-    return { error: "প্রেরকের নাম্বার ও TrxID দিন" };
+    return { error: "Please provide your sender number and TrxID" };
 
   const { data: course } = await supabase
     .from("courses")
@@ -35,7 +35,7 @@ export async function submitManualPayment(input: {
     .eq("id", courseId)
     .eq("is_published", true)
     .single();
-  if (!course) return { error: "কোর্সটি পাওয়া যায়নি" };
+  if (!course) return { error: "Course not found" };
 
   const admin = createAdminClient();
 
@@ -45,7 +45,7 @@ export async function submitManualPayment(input: {
     .eq("user_id", user.id)
     .eq("course_id", courseId)
     .maybeSingle();
-  if (enrolled) return { error: "আপনি ইতিমধ্যে এই কোর্সে এনরোলড" };
+  if (enrolled) return { error: "You are already enrolled in this course" };
 
   const { data: pendingOrder } = await admin
     .from("orders")
@@ -55,7 +55,7 @@ export async function submitManualPayment(input: {
     .eq("status", "pending")
     .maybeSingle();
   if (pendingOrder)
-    return { error: "আপনার একটি পেমেন্ট রিভিউ চলছে — অপেক্ষা করুন" };
+    return { error: "Your payment is under review — please wait" };
 
   let amount = Number(course.price);
   let couponId: string | null = null;
@@ -110,7 +110,7 @@ export async function verifyOrder(
     .select("*")
     .eq("id", orderId)
     .single();
-  if (!order) return { error: "অর্ডার পাওয়া যায়নি" };
+  if (!order) return { error: "Order not found" };
   if (order.status === "paid") {
     revalidatePath("/admin/orders");
     return {};
@@ -140,8 +140,8 @@ export async function verifyOrder(
   try {
     await admin.from("notifications").insert({
       user_id: order.user_id,
-      title: "পেমেন্ট নিশ্চিত হয়েছে ✅",
-      body: "আপনার পেমেন্ট যাচাই হয়েছে — কোর্সটি এনরোল হয়েছে। শেখা শুরু করুন!",
+      title: "Payment confirmed ✅",
+      body: "Your payment has been verified — the course is enrolled. Start learning!",
       link: "/dashboard",
     });
   } catch {
@@ -163,7 +163,7 @@ export async function rejectOrder(
     .select("*")
     .eq("id", orderId)
     .single();
-  if (!order) return { error: "অর্ডার পাওয়া যায়নি" };
+  if (!order) return { error: "Order not found" };
   if (order.status !== "pending") {
     revalidatePath("/admin/orders");
     return {};
@@ -178,8 +178,8 @@ export async function rejectOrder(
   try {
     await admin.from("notifications").insert({
       user_id: order.user_id,
-      title: "পেমেন্ট যাচাই হয়নি",
-      body: "আপনার পেমেন্টটি যাচাই করা যায়নি। TrxID মিলিয়ে আবার চেষ্টা করুন, অথবা আমাদের সাথে যোগাযোগ করুন।",
+      title: "Payment verification failed",
+      body: "Your payment could not be verified. Please check the TrxID and try again, or contact us.",
       link: "/dashboard",
     });
   } catch {

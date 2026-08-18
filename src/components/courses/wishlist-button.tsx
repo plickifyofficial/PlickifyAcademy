@@ -22,7 +22,7 @@ export function WishlistButton({ courseId, initialSaved }: Props) {
     try {
       const nowSaved = await toggleWishlist(courseId);
       setSaved(nowSaved);
-      showToast(nowSaved ? "পছন্দের তালিকায় যোগ হয়েছে ❤️" : "পছন্দের তালিকা থেকে সরানো হয়েছে", "success");
+      showToast(nowSaved ? "Added to your wishlist ❤️" : "Removed from your wishlist", "success");
       router.refresh();
     } catch (e) {
       showToast((e as Error).message, "error");
@@ -35,7 +35,7 @@ export function WishlistButton({ courseId, initialSaved }: Props) {
     <button
       onClick={handleToggle}
       disabled={pending}
-      aria-label="পছন্দের তালিকা"
+      aria-label="Wishlist"
       className={cn(
         "flex h-12 w-12 items-center justify-center rounded-lg border text-lg transition-colors disabled:opacity-60",
         saved

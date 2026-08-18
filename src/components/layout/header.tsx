@@ -49,7 +49,7 @@ export function Header({
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <Link
             href="/courses"
-            aria-label="সার্চ"
+            aria-label="Search"
             className="hidden h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-brand-600 md:flex"
           >
             <i className="fa-solid fa-magnifying-glass" />

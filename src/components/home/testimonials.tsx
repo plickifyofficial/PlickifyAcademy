@@ -42,14 +42,14 @@ export function Testimonials({ content }: { content: TestimonialsContent }) {
         <div className="flex gap-2">
           <button
             onClick={() => move(-1)}
-            aria-label="আগের"
+            aria-label="Previous"
             className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 transition-colors hover:border-brand-500 hover:text-brand-600"
           >
             <i className="fa-solid fa-arrow-left text-sm" />
           </button>
           <button
             onClick={() => move(1)}
-            aria-label="পরের"
+            aria-label="Next"
             className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-white transition-colors hover:bg-brand-700"
           >
             <i className="fa-solid fa-arrow-right text-sm" />

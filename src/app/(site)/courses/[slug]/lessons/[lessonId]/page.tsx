@@ -7,7 +7,7 @@ import { ResumeTracker } from "@/components/lessons/resume-tracker";
 import { VideoPlayer } from "@/components/lessons/video-player";
 import type { QuizQuestion } from "@/lib/types";
 
-export const metadata = { title: "লেসন" };
+export const metadata = { title: "Lesson" };
 
 export default async function LessonPage({
   params,
@@ -92,22 +92,22 @@ export default async function LessonPage({
           <i className="fa-solid fa-lock" />
         </span>
         <h1 className="mt-4 text-2xl font-bold text-zinc-900">
-          {dripLocked ? "এখনো আনলক হয়নি" : "অ্যাক্সেস নেই"}
+          {dripLocked ? "Not Unlocked Yet" : "No Access"}
         </h1>
         <p className="mt-3 text-zinc-600">
           {dripLocked && unlockAt
-            ? `এই টপিকটি ${unlockAt.toLocaleDateString("bn-BD")} তারিখে আনলক হবে।`
-            : `এই টপিকটি দেখতে হলে কোর্সটি কিনতে হবে। ${
+            ? `This topic will unlock on ${unlockAt.toLocaleDateString("bn-BD")}.`
+            : `You need to purchase the course to view this topic. ${
                 course.price === 0
-                  ? "কোর্সটি ফ্রি, লগইন করে শুরু করুন।"
-                  : `কোর্সের দাম ${course.price} টাকা।`
+                  ? "The course is free — log in and start learning."
+                  : `The course costs ${course.price} taka.`
               }`}
         </p>
         <Link
           href={`/courses/${course.slug}`}
           className="mt-6 inline-block rounded-lg bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700"
         >
-          কোর্স পেজে ফিরে যান
+          Back to Course Page
         </Link>
       </main>
     );
@@ -151,10 +151,10 @@ export default async function LessonPage({
               }`}
             />
             {lesson.type === "quiz"
-              ? "কুইজ"
+              ? "Quiz"
               : lesson.type === "video"
-                ? "ভিডিও"
-                : "অ্যাসাইনমেন্ট"}
+                ? "Video"
+                : "Assignment"}
           </span>
         )}
       </div>
@@ -204,7 +204,7 @@ export default async function LessonPage({
             href={`/courses/${course.slug}/lessons/${prevLesson.id}`}
             className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
           >
-            ← আগের টপিক
+            ← Previous Topic
           </Link>
         ) : (
           <span />
@@ -224,7 +224,7 @@ export default async function LessonPage({
             href={`/courses/${course.slug}/lessons/${nextLesson.id}`}
             className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
           >
-            পরের টপিক →
+            Next Topic →
           </Link>
         )}
       </div>

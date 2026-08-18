@@ -30,7 +30,7 @@ export function VideoPlayer({
     return (
       <iframe
         src={render.src}
-        title={title ?? "ভিডিও"}
+        title={title ?? "Video"}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
         className="aspect-video w-full"

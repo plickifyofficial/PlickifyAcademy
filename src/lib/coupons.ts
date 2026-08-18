@@ -13,16 +13,16 @@ export async function applyCoupon(
     .ilike("code", code.trim())
     .single();
 
-  if (error || !data) throw new Error("কুপনটি পাওয়া যায়নি");
+  if (error || !data) throw new Error("Coupon not found");
   const coupon = data as Coupon;
 
-  if (!coupon.is_active) throw new Error("কুপনটি আর সচল নেই");
+  if (!coupon.is_active) throw new Error("This coupon is no longer active");
   if (coupon.max_uses > 0 && coupon.used_count >= coupon.max_uses)
-    throw new Error("কুপনটির ব্যবহার সীমা শেষ হয়ে গেছে");
+    throw new Error("This coupon has reached its usage limit");
   if (coupon.expires_at && new Date(coupon.expires_at) < new Date())
-    throw new Error("কুপনটির মেয়াদ শেষ হয়ে গেছে");
+    throw new Error("This coupon has expired");
   if (coupon.course_id && coupon.course_id !== courseId)
-    throw new Error("এই কুপনটি এই কোর্সে ব্যবহার করা যাবে না");
+    throw new Error("This coupon cannot be used for this course");
 
   let amount: number;
   if (coupon.discount_type === "percent") {

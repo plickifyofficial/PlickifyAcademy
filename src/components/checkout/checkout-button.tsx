@@ -38,7 +38,7 @@ export function CheckoutButton({ courseId, price }: Props) {
       const { amount } = await previewCoupon(courseId, price, code);
       setDiscounted(amount);
       setCouponCode(code.trim().toUpperCase());
-      showToast(`কুপন প্রয়োগ হয়েছে — ${formatPrice(amount)}`, "success");
+      showToast(`Coupon applied — ${formatPrice(amount)}`, "success");
     } catch (e) {
       setCouponCode(null);
       setDiscounted(null);
@@ -61,7 +61,7 @@ export function CheckoutButton({ courseId, price }: Props) {
     setPending(false);
 
     if (result.error) {
-      if (result.error === "পেমেন্ট করতে লগইন করুন") {
+      if (result.error === "Please login to make a payment") {
         router.push("/login");
       } else {
         showToast(result.error, "error");
@@ -76,11 +76,11 @@ export function CheckoutButton({ courseId, price }: Props) {
     return (
       <div className="rounded-xl border border-green-400/40 bg-green-500/15 p-4 text-white">
         <p className="font-semibold">
-          <i className="fa-solid fa-check-circle mr-1" /> পেমেন্ট জমা হয়েছে!
+          <i className="fa-solid fa-check-circle mr-1" /> Payment submitted!
         </p>
         <p className="mt-1 text-sm text-white/80">
-          আপনার TrxID ({trxId}) যাচাই করে কোর্স এনরোল করা হবে। সাধারণত ৫–৩০ মিনিট
-          লাগে। এনরোল হলে আপনি নোটিফিকেশন পাবেন।
+          We'll verify your TrxID ({trxId}) and enroll you in the course. It usually
+          takes 5–30 minutes. You'll get a notification once enrolled.
         </p>
       </div>
     );
@@ -91,7 +91,7 @@ export function CheckoutButton({ courseId, price }: Props) {
       {couponCode ? (
         <p className="text-sm font-medium text-green-200">
           <i className="fa-solid fa-ticket mr-1" />
-          কুপন <b>{couponCode}</b> প্রয়োগ হয়েছে:{" "}
+          Coupon <b>{couponCode}</b> applied:{" "}
           <span className="line-through opacity-70">{formatPrice(price)}</span>{" "}
           → <span className="font-bold">{formatPrice(finalPrice)}</span>
         </p>
@@ -100,7 +100,7 @@ export function CheckoutButton({ courseId, price }: Props) {
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="কুপন কোড"
+            placeholder="Coupon Code"
             className="w-36 rounded-lg border border-white/40 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
           />
           <button
@@ -108,7 +108,7 @@ export function CheckoutButton({ courseId, price }: Props) {
             disabled={pending}
             className="rounded-lg border border-white/40 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 disabled:opacity-60"
           >
-            প্রয়োগ করুন
+            Apply
           </button>
         </div>
       )}
@@ -119,15 +119,15 @@ export function CheckoutButton({ courseId, price }: Props) {
           disabled={pending}
           className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
         >
-          {pending ? "অপেক্ষা করুন..." : `এখনই কিনুন — ${formatPrice(finalPrice)}`}
+          {pending ? "Please wait..." : `Buy Now — ${formatPrice(finalPrice)}`}
         </button>
       )}
 
       {step === "pay" && (
         <div className="rounded-xl border border-white/30 bg-white/10 p-4 text-white">
-          <p className="text-sm font-semibold">পেমেন্ট করুন</p>
+          <p className="text-sm font-semibold">Make Payment</p>
           <p className="mt-1 text-sm text-white/80">
-            ১. নিচের নাম্বারে <b>{formatPrice(finalPrice)}</b> পাঠান
+            1. Send <b>{formatPrice(finalPrice)}</b> to the number below
           </p>
 
           <div className="mt-3 flex gap-2">
@@ -156,14 +156,14 @@ export function CheckoutButton({ courseId, price }: Props) {
           </div>
 
           <div className="mt-3 rounded-lg bg-white/10 px-3 py-2 text-center text-lg font-bold tracking-wider">
-            {merchantNumber || "নাম্বার সেট করা হয়নি"}
+            {merchantNumber || "Number not set"}
           </div>
 
           <div className="mt-3 space-y-2">
             <input
               value={senderNumber}
               onChange={(e) => setSenderNumber(e.target.value)}
-              placeholder={`আপনার ${method === "bkash" ? "bKash" : "Nagad"} নাম্বার`}
+              placeholder={`Your ${method === "bkash" ? "bKash" : "Nagad"} number`}
               className="w-full rounded-lg border border-white/40 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
             />
             <input
@@ -179,7 +179,7 @@ export function CheckoutButton({ courseId, price }: Props) {
             disabled={pending || !trxId.trim() || !senderNumber.trim()}
             className="mt-3 w-full rounded-lg bg-white px-6 py-2.5 font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
           >
-            {pending ? "জমা হচ্ছে..." : "পেমেন্ট জমা দিন"}
+            {pending ? "Submitting..." : "Submit Payment"}
           </button>
         </div>
       )}

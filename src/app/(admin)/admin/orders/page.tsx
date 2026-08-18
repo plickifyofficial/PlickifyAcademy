@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { OrdersPanel } from "@/components/admin/orders-panel";
 
-export const metadata = { title: "অর্ডারসমূহ" };
+export const metadata = { title: "Orders" };
 
 export default async function AdminOrdersPage() {
   const supabase = await createClient();
@@ -26,15 +26,15 @@ export default async function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="wp-page-title">অর্ডারসমূহ</h1>
+      <h1 className="wp-page-title">Orders</h1>
       <p className="wp-subtitle">
-        ম্যানুয়াল পেমেন্ট (bKash/Nagad) ভেরিফাই করুন — ভেরিফাই করলে কোর্স
-        স্বয়ংক্রিয়ভাবে এনরোল হবে
+        Verify manual payments (bKash/Nagad) — verification auto-enrolls the
+        course
       </p>
 
       <div className="wp-panel">
         <div className="wp-panel-header">
-          সব অর্ডার
+          All Orders
           <span className="rounded bg-[#f0f6fc] px-2 py-0.5 text-xs font-semibold text-[#2271b1]">
             {orders?.length ?? 0}
           </span>

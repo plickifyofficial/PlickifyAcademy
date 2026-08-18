@@ -8,12 +8,12 @@ import {
 } from "@/lib/video";
 
 const PROVIDERS: { value: VideoProvider; label: string; icon: string }[] = [
-  { value: "none", label: "কোনো ভিডিও নেই", icon: "fa-solid fa-ban" },
-  { value: "youtube", label: "YouTube লিংক", icon: "fa-brands fa-youtube" },
+  { value: "none", label: "No Video", icon: "fa-solid fa-ban" },
+  { value: "youtube", label: "YouTube Link", icon: "fa-brands fa-youtube" },
   { value: "drive", label: "Google Drive", icon: "fa-brands fa-google-drive" },
   { value: "vimeo", label: "Vimeo", icon: "fa-brands fa-vimeo" },
-  { value: "direct", label: "সরাসরি ফাইল URL", icon: "fa-solid fa-file-video" },
-  { value: "embed", label: "Embed কোড", icon: "fa-solid fa-code" },
+  { value: "direct", label: "Direct File URL", icon: "fa-solid fa-file-video" },
+  { value: "embed", label: "Embed Code", icon: "fa-solid fa-code" },
 ];
 
 export function VideoSourceFields({
@@ -34,7 +34,7 @@ export function VideoSourceFields({
 
   return (
     <div className={className}>
-      <label className="wp-label">ভিডিও সোর্স</label>
+      <label className="wp-label">Video Source</label>
       <select
         value={type}
         onChange={(e) => setType(e.target.value as VideoProvider)}
@@ -50,7 +50,7 @@ export function VideoSourceFields({
         <div className="mt-2 space-y-2">
           {type === "embed" ? (
             <div>
-              <label className="wp-label">Embed কোড</label>
+              <label className="wp-label">Embed Code</label>
               <textarea
                 name={`${prefix}_embed`}
                 defaultValue={initialEmbed}
@@ -62,7 +62,7 @@ export function VideoSourceFields({
             </div>
           ) : (
             <div>
-              <label className="wp-label">ভিডিও লিংক</label>
+              <label className="wp-label">Video Link</label>
               <input
                 name={`${prefix}_url`}
                 defaultValue={initialUrl}

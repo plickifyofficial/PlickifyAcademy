@@ -28,17 +28,17 @@ import { QuestionsEditor } from "@/components/admin/questions-editor";
 import { VideoSourceFields } from "@/components/admin/video-source-fields";
 
 const TOPIC_TYPES: { value: Lesson["type"]; label: string; icon: string }[] = [
-  { value: "lesson", label: "লেসন", icon: "fa-solid fa-book-open" },
-  { value: "video", label: "ভিডিও", icon: "fa-solid fa-video" },
-  { value: "quiz", label: "কুইজ", icon: "fa-solid fa-circle-question" },
-  { value: "assignment", label: "অ্যাসাইনমেন্ট", icon: "fa-solid fa-clipboard-check" },
+  { value: "lesson", label: "Lesson", icon: "fa-solid fa-book-open" },
+  { value: "video", label: "Video", icon: "fa-solid fa-video" },
+  { value: "quiz", label: "Quiz", icon: "fa-solid fa-circle-question" },
+  { value: "assignment", label: "Assignment", icon: "fa-solid fa-clipboard-check" },
 ];
 
 const TYPE_META: Record<Lesson["type"], { label: string; icon: string; color: string }> = {
-  lesson: { label: "লেসন", icon: "fa-solid fa-book-open", color: "bg-[#e5f1fb] text-[#2271b1]" },
-  video: { label: "ভিডিও", icon: "fa-solid fa-video", color: "bg-[#e7f6ef] text-[#008a20]" },
-  quiz: { label: "কুইজ", icon: "fa-solid fa-circle-question", color: "bg-[#fdeeea] text-[#b32d2e]" },
-  assignment: { label: "অ্যাসাইনমেন্ট", icon: "fa-solid fa-clipboard-check", color: "bg-[#f6f3e8] text-[#996800]" },
+  lesson: { label: "Lesson", icon: "fa-solid fa-book-open", color: "bg-[#e5f1fb] text-[#2271b1]" },
+  video: { label: "Video", icon: "fa-solid fa-video", color: "bg-[#e7f6ef] text-[#008a20]" },
+  quiz: { label: "Quiz", icon: "fa-solid fa-circle-question", color: "bg-[#fdeeea] text-[#b32d2e]" },
+  assignment: { label: "Assignment", icon: "fa-solid fa-clipboard-check", color: "bg-[#f6f3e8] text-[#996800]" },
 };
 
 export function CurriculumBuilder({
@@ -69,7 +69,7 @@ export function CurriculumBuilder({
       await action();
       showToast(success);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "কিছু একটা সমস্যা হয়েছে", "error");
+      showToast(err instanceof Error ? err.message : "Something went wrong", "error");
     } finally {
       setPending(false);
     }
@@ -86,16 +86,16 @@ export function CurriculumBuilder({
       <div className="wp-panel">
         <div className="wp-panel-header">
           <span>
-            কারিকুলাম — {course.title}{" "}
+            Curriculum — {course.title}{" "}
             <span className="rounded bg-[#f0f6fc] px-2 py-0.5 text-xs font-semibold text-[#2271b1]">
-              {sections.length} সেকশন · {totalTopics} টপিক
+              {sections.length} Sections · {totalTopics} Topics
             </span>
           </span>
         </div>
         <div className="wp-panel-body space-y-4">
           {sections.length === 0 && (
             <p className="text-sm text-[#646970]">
-              এখনো কোনো সেকশন নেই। নিচ থেকে সেকশন যোগ করুন।
+              No sections yet. Add a section below.
             </p>
           )}
 
@@ -115,7 +115,7 @@ export function CurriculumBuilder({
                         await run(async () => {
                           await updateSection(new FormData(form));
                           setRenamingSection(null);
-                        }, "সেকশন আপডেট হয়েছে");
+                        }, "Section updated");
                       }}
                       className="flex flex-1 items-center gap-2"
                     >
@@ -141,41 +141,41 @@ export function CurriculumBuilder({
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#1d2327]">
                       {section.title}
                       <span className="ml-2 text-xs font-normal text-[#646970]">
-                        ({sectionTopics.length} টপিক)
+                        ({sectionTopics.length} Topics)
                       </span>
                     </span>
                   )}
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => run(() => moveSection(fdFor(section.id, course.id, -1)), "সেকশন সরে গেছে")}
+                      onClick={() => run(() => moveSection(fdFor(section.id, course.id, -1)), "Section moved")}
                       disabled={sIdx === 0 || pending}
                       className="wp-btn !px-2"
-                      aria-label="উপরে"
+                      aria-label="Move up"
                     >
                       <i className="fa-solid fa-arrow-up text-xs" />
                     </button>
                     <button
-                      onClick={() => run(() => moveSection(fdFor(section.id, course.id, 1)), "সেকশন সরে গেছে")}
+                      onClick={() => run(() => moveSection(fdFor(section.id, course.id, 1)), "Section moved")}
                       disabled={sIdx === sections.length - 1 || pending}
                       className="wp-btn !px-2"
-                      aria-label="নিচে"
+                      aria-label="Move down"
                     >
                       <i className="fa-solid fa-arrow-down text-xs" />
                     </button>
                     <button
                       onClick={() => setRenamingSection(section.id)}
                       className="wp-btn !px-2"
-                      aria-label="নাম পরিবর্তন"
+                      aria-label="Rename"
                     >
                       <i className="fa-solid fa-pen text-xs" />
                     </button>
                     <button
                       onClick={() => {
-                        if (!confirm(`"${section.title}" এবং এর সব টপিক মুছবেন?`)) return;
-                        run(() => deleteSection(fdOnlyId(section.id)), "সেকশন মুছে ফেলা হয়েছে");
+                        if (!confirm(`Delete "${section.title}" and all its topics?`)) return;
+                        run(() => deleteSection(fdOnlyId(section.id)), "Section deleted");
                       }}
                       className="wp-btn wp-btn-danger !px-2"
-                      aria-label="মুছুন"
+                      aria-label="Delete"
                     >
                       <i className="fa-solid fa-trash text-xs" />
                     </button>
@@ -193,46 +193,46 @@ export function CurriculumBuilder({
                       </span>
                       {topic.duration_minutes > 0 && (
                         <span className="hidden text-xs text-[#646970] sm:inline">
-                          {topic.duration_minutes} মিনিট
+                          {topic.duration_minutes} min
                         </span>
                       )}
                       {topic.is_free && (
-                        <span className="wp-tag wp-tag-green">ফ্রি</span>
+                        <span className="wp-tag wp-tag-green">Free</span>
                       )}
                       <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#2271b1]">
                         {TYPE_META[topic.type].label}
                       </span>
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => run(() => moveTopic(fdFor(topic.id, section.id, -1)), "টপিক সরে গেছে")}
+                          onClick={() => run(() => moveTopic(fdFor(topic.id, section.id, -1)), "Topic moved")}
                           disabled={tIdx === 0 || pending}
                           className="wp-btn !px-2"
-                          aria-label="উপরে"
+                          aria-label="Move up"
                         >
                           <i className="fa-solid fa-arrow-up text-xs" />
                         </button>
                         <button
-                          onClick={() => run(() => moveTopic(fdFor(topic.id, section.id, 1)), "টপিক সরে গেছে")}
+                          onClick={() => run(() => moveTopic(fdFor(topic.id, section.id, 1)), "Topic moved")}
                           disabled={tIdx === sectionTopics.length - 1 || pending}
                           className="wp-btn !px-2"
-                          aria-label="নিচে"
+                          aria-label="Move down"
                         >
                           <i className="fa-solid fa-arrow-down text-xs" />
                         </button>
                         <button
                           onClick={() => setEditingTopic(editingTopic === topic.id ? null : topic.id)}
                           className="wp-btn !px-2"
-                          aria-label="এডিট"
+                          aria-label="Edit"
                         >
                           <i className="fa-solid fa-pen text-xs" />
                         </button>
                         <button
                           onClick={() => {
-                            if (!confirm(`"${topic.title}" মুছবেন?`)) return;
-                            run(() => deleteTopic(fdOnlyId(topic.id)), "টপিক মুছে ফেলা হয়েছে");
+                            if (!confirm(`Delete "${topic.title}"?`)) return;
+                            run(() => deleteTopic(fdOnlyId(topic.id)), "Topic deleted");
                           }}
                           className="wp-btn wp-btn-danger !px-2"
-                          aria-label="মুছুন"
+                          aria-label="Delete"
                         >
                           <i className="fa-solid fa-trash text-xs" />
                         </button>
@@ -263,7 +263,7 @@ export function CurriculumBuilder({
                       onClick={() => setAddingTopicSection(section.id)}
                       className="text-xs font-semibold text-[#2271b1] hover:text-[#135e96] hover:underline"
                     >
-                      <i className="fa-solid fa-plus" /> টপিক যোগ করুন
+                      <i className="fa-solid fa-plus" /> Add Topic
                     </button>
                   )}
                 </div>
@@ -280,20 +280,20 @@ export function CurriculumBuilder({
                   await createSection(new FormData(form));
                   form.reset();
                   setAddingSection(false);
-                }, "সেকশন যোগ হয়েছে");
+                }, "Section added");
               }}
               className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-[#b5bcc2] bg-white p-3"
             >
               <input type="hidden" name="course_id" value={course.id} />
               <div className="flex-1">
-                <label className="wp-label">সেকশনের নাম</label>
-                <input name="title" required placeholder="যেমন: ভূমিকা" className="wp-input" />
+                <label className="wp-label">Section Name</label>
+                <input name="title" required placeholder="e.g., Introduction" className="wp-input" />
               </div>
               <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
-                <i className="fa-solid fa-plus" /> সেকশন যোগ করুন
+                <i className="fa-solid fa-plus" /> Add Section
               </button>
               <button type="button" onClick={() => setAddingSection(false)} className="wp-btn">
-                বাতিল
+                Cancel
               </button>
             </form>
           ) : (
@@ -301,7 +301,7 @@ export function CurriculumBuilder({
               onClick={() => setAddingSection(true)}
               className="w-full rounded-lg border border-dashed border-[#b5bcc2] px-3 py-2 text-sm font-semibold text-[#2271b1] hover:bg-[#f0f6fc]"
             >
-              <i className="fa-solid fa-plus" /> নতুন সেকশন
+              <i className="fa-solid fa-plus" /> New Section
             </button>
           )}
         </div>
@@ -311,7 +311,7 @@ export function CurriculumBuilder({
         <div className="wp-panel-header">
           <span>
             <i className="fa-solid fa-video mr-1 text-[#2271b1]" />
-            লাইভ ক্লাস ({liveClasses.length})
+            Live Classes ({liveClasses.length})
           </span>
         </div>
         <div className="wp-panel-body space-y-3">
@@ -330,21 +330,21 @@ export function CurriculumBuilder({
                         dateStyle: "medium",
                         timeStyle: "short",
                       })
-                    : "তারিখ নির্ধারিত নয়"}
+                    : "No date scheduled"}
                   {c.duration_minutes > 0
-                    ? ` • ${c.duration_minutes} মিনিট`
+                    ? ` • ${c.duration_minutes} min`
                     : ""}
                 </p>
               </div>
               <button
                 onClick={() => {
-                  if (!confirm("লাইভ ক্লাসটি মুছবেন?")) return;
+                  if (!confirm("Delete this live class?")) return;
                   const fd = new FormData();
                   fd.set("id", c.id);
-                  run(() => deleteLiveClass(fd), "লাইভ ক্লাস মুছে ফেলা হয়েছে");
+                  run(() => deleteLiveClass(fd), "Live class deleted");
                 }}
                 className="wp-btn wp-btn-danger !px-2"
-                aria-label="মুছুন"
+                aria-label="Delete"
               >
                 <i className="fa-solid fa-trash text-xs" />
               </button>
@@ -357,19 +357,19 @@ export function CurriculumBuilder({
               await run(async () => {
                 await createLiveClass(new FormData(form));
                 form.reset();
-              }, "লাইভ ক্লাস যোগ হয়েছে");
+              }, "Live class added");
             }}
             className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]"
           >
             <input type="hidden" name="course_id" value={course.id} />
-            <input name="title" required placeholder="ক্লাস শিরোনাম" className="wp-input" />
+            <input name="title" required placeholder="Class title" className="wp-input" />
             <input name="scheduled_at" type="datetime-local" className="wp-input" />
             <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
-              <i className="fa-solid fa-plus" /> যোগ করুন
+              <i className="fa-solid fa-plus" /> Add
             </button>
-            <input name="description" placeholder="বর্ণনা (ঐচ্ছিক)" className="wp-input sm:col-span-2" />
-            <input name="meeting_url" placeholder="Zoom/Meet লিংক (ঐচ্ছিক)" className="wp-input" />
-            <input name="duration_minutes" type="text" inputMode="numeric" defaultValue={60} placeholder="সময় (মিনিট)" className="wp-input" />
+            <input name="description" placeholder="Description (optional)" className="wp-input sm:col-span-2" />
+            <input name="meeting_url" placeholder="Zoom/Meet link (optional)" className="wp-input" />
+            <input name="duration_minutes" type="text" inputMode="numeric" defaultValue={60} placeholder="Duration (minutes)" className="wp-input" />
           </form>
         </div>
       </div>
@@ -378,7 +378,7 @@ export function CurriculumBuilder({
         <div className="wp-panel-header">
           <span>
             <i className="fa-solid fa-bullhorn mr-1 text-[#2271b1]" />
-            নোটিশ ({announcements.length})
+            Announcements ({announcements.length})
           </span>
         </div>
         <div className="wp-panel-body space-y-3">
@@ -400,13 +400,13 @@ export function CurriculumBuilder({
               </span>
               <button
                 onClick={() => {
-                  if (!confirm("নোটিশটি মুছবেন?")) return;
+                  if (!confirm("Delete this announcement?")) return;
                   const fd = new FormData();
                   fd.set("id", a.id);
-                  run(() => deleteAnnouncement(fd), "নোটিশ মুছে ফেলা হয়েছে");
+                  run(() => deleteAnnouncement(fd), "Announcement deleted");
                 }}
                 className="wp-btn wp-btn-danger !px-2"
-                aria-label="মুছুন"
+                aria-label="Delete"
               >
                 <i className="fa-solid fa-trash text-xs" />
               </button>
@@ -419,15 +419,15 @@ export function CurriculumBuilder({
               await run(async () => {
                 await createAnnouncement(new FormData(form));
                 form.reset();
-              }, "নোটিশ যোগ হয়েছে");
+              }, "Announcement added");
             }}
             className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_2fr_auto]"
           >
             <input type="hidden" name="course_id" value={course.id} />
-            <input name="title" required placeholder="নোটিশ শিরোনাম" className="wp-input" />
-            <input name="body" placeholder="বিস্তারিত (ঐচ্ছিক)" className="wp-input" />
+            <input name="title" required placeholder="Announcement title" className="wp-input" />
+            <input name="body" placeholder="Details (optional)" className="wp-input" />
             <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
-              <i className="fa-solid fa-plus" /> যোগ করুন
+              <i className="fa-solid fa-plus" /> Add
             </button>
           </form>
         </div>
@@ -475,15 +475,15 @@ function TopicForm({
     try {
       if (topic) {
         await updateTopic(new FormData(form));
-        showToast("টপিক আপডেট হয়েছে");
+        showToast("Topic updated");
       } else {
         await createTopic(new FormData(form));
         form.reset();
-        showToast("টপিক যোগ হয়েছে");
+        showToast("Topic added");
       }
       onDone();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "কিছু একটা সমস্যা হয়েছে", "error");
+      showToast(err instanceof Error ? err.message : "Something went wrong", "error");
     } finally {
       setPending(false);
     }
@@ -496,7 +496,7 @@ function TopicForm({
       {topic && <input type="hidden" name="id" value={topic.id} />}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div>
-          <label className="wp-label">টপিক টাইপ</label>
+          <label className="wp-label">Topic Type</label>
           <select name="type" className="wp-input" defaultValue={topic?.type ?? "lesson"}>
             {TOPIC_TYPES.map((t) => (
               <option key={t.value} value={t.value}>
@@ -506,8 +506,8 @@ function TopicForm({
           </select>
         </div>
         <div>
-          <label className="wp-label">শিরোনাম</label>
-          <input name="title" required defaultValue={topic?.title} placeholder="যেমন: ক্লাস ১" className="wp-input" />
+          <label className="wp-label">Title</label>
+          <input name="title" required defaultValue={topic?.title} placeholder="e.g., Class 1" className="wp-input" />
         </div>
         <div>
           <label className="wp-label">Slug</label>
@@ -522,39 +522,39 @@ function TopicForm({
           className="sm:col-span-2"
         />
         <div>
-          <label className="wp-label">সময় (মিনিট)</label>
+          <label className="wp-label">Duration (minutes)</label>
           <input name="duration_minutes" type="text" inputMode="numeric" defaultValue={topic?.duration_minutes ?? 0} className="wp-input" />
         </div>
       </div>
       <div className="mt-2">
-        <label className="wp-label">বর্ণনা</label>
+        <label className="wp-label">Description</label>
         <input name="description" defaultValue={topic?.description ?? ""} className="wp-input" />
       </div>
       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div>
-          <label className="wp-label">কুইজ পাস % (কুইজের জন্য)</label>
+          <label className="wp-label">Quiz pass % (for quizzes)</label>
           <input name="pass_percent" type="text" inputMode="numeric" defaultValue={topic?.pass_percent ?? 60} className="wp-input" />
         </div>
         <div>
-          <label className="wp-label">ড্রিপ রিলিজ (এনরোলের পরে দিন)</label>
+          <label className="wp-label">Drip release (days after enrollment)</label>
           <input name="release_days" type="text" inputMode="numeric" defaultValue={topic?.release_days ?? 0} className="wp-input" />
         </div>
       </div>
       <div className="mt-2">
-        <label className="wp-label">কনটেন্ট (লেসন/অ্যাসাইনমেন্টের জন্য)</label>
+        <label className="wp-label">Content (for lessons/assignments)</label>
         <textarea name="content" rows={2} defaultValue={topic?.content ?? ""} className="wp-input" />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-xs font-medium text-[#3c434a]">
           <input type="checkbox" name="is_free" defaultChecked={topic?.is_free ?? false} className="h-3.5 w-3.5" />
-          ফ্রি প্রিভিউ
+          Free Preview
         </label>
         <div className="ml-auto flex gap-2">
           <button type="submit" className="wp-btn wp-btn-primary" disabled={pending}>
-            <i className="fa-solid fa-floppy-disk" /> {pending ? "সেভ হচ্ছে..." : isEdit ? "আপডেট" : "যোগ করুন"}
+            <i className="fa-solid fa-floppy-disk" /> {pending ? "Saving..." : isEdit ? "Update" : "Add"}
           </button>
           <button type="button" onClick={onDone} className="wp-btn">
-            বাতিল
+            Cancel
           </button>
         </div>
       </div>

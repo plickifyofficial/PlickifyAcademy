@@ -2,7 +2,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 
-export const metadata = { title: "প্রোফাইল" };
+export const metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -20,9 +20,9 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-2xl font-bold text-zinc-900">প্রোফাইল</h1>
+      <h1 className="text-2xl font-bold text-zinc-900">Profile</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        আপনার একাউন্টের তথ্য দেখুন
+        View your account information
       </p>
 
       <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6">
@@ -41,15 +41,15 @@ export default async function ProfilePage() {
         <dl className="mt-6 grid grid-cols-1 gap-4 border-t border-zinc-100 pt-6 sm:grid-cols-2">
           <div>
             <dt className="text-xs font-medium uppercase text-zinc-400">
-              ভূমিকা
+              Role
             </dt>
             <dd className="mt-1 text-sm font-medium text-zinc-700">
-              {profile?.role === "admin" ? "অ্যাডমিন" : "স্টুডেন্ট"}
+              {profile?.role === "admin" ? "Admin" : "Student"}
             </dd>
           </div>
           <div>
             <dt className="text-xs font-medium uppercase text-zinc-400">
-              সাইন আপ
+              Signed up
             </dt>
             <dd className="mt-1 text-sm font-medium text-zinc-700">
               {user.created_at

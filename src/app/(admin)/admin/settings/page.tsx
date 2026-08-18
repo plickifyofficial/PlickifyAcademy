@@ -26,17 +26,17 @@ export default async function AdminSettingsPage() {
 
   const defaults = {
     site_name: "Plickify Academy",
-    tagline: "শেখো, বেড়ে উঠো",
+    tagline: "Learn, grow up",
     logo_url: null as string | null,
     favicon_url: null as string | null,
   };
 
   return (
     <div className="max-w-4xl">
-      <h1 className="wp-page-title">সাইট সেটিংস</h1>
+      <h1 className="wp-page-title">Site Settings</h1>
       <p className="wp-subtitle">
-        লোগো, ফেভিকন ও সাইটের নাম পরিবর্তন করুন — ইনস্ট্যান্ট সব জায়গায়
-        আপডেট হয়।
+        Change the logo, favicon, and site name — updates instantly
+        everywhere.
       </p>
 
       <SiteSettingsForm settings={settings ?? defaults} />

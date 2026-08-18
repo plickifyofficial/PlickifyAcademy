@@ -60,19 +60,19 @@ export default async function DashboardLayout({
             href="/courses"
             className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
           >
-            কোর্স
+            Courses
           </Link>
           <Link
             href="/dashboard/courses"
             className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
           >
-            আমার কোর্স
+            My Courses
           </Link>
           <Link
             href="/dashboard/profile"
             className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
           >
-            প্রোফাইল
+            Profile
           </Link>
         </nav>
 
@@ -82,7 +82,7 @@ export default async function DashboardLayout({
             href="/"
             className="hidden rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 sm:inline-block"
           >
-            <i className="fa-solid fa-globe mr-1" /> সাইট দেখুন
+            <i className="fa-solid fa-globe mr-1" /> View Site
           </Link>
           <span className="hidden rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700 lg:inline">
             {name.split(" ")[0]}
@@ -90,7 +90,7 @@ export default async function DashboardLayout({
           <form action={signOut}>
             <button
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
-              aria-label="লগআউট"
+              aria-label="Log out"
             >
               <i className="fa-solid fa-right-from-bracket" />
             </button>

@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "আমার কোর্স" };
+export const metadata = { title: "My Courses" };
 
 export default async function MyCoursesPage() {
   const supabase = await createClient();
@@ -44,9 +44,9 @@ export default async function MyCoursesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900">আমার কোর্স</h1>
+      <h1 className="text-2xl font-bold text-zinc-900">My Courses</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        আপনি যেসব কোর্সে এনরোল করেছেন
+        The courses you are enrolled in
       </p>
 
       {enrollments && enrollments.length > 0 ? (
@@ -74,7 +74,7 @@ export default async function MyCoursesPage() {
                   {course.title.charAt(0)}
                   {pct === 100 && (
                     <span className="absolute right-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white">
-                      <i className="fa-solid fa-check mr-1" />সম্পন্ন
+                      <i className="fa-solid fa-check mr-1" />Completed
                     </span>
                   )}
                 </div>
@@ -93,14 +93,14 @@ export default async function MyCoursesPage() {
                       />
                     </div>
                     <p className="mt-2 text-xs font-medium text-zinc-500">
-                      {pct}% সম্পন্ন ({done}/{total} লেসন)
+                      {pct}% complete ({done}/{total} lessons)
                     </p>
                   </div>
                   <Link
                     href={`/courses/${course.slug}`}
                     className="mt-4 block rounded-lg bg-brand-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-brand-700"
                   >
-                    {pct === 0 ? "শুরু করুন" : pct === 100 ? "রিভিউ করুন" : "চালিয়ে যান"}
+                    {pct === 0 ? "Start Course" : pct === 100 ? "Review Course" : "Continue Learning"}
                   </Link>
                 </div>
               </div>
@@ -109,12 +109,12 @@ export default async function MyCoursesPage() {
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
-          <p className="text-zinc-600">এখনো কোনো কোর্সে এনরোল করা হয়নি।</p>
+          <p className="text-zinc-600">You haven't enrolled in any courses yet.</p>
           <Link
             href="/courses"
             className="mt-4 inline-block rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
           >
-            কোর্স ব্রাউজ করুন
+            Browse Courses
           </Link>
         </div>
       )}

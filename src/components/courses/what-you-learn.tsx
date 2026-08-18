@@ -39,7 +39,7 @@ export function WhatYouLearn({ modules }: { modules: LearnModule[] }) {
                   {mod.title}
                 </span>
                 <span className="mt-1 block text-xs text-zinc-500">
-                  {mod.items.length}টি লেসন
+                  {mod.items.length} lessons
                 </span>
               </span>
               <span
@@ -69,7 +69,7 @@ export function WhatYouLearn({ modules }: { modules: LearnModule[] }) {
                     </span>
                     {item.duration_minutes > 0 && (
                       <span className="text-xs text-zinc-400">
-                        {item.duration_minutes}মি
+                        {item.duration_minutes}min
                       </span>
                     )}
                   </div>

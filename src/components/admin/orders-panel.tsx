@@ -43,23 +43,23 @@ export function OrdersPanel({
 
   const statusMeta = (status: string) =>
     status === "paid"
-      ? { cls: "wp-tag-green", label: "পেইড" }
+      ? { cls: "wp-tag-green", label: "Paid" }
       : status === "failed"
-        ? { cls: "wp-tag-red", label: "ব্যর্থ" }
-        : { cls: "wp-tag-amber", label: "পেন্ডিং" };
+        ? { cls: "wp-tag-red", label: "Failed" }
+        : { cls: "wp-tag-amber", label: "Pending" };
 
   return (
     <div className="overflow-x-auto">
       <table className="wp-table min-w-[860px]">
         <thead>
           <tr>
-            <th>কোর্স</th>
-            <th>স্টুডেন্ট</th>
-            <th>মেথড / TrxID</th>
-            <th>পরিমাণ</th>
-            <th>স্ট্যাটাস</th>
-            <th>তারিখ</th>
-            <th className="text-right">অ্যাকশন</th>
+            <th>Course</th>
+            <th>Student</th>
+            <th>Method / TrxID</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th className="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -113,23 +113,23 @@ export function OrdersPanel({
                               run(
                                 order.id,
                                 verifyOrder,
-                                "পেমেন্ট নিশ্চিত হয়েছে — এনরোল করা হয়েছে",
+                                "Payment confirmed — course enrolled",
                               )
                             }
                             disabled={pending}
                             className="wp-btn wp-btn-primary"
                           >
                             <i className="fa-solid fa-check" />{" "}
-                            {pending ? "..." : "ভেরিফাই"}
+                            {pending ? "..." : "Verify"}
                           </button>
                           <button
                             onClick={() =>
-                              run(order.id, rejectOrder, "অর্ডারটি ব্যর্থ করা হয়েছে")
+                              run(order.id, rejectOrder, "Order has been marked as failed")
                             }
                             disabled={pending}
                             className="wp-btn wp-btn-danger"
                           >
-                            <i className="fa-solid fa-xmark" /> বাতিল
+                            <i className="fa-solid fa-xmark" /> Cancel
                           </button>
                         </>
                       )}
@@ -141,7 +141,7 @@ export function OrdersPanel({
           ) : (
             <tr>
               <td colSpan={7} className="py-10 text-center text-[#646970]">
-                এখনো কোনো অর্ডার নেই।
+                No orders yet.
               </td>
             </tr>
           )}

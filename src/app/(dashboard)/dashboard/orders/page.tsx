@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "আমার অর্ডার" };
+export const metadata = { title: "My Orders" };
 
 export default async function OrdersPage() {
   const supabase = await createClient();
@@ -20,26 +20,26 @@ export default async function OrdersPage() {
 
   const statusMeta = (status: string) =>
     status === "paid"
-      ? { cls: "bg-green-100 text-green-700", label: "পেইড" }
+      ? { cls: "bg-green-100 text-green-700", label: "Paid" }
       : status === "failed"
-        ? { cls: "bg-red-100 text-red-700", label: "ব্যর্থ" }
-        : { cls: "bg-amber-100 text-amber-700", label: "রিভিউ চলছে" };
+        ? { cls: "bg-red-100 text-red-700", label: "Failed" }
+        : { cls: "bg-amber-100 text-amber-700", label: "Under Review" };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900">আমার অর্ডার</h1>
+      <h1 className="text-2xl font-bold text-zinc-900">My Orders</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        আপনার পেমেন্টের অবস্থা এখানে দেখুন
+        Check your payment status here
       </p>
 
       {(orders ?? []).length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
-          <p className="text-zinc-600">এখনো কোনো অর্ডার নেই।</p>
+          <p className="text-zinc-600">You have no orders yet.</p>
           <Link
             href="/courses"
             className="mt-4 inline-block rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
           >
-            কোর্স ব্রাউজ করুন
+            Browse Courses
           </Link>
         </div>
       ) : (
@@ -60,7 +60,7 @@ export default async function OrdersPage() {
                     href={`/courses/${course?.slug ?? ""}`}
                     className="font-semibold text-zinc-900 hover:text-brand-700"
                   >
-                    {course?.title ?? "কোর্স"}
+                    {course?.title ?? "Course"}
                   </Link>
                   {order.payment_method && (
                     <p className="mt-1 text-sm text-zinc-500">
@@ -98,8 +98,8 @@ export default async function OrdersPage() {
 
           <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
             <i className="fa-solid fa-circle-info mr-1" />
-            "রিভিউ চলছে" মানে আপনার পেমেন্ট admin যাচাই করছেন। যাচাই হলে
-            স্বয়ংক্রিয়ভাবে কোর্স এনরোল হয়ে যাবে এবং নোটিফিকেশন পাবেন।
+            "Under Review" means your payment is being verified by an admin. Once verified,
+            your course will be enrolled automatically and you will receive a notification.
           </p>
         </div>
       )}

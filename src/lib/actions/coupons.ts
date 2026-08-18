@@ -18,13 +18,13 @@ export async function createCoupon(formData: FormData) {
   await requireAdmin();
 
   const code = String(formData.get("code")).trim().toUpperCase();
-  if (!code) throw new Error("কুপন কোড লিখুন");
+  if (!code) throw new Error("Please enter a coupon code");
 
   const discountType = String(formData.get("discount_type")) as
     | "percent"
     | "flat";
   const value = parseFloat(String(formData.get("value")));
-  if (isNaN(value) || value <= 0) throw new Error("সঠিক ডিসকাউন্ট দিন");
+  if (isNaN(value) || value <= 0) throw new Error("Please provide a valid discount");
 
   const courseId = String(formData.get("course_id") || "").trim() || null;
   const maxUses = parseInt(String(formData.get("max_uses")), 10) || 0;

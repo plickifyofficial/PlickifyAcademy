@@ -131,10 +131,10 @@ export function ContentEditor({
     setPending(section.key);
     try {
       await saveSectionContent(section.key, values[section.key] ?? {});
-      showToast(`${section.title} সেভ হয়েছে`);
+      showToast(`${section.title} saved`);
       router.refresh();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "সেভ করা যায়নি", "error");
+      showToast(err instanceof Error ? err.message : "Could not save", "error");
     } finally {
       setPending(null);
     }
@@ -145,10 +145,10 @@ export function ContentEditor({
     try {
       await saveSectionContent(section.key, section.defaults);
       setValues((v) => ({ ...v, [section.key]: section.defaults }));
-      showToast(`${section.title} ডিফল্টে রিসেট হয়েছে`);
+      showToast(`${section.title} reset to defaults`);
       router.refresh();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "রিসেট করা যায়নি", "error");
+      showToast(err instanceof Error ? err.message : "Could not reset", "error");
     } finally {
       setPending(null);
     }
@@ -166,9 +166,9 @@ export function ContentEditor({
     try {
       const res = await uploadContentImage(fd);
       change(sectionKey, path, res.url);
-      showToast("ইমেজ আপলোড হয়েছে");
+      showToast("Image uploaded");
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "ইমেজ আপলোড ব্যর্থ", "error");
+      showToast(err instanceof Error ? err.message : "Image upload failed", "error");
     }
   }
 
@@ -232,14 +232,14 @@ export function ContentEditor({
                     className="wp-btn wp-btn-primary"
                   >
                     <i className="fa-solid fa-floppy-disk" />
-                    {pending === section.key ? "সেভ হচ্ছে..." : "সেভ করুন"}
+                    {pending === section.key ? "Saving..." : "Save"}
                   </button>
                   <button
                     onClick={() => reset(section)}
                     disabled={pending === section.key}
                     className="wp-btn"
                   >
-                    <i className="fa-solid fa-rotate-left" /> ডিফল্টে রিসেট
+                    <i className="fa-solid fa-rotate-left" /> Reset to Defaults
                   </button>
                 </div>
               </div>
@@ -349,11 +349,11 @@ function FieldRenderer({
                 type="text"
                 className="wp-input"
                 value={typeof value === "string" ? value : ""}
-                placeholder="ইমেজ URL অথবা আপলোড করুন"
+                placeholder="Image URL or upload"
                 onChange={(e) => onChange([], e.target.value)}
               />
               <label className="block cursor-pointer rounded border border-dashed border-[#8c8f94] px-3 py-2 text-center text-xs font-medium text-[#2271b1] hover:border-[#2271b1]">
-                <i className="fa-solid fa-upload mr-1" /> ইমেজ আপলোড করুন
+                <i className="fa-solid fa-upload mr-1" /> Upload Image
                 <input
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
@@ -375,7 +375,7 @@ function FieldRenderer({
                   type="text"
                   className="wp-input"
                   value={typeof item === "string" ? item : ""}
-                  placeholder={field.itemLabel ?? "আইটেম"}
+                  placeholder={field.itemLabel ?? "Item"}
                   onChange={(e) => {
                     const next = [...((Array.isArray(value) ? value : []) as string[])];
                     next[i] = e.target.value;
@@ -390,7 +390,7 @@ function FieldRenderer({
                     onChange([], next);
                   }}
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[#c3c4c7] text-[#d63638] hover:bg-red-50"
-                  aria-label="মুছুন"
+                  aria-label="Delete"
                 >
                   <i className="fa-solid fa-trash-can text-sm" />
                 </button>
@@ -403,7 +403,7 @@ function FieldRenderer({
               }
               className="wp-btn"
             >
-              <i className="fa-solid fa-plus" /> যোগ করুন
+              <i className="fa-solid fa-plus" /> Add
             </button>
           </div>
         </FieldWrapper>
@@ -430,7 +430,7 @@ function FieldRenderer({
                         onChange([], next);
                       }}
                       className="flex h-7 w-7 items-center justify-center rounded border border-[#c3c4c7] text-[#2271b1] disabled:opacity-40"
-                      aria-label="উপরে"
+                      aria-label="Move up"
                     >
                       <i className="fa-solid fa-arrow-up text-xs" />
                     </button>
@@ -445,7 +445,7 @@ function FieldRenderer({
                         onChange([], next);
                       }}
                       className="flex h-7 w-7 items-center justify-center rounded border border-[#c3c4c7] text-[#2271b1] disabled:opacity-40"
-                      aria-label="নিচে"
+                      aria-label="Move down"
                     >
                       <i className="fa-solid fa-arrow-down text-xs" />
                     </button>
@@ -457,7 +457,7 @@ function FieldRenderer({
                         onChange([], next);
                       }}
                       className="flex h-7 w-7 items-center justify-center rounded border border-[#c3c4c7] text-[#d63638] hover:bg-red-50"
-                      aria-label="মুছুন"
+aria-label="Delete"
                     >
                       <i className="fa-solid fa-trash-can text-xs" />
                     </button>
@@ -488,7 +488,7 @@ function FieldRenderer({
               }
               className="wp-btn"
             >
-              <i className="fa-solid fa-plus" /> {field.itemLabel} যোগ করুন
+              <i className="fa-solid fa-plus" /> Add {field.itemLabel}
             </button>
           </div>
         </FieldWrapper>

@@ -37,9 +37,9 @@ export function QnaSection({
     try {
       await askQuestion(courseId, question);
       setQuestion("");
-      showToast("প্রশ্ন জমা হয়েছে");
+      showToast("Question submitted");
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "জমা দেওয়া যায়নি", "error");
+      showToast(err instanceof Error ? err.message : "Couldn't submit", "error");
     } finally {
       setPending(false);
     }
@@ -52,9 +52,9 @@ export function QnaSection({
     try {
       await answerQuestion(qnaId, text);
       setAnswerFor(null);
-      showToast("উত্তর জমা হয়েছে");
+      showToast("Answer submitted");
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "উত্তর দেওয়া যায়নি", "error");
+      showToast(err instanceof Error ? err.message : "Couldn't submit the answer", "error");
     } finally {
       setPending(false);
     }
@@ -62,7 +62,7 @@ export function QnaSection({
 
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-bold text-zinc-900">প্রশ্ন ও উত্তর</h2>
+      <h2 className="text-2xl font-bold text-zinc-900">Questions &amp; Answers</h2>
 
       {isEnrolled ? (
         <form
@@ -72,7 +72,7 @@ export function QnaSection({
           <input
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="কোর্স সম্পর্কে প্রশ্ন করুন..."
+            placeholder="Ask a question about the course..."
             className="flex-1 rounded-xl border border-zinc-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
           />
           <button
@@ -80,18 +80,18 @@ export function QnaSection({
             disabled={pending || !question.trim()}
             className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
           >
-            <i className="fa-solid fa-paper-plane" /> জিজ্ঞেস করুন
+            <i className="fa-solid fa-paper-plane" /> Ask
           </button>
         </form>
       ) : (
         <p className="mt-5 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-500">
-          প্রশ্ন করতে হলে এনরোল করুন।
+          Enroll to ask a question.
         </p>
       )}
 
       <div className="mt-6 space-y-4">
         {items.length === 0 && (
-          <p className="text-zinc-500">এখনো কোনো প্রশ্ন নেই।</p>
+          <p className="text-zinc-500">No questions yet.</p>
         )}
         {items.map((q) => (
           <div key={q.id} className="rounded-2xl border border-zinc-200 bg-white p-5">
@@ -102,7 +102,7 @@ export function QnaSection({
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-zinc-900">{q.question}</p>
                 <p className="mt-0.5 text-xs text-zinc-400">
-                  {q.profiles?.full_name ?? "শিক্ষার্থী"} ·{" "}
+                  {q.profiles?.full_name ?? "Student"} ·{" "}
                   {new Date(q.created_at).toLocaleDateString("bn-BD")}
                 </p>
               </div>
@@ -111,7 +111,7 @@ export function QnaSection({
             {q.answer ? (
               <div className="mt-3 rounded-xl border-l-4 border-brand-500 bg-brand-50/50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
-                  <i className="fa-solid fa-reply mr-1" /> উত্তর
+                  <i className="fa-solid fa-reply mr-1" /> Answer
                 </p>
                 <p className="mt-1 text-sm text-zinc-700">{q.answer}</p>
               </div>
@@ -125,7 +125,7 @@ export function QnaSection({
                         onChange={(e) =>
                           setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))
                         }
-                        placeholder="উত্তর লিখুন..."
+                        placeholder="Write an answer..."
                         className="flex-1 rounded-xl border border-zinc-300 px-4 py-2 text-sm focus:border-brand-500 focus:outline-none"
                       />
                       <button
@@ -133,7 +133,7 @@ export function QnaSection({
                         disabled={pending || !(answers[q.id] ?? "").trim()}
                         className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
                       >
-                        উত্তর দিন
+                        Reply
                       </button>
                     </div>
                   ) : (
@@ -141,7 +141,7 @@ export function QnaSection({
                       onClick={() => setAnswerFor(q.id)}
                       className="text-xs font-semibold text-brand-600 hover:underline"
                     >
-                      <i className="fa-solid fa-reply mr-1" /> উত্তর দিন
+                      <i className="fa-solid fa-reply mr-1" /> Reply
                     </button>
                   )}
                 </div>

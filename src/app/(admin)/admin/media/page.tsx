@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MediaDeleteButton } from "@/components/admin/media-delete-button";
 
-export const metadata = { title: "মিডিয়া লাইব্রেরি" };
+export const metadata = { title: "Media Library" };
 export const dynamic = "force-dynamic";
 
 type MediaFile = {
@@ -52,12 +52,12 @@ export default async function AdminMediaPage() {
 
   return (
     <div>
-      <h1 className="wp-page-title">মিডিয়া লাইব্রেরি</h1>
-      <p className="wp-subtitle">আপলোড করা ছবি ও ফাইল ম্যানেজ করুন</p>
+      <h1 className="wp-page-title">Media Library</h1>
+      <p className="wp-subtitle">Manage uploaded images and files</p>
 
       <div className="wp-panel">
         <div className="wp-panel-header">
-          সব ফাইল
+          All Files
           <span className="rounded bg-[#f0f6fc] px-2 py-0.5 text-xs font-semibold text-[#2271b1]">
             {files.length}
           </span>
@@ -91,7 +91,7 @@ export default async function AdminMediaPage() {
                       rel="noreferrer"
                       className="wp-btn flex-1"
                     >
-                      <i className="fa-solid fa-eye" /> দেখুন
+                      <i className="fa-solid fa-eye" /> View
                     </a>
                     <MediaDeleteButton bucket={file.bucket} path={file.name} />
                   </div>
@@ -101,7 +101,7 @@ export default async function AdminMediaPage() {
           </div>
         ) : (
           <p className="p-6 text-sm text-[#646970]">
-            এখনো কোনো ফাইল নেই। কোর্স কভার বা লোগো আপলোড করলে এখানে দেখা যাবে।
+            No files yet. Uploaded course covers or logos will appear here.
           </p>
         )}
       </div>

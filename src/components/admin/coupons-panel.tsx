@@ -25,7 +25,7 @@ export function CouponsPanel({ coupons, courses }: Props) {
     setPending(true);
     try {
       await createCoupon(new FormData(e.currentTarget));
-      showToast("কুপন তৈরি হয়েছে", "success");
+      showToast("Coupon created", "success");
       router.refresh();
     } catch (err) {
       showToast((err as Error).message, "error");
@@ -46,7 +46,7 @@ export function CouponsPanel({ coupons, courses }: Props) {
   async function handleDelete(id: string) {
     try {
       await deleteCoupon(id);
-      showToast("কুপন মুছে ফেলা হয়েছে", "success");
+      showToast("Coupon deleted", "success");
       router.refresh();
     } catch (err) {
       showToast((err as Error).message, "error");
@@ -60,10 +60,10 @@ export function CouponsPanel({ coupons, courses }: Props) {
         className="wp-card h-fit rounded-lg border border-black/10 bg-white p-5"
       >
         <h2 className="mb-4 text-sm font-semibold text-zinc-800">
-          নতুন কুপন
+          New Coupon
         </h2>
 
-        <label className="wp-label">কুপন কোড</label>
+        <label className="wp-label">Coupon Code</label>
         <input
           name="code"
           required
@@ -71,13 +71,13 @@ export function CouponsPanel({ coupons, courses }: Props) {
           className="wp-input mb-3"
         />
 
-        <label className="wp-label">ডিসকাউন্ট টাইপ</label>
+        <label className="wp-label">Discount Type</label>
         <select name="discount_type" className="wp-input mb-3">
-          <option value="percent">শতাংশ (%)</option>
-          <option value="flat">ফ্ল্যাট (৳)</option>
+          <option value="percent">Percentage (%)</option>
+          <option value="flat">Flat (৳)</option>
         </select>
 
-        <label className="wp-label">ভ্যালু</label>
+        <label className="wp-label">Value</label>
         <input
           name="value"
           type="number"
@@ -88,9 +88,9 @@ export function CouponsPanel({ coupons, courses }: Props) {
           className="wp-input mb-3"
         />
 
-        <label className="wp-label">কোর্স (ঐচ্ছিক)</label>
+        <label className="wp-label">Course (Optional)</label>
         <select name="course_id" className="wp-input mb-3">
-          <option value="">সব কোর্সে প্রযোজ্য</option>
+          <option value="">Applies to all courses</option>
           {courses.map((c) => (
             <option key={c.id} value={c.id}>
               {c.title}
@@ -98,7 +98,7 @@ export function CouponsPanel({ coupons, courses }: Props) {
           ))}
         </select>
 
-        <label className="wp-label">সর্বোচ্চ ব্যবহার (০ = সীমাহীন)</label>
+        <label className="wp-label">Max Uses (0 = Unlimited)</label>
         <input
           name="max_uses"
           type="number"
@@ -107,21 +107,21 @@ export function CouponsPanel({ coupons, courses }: Props) {
           className="wp-input mb-3"
         />
 
-        <label className="wp-label">মেয়াদ শেষ (ঐচ্ছিক)</label>
+        <label className="wp-label">Expires (Optional)</label>
         <input name="expires_at" type="datetime-local" className="wp-input mb-4" />
 
         <button
           disabled={pending}
           className="wp-btn wp-btn-primary w-full"
         >
-          {pending ? "তৈরি হচ্ছে..." : "কুপন তৈরি করুন"}
+          {pending ? "Creating..." : "Create Coupon"}
         </button>
       </form>
 
       <div className="space-y-3 lg:col-span-2">
         {coupons.length === 0 ? (
           <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-8 text-center text-sm text-zinc-500">
-            এখনো কোনো কুপন নেই।
+            No coupons yet.
           </div>
         ) : (
           coupons.map((coupon) => (
@@ -147,18 +147,18 @@ export function CouponsPanel({ coupons, courses }: Props) {
                   </span>
                   {!coupon.is_active && (
                     <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-500">
-                      নিষ্ক্রিয়
+Inactive
                     </span>
                   )}
                 </div>
                 <p className="mt-1 text-xs text-zinc-500">
-                  {coupon.course_id ? "নির্দিষ্ট কোর্সে" : "সব কোর্সে"} • ব্যবহৃত{" "}
+                  {coupon.course_id ? "Specific course" : "All courses"} • Used{" "}
                   {coupon.used_count}
                   {coupon.max_uses > 0 ? `/${coupon.max_uses}` : ""}
                   {coupon.expires_at && (
                     <>
                       {" "}
-                      • শেষ:{" "}
+                      • Expires:{" "}
                       {new Date(coupon.expires_at).toLocaleDateString("bn-BD")}
                     </>
                   )}
@@ -173,13 +173,13 @@ export function CouponsPanel({ coupons, courses }: Props) {
                     : "border-green-300 text-green-700 hover:bg-green-50"
                 }`}
               >
-                {coupon.is_active ? "নিষ্ক্রিয় করুন" : "সক্রিয় করুন"}
+                {coupon.is_active ? "Deactivate" : "Activate"}
               </button>
               <button
                 onClick={() => handleDelete(coupon.id)}
                 className="rounded border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
               >
-                মুছুন
+                Delete
               </button>
             </div>
           ))

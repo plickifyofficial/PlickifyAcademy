@@ -41,17 +41,17 @@ export function detectProvider(url: string): VideoProvider {
 export function providerHint(type: VideoProvider): string {
   switch (type) {
     case "youtube":
-      return "YouTube ভিডিও লিংক (যেমন: https://youtu.be/xxxx বা https://www.youtube.com/watch?v=xxxx)";
+      return "YouTube video link (e.g. https://youtu.be/xxxx or https://www.youtube.com/watch?v=xxxx)";
     case "drive":
-      return "Google Drive শেয়ার লিংক (যেমন: https://drive.google.com/file/d/XXXX/view) — লিংকটি অবশ্যই 'Anyone with the link' হিসাবে শেয়ার করা থাকতে হবে";
+      return "Google Drive share link (e.g. https://drive.google.com/file/d/XXXX/view) — the link must be shared as 'Anyone with the link'";
     case "vimeo":
-      return "Vimeo ভিডিও লিংক";
+      return "Vimeo video link";
     case "direct":
-      return "সরাসরি ভিডিও ফাইল URL (.mp4/.webm/.ogg)";
+      return "Direct video file URL (.mp4/.webm/.ogg)";
     case "embed":
-      return "পুরো iframe embed কোড পেস্ট করুন (YouTube / Google Drive / Vimeo থেকে Share → Embed)";
+      return "Paste the full iframe embed code (Share → Embed from YouTube / Google Drive / Vimeo)";
     default:
-      return "কোনো ভিডিও নেই";
+      return "No video";
   }
 }
 

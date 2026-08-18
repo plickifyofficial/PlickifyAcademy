@@ -66,32 +66,32 @@ export const skills: Skill[] = [
   {
     icon: "fa-solid fa-brain",
     title: "AI Productivity",
-    desc: "AI tools দিয়ে smart work করার skill।",
+    desc: "Learn to work smarter using AI tools.",
   },
   {
     icon: "fa-solid fa-briefcase",
     title: "Freelancing",
-    desc: "Online marketplace এবং client work শেখা।",
+    desc: "Learn online marketplaces and client work.",
   },
   {
     icon: "fa-solid fa-chart-line",
     title: "Passive Income",
-    desc: "Digital assets এবং online income strategy।",
+    desc: "Digital assets and online income strategies.",
   },
   {
     icon: "fa-solid fa-palette",
     title: "Graphic Design",
-    desc: "AI-powered modern graphic design।",
+    desc: "Modern graphic design powered by AI.",
   },
   {
     icon: "fa-solid fa-bullhorn",
     title: "Digital Marketing",
-    desc: "Marketing, ads এবং audience growth।",
+    desc: "Marketing, ads and audience growth.",
   },
   {
     icon: "fa-solid fa-globe",
     title: "Web & Tech",
-    desc: "Modern web এবং digital technology।",
+    desc: "Modern web and digital technology.",
   },
 ];
 
@@ -100,18 +100,18 @@ export const featuredCourse = {
   tagline: "FEATURED COURSE",
   title: "AI Income Mastery 2026",
   description:
-    "AI দিয়ে smart income তৈরি করার জন্য complete practical course।",
+    "A complete practical course to build smart income with AI.",
   features: [
-    "40+ ভিডিও লেসন",
-    "লাইভ ক্লাস",
-    "সাপ্তাহিক Q&A",
-    "প্র্যাকটিক্যাল অ্যাসাইনমেন্ট",
+    "40+ Video Lessons",
+    "Live Classes",
+    "Weekly Q&A",
+    "Practical Assignments",
     "Premium Resources",
     "Certificate",
   ],
   info: [
     { icon: "fa-solid fa-signal", label: "Level", value: "Beginner to Advanced" },
-    { icon: "fa-solid fa-language", label: "Language", value: "বাংলা" },
+    { icon: "fa-solid fa-language", label: "Language", value: "Bengali" },
     { icon: "fa-solid fa-user-group", label: "Students", value: "500+ Enrolled" },
     { icon: "fa-solid fa-clock", label: "Duration", value: "10+ Hours" },
     { icon: "fa-solid fa-certificate", label: "Certificate", value: "Yes, Verifiable" },
@@ -122,31 +122,31 @@ export const whyUs = [
   {
     icon: "fa-solid fa-graduation-cap",
     title: "Real Skills",
-    desc: "Practical এবং market-ready skill শেখানো হবে।",
+    desc: "You will be taught practical, market-ready skills.",
   },
   {
     icon: "fa-solid fa-rocket",
     title: "Real Projects",
-    desc: "বাস্তব project-এর মাধ্যমে experience তৈরি করুন।",
+    desc: "Build real experience through actual projects.",
   },
   {
     icon: "fa-solid fa-dollar-sign",
     title: "Real Income",
-    desc: "Skill ব্যবহার করে online income-এর পথে এগিয়ে যান।",
+    desc: "Move toward online income by using your skills.",
   },
 ];
 
 export const learningSteps = [
-  { icon: "fa-solid fa-user-plus", title: "Enroll", desc: "কোর্সে ভর্তি হন" },
-  { icon: "fa-solid fa-book-open-reader", title: "Learn", desc: "ক্লাস এবং resources ব্যবহার করুন" },
-  { icon: "fa-solid fa-keyboard", title: "Practice", desc: "Homework এবং practical কাজ করুন" },
-  { icon: "fa-solid fa-diagram-project", title: "Build Portfolio", desc: "Real project দিয়ে portfolio তৈরি করুন" },
-  { icon: "fa-solid fa-sack-dollar", title: "Start Earning", desc: "Freelancing/online income শুরু করুন" },
+  { icon: "fa-solid fa-user-plus", title: "Enroll", desc: "Enroll in the course" },
+  { icon: "fa-solid fa-book-open-reader", title: "Learn", desc: "Use the classes and resources" },
+  { icon: "fa-solid fa-keyboard", title: "Practice", desc: "Do homework and practical work" },
+  { icon: "fa-solid fa-diagram-project", title: "Build Portfolio", desc: "Create a portfolio with real projects" },
+  { icon: "fa-solid fa-sack-dollar", title: "Start Earning", desc: "Start freelancing / online income" },
 ];
 
 export const liveBatch = {
-  title: "Batch 01 ভর্তি চলছে!",
-  checks: ["লাইভ ক্লাস", "ক্লাস রেকর্ডিং", "প্র্যাকটিক্যাল সাপোর্ট"],
+  title: "Batch 01 Admissions Open!",
+  checks: ["Live Classes", "Class Recordings", "Practical Support"],
   deadline: new Date("2026-10-01T00:00:00+06:00").getTime(),
   seatsFilled: 28,
   seatsTotal: 100,
@@ -190,7 +190,7 @@ export const testimonials: Testimonial[] = [
     name: "Rafiq Hasan",
     role: "Freelancer",
     quote:
-      "AI Income Mastery কোর্সটা করার পর প্রথম মাসেই আমার ফ্রিল্যান্সিং ইনকাম শুরু হয়েছে। কোর্সের প্র্যাকটিক্যাল ভিডিওগুলো অসাধারণ।",
+      "Within the first month of the AI Income Mastery course, my freelancing income started. The practical videos in the course are outstanding.",
     color: "bg-blue-500",
     initials: "RH",
   },
@@ -198,7 +198,7 @@ export const testimonials: Testimonial[] = [
     name: "Nusrat Jahan",
     role: "Graphic Designer",
     quote:
-      "Canva আর AI tools শেখার পরে এখন আমি ডিজাইনের কাজ সরাসরি ক্লায়েন্ট থেকে পাই। প্লিকিফাইয়ের সাপোর্ট সত্যিই দারুণ।",
+      "After learning Canva and AI tools, I now get design work directly from clients. Plickify's support is truly great.",
     color: "bg-violet-500",
     initials: "NJ",
   },
@@ -206,7 +206,7 @@ export const testimonials: Testimonial[] = [
     name: "Mahadi Hasan",
     role: "Digital Marketer",
     quote:
-      "ডিজিটাল মার্কেটিং কোর্সটা আমার ক্যারিয়ার বদলে দিয়েছে। লাইভ ক্লাস আর Q&A সেশনগুলো খুবই সহায়ক ছিল।",
+      "The digital marketing course changed my career. The live classes and Q&A sessions were extremely helpful.",
     color: "bg-emerald-500",
     initials: "MH",
   },
@@ -214,27 +214,27 @@ export const testimonials: Testimonial[] = [
 
 export const faqs: Faq[] = [
   {
-    q: "কোর্স কিভাবে কাজ করবে?",
-    a: "কোর্স ভর্তির পরই সব ভিডিও লেসন আপনার ড্যাশবোর্ডে আনলক হয়ে যাবে। আপনি নিজের গতিতে লেসনগুলো দেখতে পারবেন এবং প্র্যাকটিক্যাল কাজ করতে পারবেন।",
+    q: "How does the course work?",
+    a: "All video lessons unlock in your dashboard as soon as you enroll. You can watch the lessons at your own pace and do the practical work.",
   },
   {
-    q: "কোর্স কি মোবাইল থেকে করা যাবে?",
-    a: "হ্যাঁ, আমাদের প্ল্যাটফর্ম সম্পূর্ণ মোবাইল-ফ্রেন্ডলি। যেকোনো স্মার্টফোন বা ট্যাবলেট থেকেই ভিডিও দেখতে ও প্র্যাকটিস করতে পারবেন।",
+    q: "Can I do the course from mobile?",
+    a: "Yes, our platform is fully mobile-friendly. You can watch videos and practice from any smartphone or tablet.",
   },
   {
-    q: "সার্টিফিকেট কি পাওয়া যাবে?",
-    a: "হ্যাঁ, কোর্স সম্পন্ন করলে Verifiable Certificate পাবেন। সার্টিফিকেটে আপনার নাম, কোর্সের নাম এবং সফলভাবে সম্পন্নের তারিখ থাকবে।",
+    q: "Will I get a certificate?",
+    a: "Yes, you get a Verifiable Certificate after completing the course. The certificate includes your name, the course name and the completion date.",
   },
   {
-    q: "লাইভ ক্লাস কবে?",
-    a: "লাইভ ক্লাস সাপ্তাহিকভাবে নির্ধারিত সময়ে হয়। ভর্তি হওয়ার পর ক্লাসের সময়সূচি আপনার ড্যাশবোর্ডে পেয়ে যাবেন। মিস করলে রেকর্ডিংও পাবেন।",
+    q: "When are the live classes?",
+    a: "Live classes happen weekly at scheduled times. After enrolling you will find the schedule in your dashboard. If you miss one, you get the recording.",
   },
   {
-    q: "পেমেন্ট কিভাবে করবো?",
-    a: "Stripe এর মাধ্যমে যেকোনো আন্তর্জাতিক কার্ড বা বিকাশ সহজে পেমেন্ট করতে পারবেন। পেমেন্ট সম্পন্ন হওয়ার সাথে সাথেই এনরোলমেন্ট কনফার্ম হয়।",
+    q: "How do I make the payment?",
+    a: "Pay via Stripe with any international card or easily with bKash. Enrollment is confirmed as soon as the payment is completed.",
   },
   {
-    q: "কোর্সে কিভাবে ভর্তি হবো?",
-    a: "কোর্স পেজ থেকে 'এখনই ভর্তি করুন' বাটনে ক্লিক করুন, একাউন্ট তৈরি করে পেমেন্ট সম্পন্ন করলেই ভর্তি সম্পন্ন। প্রয়োজনে আমাদের সাপোর্ট টিম সাহায্য করবে।",
+    q: "How do I enroll in the course?",
+    a: "Click the 'Enroll Now' button on the course page, create an account and complete the payment to finish enrolling. Our support team can help if needed.",
   },
 ];

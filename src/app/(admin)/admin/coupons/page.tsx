@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { CouponsPanel } from "@/components/admin/coupons-panel";
 
-export const metadata = { title: "কুপনসমূহ" };
+export const metadata = { title: "Coupons" };
 
 export default async function AdminCouponsPage() {
   const supabase = await createClient();
@@ -18,9 +18,9 @@ export default async function AdminCouponsPage() {
 
   return (
     <div>
-      <h1 className="wp-page-title">কুপনসমূহ</h1>
+      <h1 className="wp-page-title">Coupons</h1>
       <p className="wp-subtitle mb-5">
-        ডিসকাউন্ট কুপন তৈরি ও ম্যানেজ করুন
+        Create and manage discount coupons
       </p>
       <CouponsPanel
         coupons={coupons ?? []}

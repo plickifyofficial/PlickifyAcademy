@@ -67,7 +67,7 @@ async function courseIdFor(
     .select("course_id")
     .eq("id", id)
     .single();
-  if (error || !data) throw new Error("আইটেমটি পাওয়া যায়নি");
+  if (error || !data) throw new Error("Item not found");
   return (data as unknown as { course_id: string }).course_id;
 }
 
@@ -88,7 +88,7 @@ async function uploadCoverImage(file: File): Promise<string> {
     .from("course-images")
     .upload(path, file, { upsert: true, contentType: file.type });
 
-  if (error) throw new Error(`ছবি আপলোড ব্যর্থ: ${error.message}`);
+  if (error) throw new Error(`Image upload failed: ${error.message}`);
 
   const { data } = admin.storage.from("course-images").getPublicUrl(path);
   return data.publicUrl;
@@ -98,9 +98,9 @@ async function resolveCoverImage(formData: FormData, fallback: string | null) {
   const file = formData.get("cover_image_file");
   if (file instanceof File && file.size > 0) {
     if (file.size > MAX_IMAGE_SIZE)
-      throw new Error("কভার ইমেজ 5MB-এর মধ্যে হতে হবে");
+      throw new Error("Cover image must be within 5MB");
     if (!ALLOWED_IMAGE_MIME.includes(file.type))
-      throw new Error("PNG/JPG/WebP/SVG ইমেজ দিন");
+      throw new Error("Please provide a PNG/JPG/WebP/SVG image");
     return uploadCoverImage(file);
   }
   const url = String(formData.get("cover_image")).trim();
@@ -138,7 +138,7 @@ export async function createCourse(formData: FormData) {
 
   const title = String(formData.get("title")).trim();
   const slug = String(formData.get("slug")).trim();
-  if (!title || !slug) throw new Error("শিরোনাম ও Slug দিন");
+  if (!title || !slug) throw new Error("Please provide a title and slug");
 
   const description = String(formData.get("description")).trim();
   const price = toNumber(formData.get("price"));
@@ -235,7 +235,7 @@ export async function updateCourse(formData: FormData) {
 export async function deleteCourse(formData: FormData) {
   const supabase = await requireCourseEditor(String(formData.get("id")));
   const id = String(formData.get("id"));
-  if (!id) throw new Error("কোর্স ID নেই");
+  if (!id) throw new Error("Course ID missing");
 
   const { error: lerr } = await supabase
     .from("lessons")
@@ -290,7 +290,7 @@ export async function createLesson(formData: FormData) {
 
 export async function deleteLesson(formData: FormData) {
   const id = String(formData.get("id"));
-  if (!id) throw new Error("লেসন ID নেই");
+  if (!id) throw new Error("Lesson ID missing");
 
   const supabase = await createClient();
   await requireCourseEditor(await courseIdFor(supabase, "lessons", id));
@@ -306,7 +306,7 @@ export async function createSection(formData: FormData) {
 
   const courseId = String(formData.get("course_id"));
   const title = String(formData.get("title")).trim();
-  if (!courseId || !title) throw new Error("সেকশনের নাম দিন");
+  if (!courseId || !title) throw new Error("Please provide a section name");
 
   const { data: last } = await supabase
     .from("course_sections")
@@ -346,7 +346,7 @@ export async function updateSection(formData: FormData) {
 
 export async function deleteSection(formData: FormData) {
   const id = String(formData.get("id"));
-  if (!id) throw new Error("সেকশন ID নেই");
+  if (!id) throw new Error("Section ID missing");
 
   const supabase = await createClient();
   await requireCourseEditor(await courseIdFor(supabase, "course_sections", id));
@@ -394,7 +394,7 @@ export async function createTopic(formData: FormData) {
   const title = String(formData.get("title")).trim();
   const slug = String(formData.get("slug")).trim();
   const type = String(formData.get("type")) || "lesson";
-  if (!courseId || !sectionId || !title || !slug) throw new Error("শিরোনাম, Slug ও সেকশন দিন");
+  if (!courseId || !sectionId || !title || !slug) throw new Error("Please provide a title, slug and section");
 
   const { data: last } = await supabase
     .from("lessons")
@@ -458,7 +458,7 @@ export async function updateTopic(formData: FormData) {
 
 export async function deleteTopic(formData: FormData) {
   const id = String(formData.get("id"));
-  if (!id) throw new Error("টপিক ID নেই");
+  if (!id) throw new Error("Topic ID missing");
 
   const supabase = await createClient();
   await requireCourseEditor(await courseIdFor(supabase, "lessons", id));
@@ -506,17 +506,17 @@ export async function createQuizQuestion(formData: FormData) {
   await requireCourseEditor(await courseIdFor(supabase, "lessons", lessonId));
 
   const question = String(formData.get("question")).trim();
-  if (!lessonId || !question) throw new Error("প্রশ্ন লিখুন");
+  if (!lessonId || !question) throw new Error("Please write a question");
 
   const options = String(formData.get("options"))
     .split("\n")
     .map((o) => o.trim())
     .filter(Boolean);
-  if (options.length < 2) throw new Error("কমপক্ষে ২টি অপশন দিন");
+  if (options.length < 2) throw new Error("Please provide at least 2 options");
 
   const correctIndex = toNumber(formData.get("correct_index"));
   if (correctIndex >= options.length)
-    throw new Error("সঠিক উত্তরের সূচক ভুল");
+    throw new Error("The correct answer index is invalid");
 
   const { data: last } = await supabase
     .from("quiz_questions")
@@ -542,7 +542,7 @@ export async function createQuizQuestion(formData: FormData) {
 export async function updateQuizQuestion(formData: FormData) {
   const id = String(formData.get("id"));
   const question = String(formData.get("question")).trim();
-  if (!id || !question) throw new Error("প্রশ্ন লিখুন");
+  if (!id || !question) throw new Error("Please write a question");
 
   const supabase = await createClient();
   const { data: quiz } = await supabase
@@ -550,18 +550,18 @@ export async function updateQuizQuestion(formData: FormData) {
     .select("lesson_id")
     .eq("id", id)
     .single();
-  if (!quiz) throw new Error("প্রশ্ন পাওয়া যায়নি");
+  if (!quiz) throw new Error("Question not found");
   await requireCourseEditor(await courseIdFor(supabase, "lessons", quiz.lesson_id));
 
   const options = String(formData.get("options"))
     .split("\n")
     .map((o) => o.trim())
     .filter(Boolean);
-  if (options.length < 2) throw new Error("কমপক্ষে ২টি অপশন দিন");
+  if (options.length < 2) throw new Error("Please provide at least 2 options");
 
   const correctIndex = toNumber(formData.get("correct_index"));
   if (correctIndex >= options.length)
-    throw new Error("সঠিক উত্তরের সূচক ভুল");
+    throw new Error("The correct answer index is invalid");
 
   const { error } = await supabase
     .from("quiz_questions")
@@ -579,7 +579,7 @@ export async function updateQuizQuestion(formData: FormData) {
 
 export async function deleteQuizQuestion(formData: FormData) {
   const id = String(formData.get("id"));
-  if (!id) throw new Error("প্রশ্ন ID নেই");
+  if (!id) throw new Error("Question ID missing");
 
   const supabase = await createClient();
   const { data: quiz } = await supabase
@@ -587,7 +587,7 @@ export async function deleteQuizQuestion(formData: FormData) {
     .select("lesson_id")
     .eq("id", id)
     .single();
-  if (!quiz) throw new Error("প্রশ্ন পাওয়া যায়নি");
+  if (!quiz) throw new Error("Question not found");
   await requireCourseEditor(await courseIdFor(supabase, "lessons", quiz.lesson_id));
 
   const { error } = await supabase.from("quiz_questions").delete().eq("id", id);
@@ -600,7 +600,7 @@ export async function createAnnouncement(formData: FormData) {
   const courseId = String(formData.get("course_id"));
   const supabase = await requireCourseEditor(courseId);
   const title = String(formData.get("title")).trim();
-  if (!courseId || !title) throw new Error("শিরোনাম দিন");
+  if (!courseId || !title) throw new Error("Please provide a title");
 
   const { error } = await supabase.from("course_announcements").insert({
     course_id: courseId,
@@ -617,8 +617,8 @@ export async function createAnnouncement(formData: FormData) {
   for (const e of enrolled ?? []) {
     await createNotification(
       e.user_id,
-      "নতুন নোটিশ 📢",
-      `"${title}" — কোর্সে নতুন নোটিশ যোগ হয়েছে।`,
+      "New announcement 📢",
+      `"${title}" — A new announcement was added to the course.`,
       `/courses/${await slugOf(supabase, courseId)}`,
     );
   }
@@ -629,7 +629,7 @@ export async function createAnnouncement(formData: FormData) {
 
 export async function deleteAnnouncement(formData: FormData) {
   const id = String(formData.get("id"));
-  if (!id) throw new Error("ID নেই");
+  if (!id) throw new Error("ID missing");
 
   const supabase = await createClient();
 
@@ -667,7 +667,7 @@ export async function createLiveClass(formData: FormData) {
   const courseId = String(formData.get("course_id"));
   const supabase = await requireCourseEditor(courseId);
   const title = String(formData.get("title")).trim();
-  if (!courseId || !title) throw new Error("শিরোনাম দিন");
+  if (!courseId || !title) throw new Error("Please provide a title");
 
   const { error } = await supabase.from("live_classes").insert({
     course_id: courseId,
@@ -684,7 +684,7 @@ export async function createLiveClass(formData: FormData) {
 
 export async function deleteLiveClass(formData: FormData) {
   const id = String(formData.get("id"));
-  if (!id) throw new Error("ক্লাস ID নেই");
+  if (!id) throw new Error("Class ID missing");
 
   const supabase = await createClient();
   await requireCourseEditor(await courseIdFor(supabase, "live_classes", id));
@@ -704,14 +704,14 @@ export async function enrollStudent(
   try {
     const courseId = String(formData.get("course_id"));
     const email = String(formData.get("email")).trim().toLowerCase();
-    if (!courseId || !email) throw new Error("কোর্স ও ইমেইল দিন");
+    if (!courseId || !email) throw new Error("Please provide a course and email");
 
     const { data: user } = await admin
       .from("profiles")
       .select("id")
       .eq("email", email)
       .maybeSingle();
-    if (!user) return { error: "এই ইমেইলে কোনো ইউজার নেই" };
+    if (!user) return { error: "No user exists with this email" };
 
     const { data: course } = await admin
       .from("courses")
@@ -725,7 +725,7 @@ export async function enrollStudent(
       .eq("user_id", user.id)
       .eq("course_id", courseId)
       .maybeSingle();
-    if (existing) return { error: "ছাত্রটি ইতিমধ্যে এই কোর্সে এনরোল করা আছে" };
+    if (existing) return { error: "This student is already enrolled in this course" };
 
     const { error } = await admin.from("enrollments").insert({
       user_id: user.id,
@@ -737,8 +737,8 @@ export async function enrollStudent(
       try {
         await createNotification(
           user.id,
-          "কোর্সে এনরোল হয়েছে 🎉",
-          `আপনি "${course.title}" কোর্সে এনরোল হয়েছেন।`,
+          "Enrolled in a course 🎉",
+          `You have been enrolled in the "${course.title}" course.`,
           `/courses/${await slugOf(admin, courseId)}`,
         );
       } catch {
@@ -749,7 +749,7 @@ export async function enrollStudent(
     revalidatePath("/admin/enrollments");
     return {};
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "এনরোল করা যায়নি" };
+    return { error: err instanceof Error ? err.message : "Could not enroll" };
   }
 }
 
@@ -760,7 +760,7 @@ export async function unenrollStudent(
   const admin = createAdminClient();
   try {
     const id = String(formData.get("id"));
-    if (!id) return { error: "এনরোলমেন্ট ID নেই" };
+    if (!id) return { error: "Enrollment ID missing" };
 
     const { error } = await admin.from("enrollments").delete().eq("id", id);
     if (error) return { error: error.message };
@@ -768,7 +768,7 @@ export async function unenrollStudent(
     revalidatePath("/admin/enrollments");
     return {};
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "মুছে ফেলা যায়নি" };
+    return { error: err instanceof Error ? err.message : "Could not unenroll" };
   }
 }
 
@@ -791,7 +791,7 @@ export async function setUserRole(formData: FormData) {
   const role = String(formData.get("role"));
 
   if (role !== "admin" && role !== "student" && role !== "instructor")
-    throw new Error("অবৈধ ভূমিকা");
+    throw new Error("Invalid role");
 
   const { error } = await supabase
     .from("profiles")

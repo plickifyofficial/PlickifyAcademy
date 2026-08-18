@@ -36,7 +36,7 @@ export async function submitQuiz(
     .select("pass_percent")
     .eq("id", lessonId)
     .single();
-  if (!lesson) throw new Error("কুইজ পাওয়া যায়নি");
+  if (!lesson) throw new Error("Quiz not found");
 
   const { data: questions } = await supabase
     .from("quiz_questions")
@@ -137,7 +137,7 @@ export async function submitReview(
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  if (rating < 1 || rating > 5) throw new Error("রেটিং ১-৫ এর মধ্যে দিন");
+  if (rating < 1 || rating > 5) throw new Error("Please provide a rating between 1-5");
 
   const { error } = await supabase.from("reviews").upsert(
     {
@@ -160,7 +160,7 @@ export async function askQuestion(courseId: string, question: string) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  if (!question.trim()) throw new Error("প্রশ্ন লিখুন");
+  if (!question.trim()) throw new Error("Please write a question");
 
   const { error } = await supabase.from("course_qna").insert({
     course_id: courseId,
@@ -179,14 +179,14 @@ export async function answerQuestion(qnaId: string, answer: string) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  if (!answer.trim()) throw new Error("উত্তর লিখুন");
+  if (!answer.trim()) throw new Error("Please write an answer");
 
   const { data: qna } = await supabase
     .from("course_qna")
     .select("course_id, user_id")
     .eq("id", qnaId)
     .single();
-  if (!qna) throw new Error("প্রশ্ন পাওয়া যায়নি");
+  if (!qna) throw new Error("Question not found");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -195,7 +195,7 @@ export async function answerQuestion(qnaId: string, answer: string) {
     .single();
 
   if (profile?.role !== "admin" && qna.user_id !== user.id)
-    throw new Error("শুধু প্রশ্নকর্তা বা অ্যাডমিন উত্তর দিতে পারেন");
+    throw new Error("Only the question author or an admin can answer");
 
   const { error } = await supabase
     .from("course_qna")
@@ -209,8 +209,8 @@ export async function answerQuestion(qnaId: string, answer: string) {
   if (qna.user_id !== user.id) {
     await createNotification(
       qna.user_id,
-      "আপনার প্রশ্নের উত্তর এসেছে ✅",
-      "কোর্সের প্রশ্নোত্তরে আপনার প্রশ্নের উত্তর দেওয়া হয়েছে।",
+      "Your question has an answer ✅",
+      "Your question was answered in the course Q&A.",
       `/courses/${await courseSlug(supabase, qna.course_id)}#qna`,
     );
   }
@@ -235,8 +235,8 @@ export async function issueCertificate(
   if (data) {
     await createNotification(
       user.id,
-      "সার্টিফিকেট প্রস্তুত 🎓",
-      "কোর্স সম্পন্ন করার অভিনন্দন! আপনার সার্টিফিকেট ডাউনলোড করুন।",
+      "Certificate ready 🎓",
+      "Congratulations on completing the course! Download your certificate.",
       `/certificates/${data}`,
     );
   }

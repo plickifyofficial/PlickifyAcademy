@@ -72,12 +72,12 @@ export default async function AdminLayout({
               href="/"
               className="rounded border border-white/20 px-2.5 py-1 text-xs font-medium text-zinc-200 hover:bg-white/10"
             >
-              <i className="fa-solid fa-globe mr-1" /> সাইট দেখুন
+              <i className="fa-solid fa-globe mr-1" /> View Site
             </Link>
             <form action={signOut}>
               <button
                 className="rounded border border-white/20 px-2.5 py-1 text-xs font-medium text-zinc-200 hover:bg-white/10"
-                aria-label="লগআউট"
+                aria-label="Logout"
               >
                 <i className="fa-solid fa-right-from-bracket" />
               </button>

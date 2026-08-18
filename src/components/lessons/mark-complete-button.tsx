@@ -47,7 +47,7 @@ export function MarkCompleteButton({
       disabled={pending}
       className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-60"
     >
-      {pending ? "সেভ হচ্ছে..." : "লেসন সম্পন্ন করুন"}
+      {pending ? "Saving..." : "Mark Lesson Complete"}
     </button>
   );
 }

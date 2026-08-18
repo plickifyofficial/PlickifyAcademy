@@ -20,7 +20,7 @@ export function UserMenu() {
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-brand-700 transition-colors hover:bg-brand-200"
-        aria-label="মেনু"
+        aria-label="Menu"
       >
         <i className="fa-solid fa-user" />
       </button>
@@ -36,13 +36,13 @@ export function UserMenu() {
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
             >
-              ড্যাশবোর্ড
+              Dashboard
             </Link>
             <button
               onClick={handleSignOut}
               className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
             >
-              লগআউট
+              Log Out
             </button>
           </div>
         </>

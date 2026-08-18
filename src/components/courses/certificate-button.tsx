@@ -24,7 +24,7 @@ export function CertificateButton({
         href={`/certificates/${certificateId}`}
         className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-700"
       >
-        <i className="fa-solid fa-award" /> সার্টিফিকেট দেখুন
+        <i className="fa-solid fa-award" /> View Certificate
       </a>
     );
   }
@@ -36,11 +36,11 @@ export function CertificateButton({
     try {
       const id = await issueCertificate(courseId);
       if (id) {
-        showToast("অভিনন্দন! সার্টিফিকেট তৈরি হয়েছে 🎉");
+        showToast("Congratulations! Your certificate has been created 🎉");
         router.push(`/certificates/${id}`);
       }
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "সার্টিফিকেট তৈরি হয়নি", "error");
+      showToast(err instanceof Error ? err.message : "Certificate could not be created", "error");
     } finally {
       setPending(false);
     }
@@ -53,7 +53,7 @@ export function CertificateButton({
       className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-60"
     >
       <i className="fa-solid fa-award" />
-      {pending ? "তৈরি হচ্ছে..." : "সার্টিফিকেট নিন"}
+      {pending ? "Creating..." : "Get Certificate"}
     </button>
   );
 }

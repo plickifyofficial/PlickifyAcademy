@@ -20,11 +20,11 @@ export function LiveClassesSection({ classes, isEnrolled }: Props) {
   return (
     <div className="rounded-2xl border border-brand-100 bg-brand-50/50 p-6">
       <h2 className="flex items-center gap-2 text-xl font-bold text-zinc-900">
-        <i className="fa-solid fa-video text-brand-600" /> লাইভ ক্লাস
+        <i className="fa-solid fa-video text-brand-600" /> Live Classes
       </h2>
 
       {upcoming.length === 0 && past.length === 0 && (
-        <p className="mt-3 text-sm text-zinc-500">কোনো লাইভ ক্লাস নেই।</p>
+        <p className="mt-3 text-sm text-zinc-500">No live classes scheduled.</p>
       )}
 
       <div className="mt-4 space-y-3">
@@ -46,10 +46,10 @@ export function LiveClassesSection({ classes, isEnrolled }: Props) {
                         dateStyle: "medium",
                         timeStyle: "short",
                       })
-                    : "তারিখ ঘোষণা করা হবে"}
+                    : "Date to be announced"}
                   {c.duration_minutes > 0 && (
                     <span className="ml-2 text-zinc-400">
-                      • {c.duration_minutes} মিনিট
+                      • {c.duration_minutes} min
                     </span>
                   )}
                 </p>
@@ -61,7 +61,7 @@ export function LiveClassesSection({ classes, isEnrolled }: Props) {
                   rel="noopener noreferrer"
                   className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
                 >
-                  <i className="fa-solid fa-video mr-1" /> যোগ দিন
+                  <i className="fa-solid fa-video mr-1" /> Join
                 </a>
               )}
             </div>
@@ -71,7 +71,7 @@ export function LiveClassesSection({ classes, isEnrolled }: Props) {
         {past.length > 0 && (
           <details className="mt-2">
             <summary className="cursor-pointer text-xs font-medium text-zinc-400 hover:text-zinc-600">
-              আগের লাইভ ক্লাস ({past.length}টি)
+              Previous live classes ({past.length})
             </summary>
             <div className="mt-2 space-y-2">
               {past.map((c) => (

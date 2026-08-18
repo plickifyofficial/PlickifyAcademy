@@ -27,9 +27,9 @@ export function StudentsTable({
     setPendingId(id);
     try {
       await setUserRole(new FormData(e.currentTarget));
-      showToast("ভূমিকা আপডেট হয়েছে");
+      showToast("Role updated");
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "আপডেট করা যায়নি", "error");
+      showToast(err instanceof Error ? err.message : "Could not update", "error");
     } finally {
       setPendingId(null);
     }
@@ -37,7 +37,7 @@ export function StudentsTable({
   return (
     <div className="wp-panel">
       <div className="wp-panel-header">
-        সব ব্যবহারকারী
+        All Users
         <span className="rounded bg-[#f0f6fc] px-2 py-0.5 text-xs font-semibold text-[#2271b1]">
           {students.length}
         </span>
@@ -46,11 +46,11 @@ export function StudentsTable({
         <table className="wp-table min-w-[640px]">
           <thead>
             <tr>
-              <th>নাম</th>
-              <th>ইমেইল</th>
-              <th>ভূমিকা</th>
-              <th>যোগদান</th>
-              <th className="text-right">অ্যাকশন</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Joined</th>
+              <th className="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -79,14 +79,14 @@ export function StudentsTable({
                   >
                     {s.role === "admin" ? (
                       <>
-                        <i className="fa-solid fa-shield-halved text-[10px]" /> অ্যাডমিন
+                        <i className="fa-solid fa-shield-halved text-[10px]" /> Admin
                       </>
                     ) : s.role === "instructor" ? (
                       <>
-                        <i className="fa-solid fa-chalkboard-user text-[10px]" /> ইনস্ট্রাক্টর
+                        <i className="fa-solid fa-chalkboard-user text-[10px]" /> Instructor
                       </>
                     ) : (
-                      "স্টুডেন্ট"
+                      "Student"
                     )}
                   </span>
                 </td>
@@ -102,29 +102,29 @@ export function StudentsTable({
                           <>
                             <input type="hidden" name="role" value="student" />
                             <button className="wp-btn wp-btn-danger" disabled={pendingId === s.id}>
-                              <i className="fa-solid fa-user-slash" /> অ্যাডমিন সরান
+                              <i className="fa-solid fa-user-slash" /> Remove Admin
                             </button>
                           </>
                         ) : s.role === "instructor" ? (
                           <>
                             <input type="hidden" name="role" value="admin" />
                             <button className="wp-btn" disabled={pendingId === s.id}>
-                              <i className="fa-solid fa-user-shield" /> অ্যাডমিন বানান
+                              <i className="fa-solid fa-user-shield" /> Make Admin
                             </button>
                             <input type="hidden" name="role" value="student" />
                             <button className="wp-btn wp-btn-danger" disabled={pendingId === s.id}>
-                              <i className="fa-solid fa-user-slash" /> ইনস্ট্রাক্টর সরান
+                              <i className="fa-solid fa-user-slash" /> Remove Instructor
                             </button>
                           </>
                         ) : (
                           <>
                             <input type="hidden" name="role" value="instructor" />
                             <button className="wp-btn" disabled={pendingId === s.id}>
-                              <i className="fa-solid fa-chalkboard-user" /> ইনস্ট্রাক্টর
+                              <i className="fa-solid fa-chalkboard-user" /> Instructor
                             </button>
                             <input type="hidden" name="role" value="admin" />
                             <button className="wp-btn" disabled={pendingId === s.id}>
-                              <i className="fa-solid fa-user-shield" /> অ্যাডমিন বানান
+                              <i className="fa-solid fa-user-shield" /> Make Admin
                             </button>
                           </>
                         )}
@@ -137,7 +137,7 @@ export function StudentsTable({
             {students.length === 0 && (
               <tr>
                 <td colSpan={5} className="py-10 text-center text-[#646970]">
-                  কোনো ব্যবহারকারী নেই।
+                  No users.
                 </td>
               </tr>
             )}

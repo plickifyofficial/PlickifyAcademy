@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { StudentsTable } from "@/components/admin/students-table";
 
-export const metadata = { title: "স্টুডেন্টস" };
+export const metadata = { title: "Students" };
 
 export default async function AdminStudentsPage() {
   const supabase = await createClient();
@@ -32,8 +32,8 @@ export default async function AdminStudentsPage() {
 
   return (
     <div>
-      <h1 className="wp-page-title">স্টুডেন্টস</h1>
-      <p className="wp-subtitle">সব ব্যবহারকারী ও তাদের ভূমিকা</p>
+      <h1 className="wp-page-title">Students</h1>
+      <p className="wp-subtitle">All users and their roles</p>
       <StudentsTable students={rows} currentUserId={user.id} />
     </div>
   );

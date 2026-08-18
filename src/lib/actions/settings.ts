@@ -55,13 +55,13 @@ export async function saveSiteSettings(formData: FormData) {
 
   const logo = formData.get("logo_file");
   if (logo instanceof File && logo.size > 0) {
-    if (!validImage(logo)) throw new Error("Logo: PNG/JPG/WebP/SVG 2MB-এর মধ্যে দিন");
+    if (!validImage(logo)) throw new Error("Logo: provide a PNG/JPG/WebP/SVG within 2MB");
     updates.logo_url = await uploadImage("site-assets", "logo", logo);
   }
 
   const favicon = formData.get("favicon_file");
   if (favicon instanceof File && favicon.size > 0) {
-    if (!validImage(favicon)) throw new Error("Favicon: PNG/JPG/WebP/SVG 2MB-এর মধ্যে দিন");
+    if (!validImage(favicon)) throw new Error("Favicon: provide a PNG/JPG/WebP/SVG within 2MB");
     updates.favicon_url = await uploadImage("site-assets", "favicon", favicon);
   }
 

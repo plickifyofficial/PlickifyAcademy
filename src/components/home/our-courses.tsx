@@ -62,7 +62,7 @@ export async function OurCourses({ content }: { content: OurCoursesContent }) {
           </div>
         ) : (
           <p className="mt-12 rounded-2xl border border-dashed border-zinc-300 bg-white p-10 text-center text-zinc-500">
-            এখনো কোনো কোর্স পাবলিশ করা হয়নি।
+            No courses have been published yet.
           </p>
         )}
 

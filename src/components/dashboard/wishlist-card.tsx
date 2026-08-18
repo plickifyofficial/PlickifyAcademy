@@ -44,7 +44,7 @@ export function WishlistCard({ course }: { course: Course }) {
           onClick={handleRemove}
           disabled={pending}
           className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-red-500 shadow hover:bg-white"
-          aria-label="মুছে ফেলুন"
+          aria-label="Remove"
         >
           <i className="fa-solid fa-trash-can text-sm" />
         </button>
@@ -64,7 +64,7 @@ export function WishlistCard({ course }: { course: Course }) {
             href={`/courses/${course.slug}`}
             className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
           >
-            দেখুন
+            View
           </Link>
         </div>
       </div>

@@ -22,14 +22,14 @@ export function QuizPlayer({
   if (questions.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center text-zinc-500">
-        এই কুইজে এখনো প্রশ্ন যোগ করা হয়নি। শীঘ্রই আসছে।
+        No questions have been added to this quiz yet. Coming soon.
       </div>
     );
   }
 
   async function handleSubmit() {
     if (Object.keys(answers).length < questions.length) {
-      setError("সব প্রশ্নের উত্তর দিন।");
+      setError("Please answer all questions.");
       return;
     }
     setPending(true);
@@ -38,7 +38,7 @@ export function QuizPlayer({
       const res = await submitQuiz(lessonId, answers);
       setResult(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "জমা দেওয়া যায়নি");
+      setError(err instanceof Error ? err.message : "Couldn't submit");
     } finally {
       setPending(false);
     }
@@ -67,11 +67,11 @@ export function QuizPlayer({
               passed ? "text-green-700" : "text-red-700"
             }`}
           >
-            {passed ? "কুইজ পাস! 🎉" : "পাস করেননি"}
+            {passed ? "Quiz Passed! 🎉" : "Not Passed"}
           </h3>
           <p className="mt-1 text-zinc-600">
-            আপনার স্কোর: <strong>{result.score}</strong>/{result.total} (
-            {result.percent}%) — পাস মার্ক: {result.passPercent}%
+            Your score: <strong>{result.score}</strong>/{result.total} (
+            {result.percent}%) — Pass mark: {result.passPercent}%
           </p>
           {!passed && (
             <button
@@ -81,7 +81,7 @@ export function QuizPlayer({
               }}
               className="mt-4 rounded-lg bg-brand-600 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700"
             >
-              আবার চেষ্টা করুন
+              Try Again
             </button>
           )}
         </div>
@@ -145,11 +145,11 @@ export function QuizPlayer({
     <div className="space-y-5">
       <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3">
         <p className="text-sm text-zinc-600">
-          মোট <strong>{questions.length}</strong>টি প্রশ্ন · পাস মার্ক{" "}
+          Total <strong>{questions.length}</strong> questions · Pass mark{" "}
           <strong>{passPercent}%</strong>
         </p>
         <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-          {Object.keys(answers).length}/{questions.length} উত্তর
+          {Object.keys(answers).length}/{questions.length} answered
         </span>
       </div>
 
@@ -198,7 +198,7 @@ export function QuizPlayer({
         disabled={pending}
         className="w-full rounded-xl bg-brand-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
       >
-        {pending ? "জমা হচ্ছে..." : "উত্তর জমা দিন"}
+        {pending ? "Submitting..." : "Submit Answers"}
       </button>
     </div>
   );

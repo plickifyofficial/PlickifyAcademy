@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { EnrollmentsPanel } from "@/components/admin/enrollments-panel";
 
-export const metadata = { title: "এনরোলমেন্ট" };
+export const metadata = { title: "Enrollments" };
 
 export default async function AdminEnrollmentsPage() {
   const supabase = await createClient();
@@ -17,8 +17,8 @@ export default async function AdminEnrollmentsPage() {
   return (
     <div>
       <div>
-        <h1 className="wp-page-title">এনরোলমেন্ট</h1>
-        <p className="wp-subtitle">ছাত্রদের ম্যানুয়ালি কোর্সে এনরোল / আনএনরোল করুন</p>
+        <h1 className="wp-page-title">Enrollments</h1>
+        <p className="wp-subtitle">Manually enroll/unenroll students in courses</p>
       </div>
       <EnrollmentsPanel
         courses={courses ?? []}

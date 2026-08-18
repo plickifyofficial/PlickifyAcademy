@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "ড্যাশবোর্ড" };
+export const metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -71,20 +71,20 @@ export default async function DashboardPage() {
   const inProgress = enrollments?.length ?? 0;
 
   const stats = [
-    { label: "এনরোল্ড কোর্স", value: enrollments?.length ?? 0, icon: "fa-solid fa-graduation-cap", color: "bg-brand-50 text-brand-600" },
-    { label: "চলমান কোর্স", value: inProgress - completedCourses, icon: "fa-solid fa-book-open", color: "bg-amber-50 text-amber-600" },
-    { label: "সম্পন্ন কোর্স", value: completedCourses, icon: "fa-solid fa-circle-check", color: "bg-green-50 text-green-600" },
-    { label: "সামগ্রিক অগ্রগতি", value: `${totalPct}%`, icon: "fa-solid fa-chart-line", color: "bg-purple-50 text-purple-600" },
+    { label: "Enrolled Courses", value: enrollments?.length ?? 0, icon: "fa-solid fa-graduation-cap", color: "bg-brand-50 text-brand-600" },
+    { label: "In Progress", value: inProgress - completedCourses, icon: "fa-solid fa-book-open", color: "bg-amber-50 text-amber-600" },
+    { label: "Completed Courses", value: completedCourses, icon: "fa-solid fa-circle-check", color: "bg-green-50 text-green-600" },
+    { label: "Overall Progress", value: `${totalPct}%`, icon: "fa-solid fa-chart-line", color: "bg-purple-50 text-purple-600" },
   ];
 
   return (
     <div>
       <div className="rounded-2xl bg-gradient-to-r from-brand-600 to-purple-700 p-6 text-white sm:p-8">
         <h1 className="text-2xl font-bold">
-          স্বাগতম, {firstName}!
+          Welcome, {firstName}!
         </h1>
         <p className="mt-1 text-brand-100">
-          আজও শেখা চালিয়ে যান। আপনার অগ্রগতি দেখুন নিচে।
+          Keep learning today. See your progress below.
         </p>
       </div>
 
@@ -105,12 +105,12 @@ export default async function DashboardPage() {
 
       <div className="mt-8">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-900">আমার কোর্স</h2>
+          <h2 className="text-lg font-semibold text-zinc-900">My Courses</h2>
           <Link
             href="/dashboard/courses"
             className="text-sm font-medium text-brand-600 hover:underline"
           >
-            সব দেখুন →
+            View all →
           </Link>
         </div>
 
@@ -148,7 +148,7 @@ export default async function DashboardPage() {
                       />
                     </div>
                     <p className="mt-2 text-xs font-medium text-zinc-500">
-                      {pct}% সম্পন্ন ({pc.done}/{pc.total} লেসন)
+                      {pct}% complete ({pc.done}/{pc.total} lessons)
                     </p>
                   </div>
                 </Link>
@@ -157,12 +157,12 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
-            <p className="text-zinc-600">এখনো কোনো কোর্সে এনরোল করা হয়নি।</p>
+            <p className="text-zinc-600">You haven't enrolled in any courses yet.</p>
             <Link
               href="/courses"
               className="mt-4 inline-block rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
             >
-              কোর্স ব্রাউজ করুন
+              Browse Courses
             </Link>
           </div>
         )}

@@ -5,7 +5,7 @@ import { getSiteContent } from "@/lib/site-content";
 import { ctaDefaults, productsDefaults } from "@/lib/content-schema";
 
 export const metadata = {
-  title: "ডিজিটাল প্রোডাক্ট | Plickify Academy",
+  title: "Digital Products | Plickify Academy",
 };
 
 export const revalidate = 60;
@@ -20,8 +20,8 @@ export default async function ProductsPage() {
     <>
       <PageHero
         eyebrow="Learning Products"
-        title="প্রিমিয়াম ডিজিটাল রিসোর্স"
-        subtitle="AI Tools, টেমপ্লেট, eBook ও আরও অনেক কিছু — শেখার জন্য প্রয়োজনীয় সব রিসোর্স এক জায়গায়।"
+        title="Premium Digital Resources"
+        subtitle="AI Tools, templates, eBooks, and much more — every resource you need for learning, all in one place."
       />
       <Products content={products} hideViewAll />
       <FinalCta content={cta} />
