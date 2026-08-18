@@ -3,6 +3,7 @@ import { Stats } from "@/components/home/stats";
 import { AiTools } from "@/components/home/ai-tools";
 import { Skills } from "@/components/home/skills";
 import { FeaturedCourse } from "@/components/home/featured-course";
+import { OurCourses } from "@/components/home/our-courses";
 import { WhyUs } from "@/components/home/why-us";
 import { LearningProcess } from "@/components/home/learning-process";
 import { LiveBatch } from "@/components/home/live-batch";
@@ -17,6 +18,7 @@ import {
   featuredDefaults,
   heroDefaults,
   liveBatchDefaults,
+  ourCoursesDefaults,
   processDefaults,
   productsDefaults,
   skillsDefaults,
@@ -31,13 +33,14 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [hero, stats, tools, skills, featured, why, process, liveBatch, products, testimonials, faq, cta] =
+  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta] =
     await Promise.all([
       getSiteContent("home.hero", heroDefaults),
       getSiteContent("home.stats", statsDefaults),
       getSiteContent("home.tools", toolsDefaults),
       getSiteContent("home.skills", skillsDefaults),
       getSiteContent("home.featured", featuredDefaults),
+      getSiteContent("home.our_courses", ourCoursesDefaults),
       getSiteContent("home.why", whyDefaults),
       getSiteContent("home.process", processDefaults),
       getSiteContent("home.live_batch", liveBatchDefaults),
@@ -54,6 +57,7 @@ export default async function HomePage() {
       <AiTools content={tools} />
       <Skills content={skills} />
       <FeaturedCourse content={featured} />
+      <OurCourses content={ourCourses} />
       <WhyUs content={why} />
       <LearningProcess content={process} />
       <LiveBatch content={liveBatch} />

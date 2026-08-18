@@ -92,6 +92,16 @@ export const skillsDefaults = {
 };
 export type SkillsContent = typeof skillsDefaults;
 
+export const ourCoursesDefaults = {
+  eyebrow: "Our Courses",
+  title: "আমাদের কোর্সসমূহ",
+  subtitle: "সেরা প্র্যাকটিক্যাল কোর্স বেছে নিন এবং শেখা শুরু করুন।",
+  viewAllText: "সব কোর্স দেখুন",
+  viewAllLink: "/courses",
+  limit: 6,
+};
+export type OurCoursesContent = typeof ourCoursesDefaults;
+
 export const featuredDefaults = {
   badge: "BEST SELLER",
   tagline: "FEATURED COURSE",
@@ -272,11 +282,11 @@ export const footerDefaults = {
   ],
   supportTitle: "Support",
   supportLinks: [
-    { label: "FAQ", href: "/#faq" },
+    { label: "FAQ", href: "/faq" },
     { label: "Contact Us", href: "/contact" },
-    { label: "Terms & Conditions", href: "/contact" },
-    { label: "Privacy Policy", href: "/contact" },
-    { label: "Refund Policy", href: "/contact" },
+    { label: "Terms & Conditions", href: "/terms" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Refund Policy", href: "/refund" },
   ],
   socials: [
     { icon: "fa-brands fa-facebook-f", href: "#" },
@@ -424,6 +434,20 @@ export const homeSections: SectionDef[] = [
           { kind: "text", key: "value", label: "মান" },
         ],
       },
+    ],
+  },
+  {
+    key: "home.our_courses",
+    title: "আমাদের কোর্স (Our Courses)",
+    description: "ডাটাবেস থেকে পাবলিশড কোর্সের গ্রিড — টাইটেল ও সংখ্যা এডিট করুন।",
+    defaults: ourCoursesDefaults,
+    fields: [
+      { kind: "text", key: "eyebrow", label: "আপার লেবেল" },
+      { kind: "text", key: "title", label: "শিরোনাম" },
+      { kind: "text", key: "subtitle", label: "সাবটাইটেল" },
+      { kind: "text", key: "viewAllText", label: "সব দেখুন বাটন টেক্সট" },
+      { kind: "url", key: "viewAllLink", label: "সব দেখুন লিংক" },
+      { kind: "number", key: "limit", label: "কয়টি কোর্স দেখাবে" },
     ],
   },
   {
@@ -664,4 +688,214 @@ export const globalSections: SectionDef[] = [
   },
 ];
 
-export const allSections = [...homeSections, ...globalSections];
+export const faqPageDefaults = {
+  title: "সাধারণ কিছু প্রশ্ন",
+  intro:
+    "ভর্তি, পেমেন্ট, কোর্স ও সার্টিফিকেট সম্পর্কে সাধারণ প্রশ্নগুলোর উত্তর এখানে পাবেন।",
+  items: [
+    {
+      q: "কোর্স কিভাবে কাজ করবে?",
+      a: "কোর্স ভর্তির পরই সব ভিডিও লেসন আপনার ড্যাশবোর্ডে আনলক হয়ে যাবে। আপনি নিজের গতিতে লেসনগুলো দেখতে পারবেন এবং প্র্যাকটিক্যাল কাজ করতে পারবেন।",
+    },
+    {
+      q: "কোর্স কি মোবাইল থেকে করা যাবে?",
+      a: "হ্যাঁ, আমাদের প্ল্যাটফর্ম সম্পূর্ণ মোবাইল-ফ্রেন্ডলি। যেকোনো স্মার্টফোন বা ট্যাবলেট থেকেই ভিডিও দেখতে ও প্র্যাকটিস করতে পারবেন।",
+    },
+    {
+      q: "সার্টিফিকেট কি পাওয়া যাবে?",
+      a: "হ্যাঁ, কোর্স সম্পন্ন করলে Verifiable Certificate পাবেন। সার্টিফিকেটে আপনার নাম, কোর্সের নাম এবং সফলভাবে সম্পন্নের তারিখ থাকবে।",
+    },
+    {
+      q: "লাইভ ক্লাস কবে?",
+      a: "লাইভ ক্লাস সাপ্তাহিকভাবে নির্ধারিত সময়ে হয়। ভর্তি হওয়ার পর ক্লাসের সময়সূচি আপনার ড্যাশবোর্ডে পেয়ে যাবেন। মিস করলে রেকর্ডিংও পাবেন।",
+    },
+    {
+      q: "পেমেন্ট কিভাবে করবো?",
+      a: "bKash বা Nagad-এ পেমেন্ট করে TrxID জমা দিলেই আমাদের টিম ভেরিফাই করে এনরোল করে দেবে। সাধারণত ৫-৩০ মিনিটের মধ্যে এনরোল কনফার্ম হয়।",
+    },
+    {
+      q: "কোর্সে কিভাবে ভর্তি হবো?",
+      a: "কোর্স পেজ থেকে 'এখনই ভর্তি করুন' বাটনে ক্লিক করুন, একাউন্ট তৈরি করে পেমেন্ট সম্পন্ন করলেই ভর্তি সম্পন্ন। প্রয়োজনে আমাদের সাপোর্ট টিম সাহায্য করবে।",
+    },
+  ],
+};
+export type FaqPageContent = typeof faqPageDefaults;
+
+export const legalPageDefaults = {
+  title: "",
+  intro: "",
+  updated: "",
+  sections: [] as { heading: string; body: string }[],
+};
+export type LegalPageContent = typeof legalPageDefaults;
+
+export const termsPageDefaults: LegalPageContent = {
+  title: "Terms & Conditions",
+  intro:
+    "Plickify Academy ব্যবহার করার আগে নিচের শর্তাবলি মনোযোগ দিয়ে পড়ুন। ওয়েবসাইট ব্যবহার করার অর্থ আপনি এই শর্তগুলো মেনে নিচ্ছেন।",
+  updated: "সর্বশেষ আপডেট: জানুয়ারি 2026",
+  sections: [
+    {
+      heading: "১. একাউন্ট ও ভর্তি",
+      body: "কোর্সে ভর্তি হতে একটি বৈধ একাউন্ট তৈরি করতে হবে। কোনো শিক্ষার্থী একাধিক একাউন্ট তৈরি করে কোর্স শেয়ার বা রিসেল করলে তার এনরোলমেন্ট বাতিল করা হতে পারে।",
+    },
+    {
+      heading: "২. পেমেন্ট",
+      body: "কোর্স ফি bKash বা Nagad-এর মাধ্যমে পরিশোধ করতে হয়। পেমেন্ট ভেরিফাই হওয়ার পরই এনরোলমেন্ট কনফার্ম হয়। ভুল ট্রানজেকশন হলে আমাদের সাপোর্ট টিম যোগাযোগ করুন।",
+    },
+    {
+      heading: "৩. কনটেন্ট ব্যবহার",
+      body: "কোর্সের ভিডিও, রিসোর্স ও কনটেন্ট শুধুমাত্র ব্যক্তিগত শিক্ষার জন্য। কোনো কনটেন্ট ডাউনলোড, শেয়ার বা পুনঃবিক্রয় করা সম্পূর্ণ নিষিদ্ধ।",
+    },
+    {
+      heading: "৪. আচরণবিধি",
+      body: "কোর্সের ফোরাম, Q&A ও কমিউনিটিতে সম্মানজনক আচরণ করতে হবে। অন্য শিক্ষার্থীর প্রতি অসম্মানজনক বা ক্ষতিকর আচরণ করলে একাউন্ট নিষিদ্ধ হতে পারে।",
+    },
+    {
+      heading: "৫. শর্ত পরিবর্তন",
+      body: "আমরা যেকোনো সময় এই শর্তাবলি পরিবর্তন করতে পারি। পরিবর্তনের পর ওয়েবসাইট ব্যবহার করলে নতুন শর্ত প্রযোজ্য হবে।",
+    },
+  ],
+};
+
+export const privacyPageDefaults: LegalPageContent = {
+  title: "Privacy Policy",
+  intro:
+    "আপনার ব্যক্তিগত তথ্যের নিরাপত্তা আমাদের কাছে গুরুত্বপূর্ণ। আমরা কীভাবে আপনার তথ্য সংগ্রহ ও ব্যবহার করি তা নিচে বর্ণিত হলো।",
+  updated: "সর্বশেষ আপডেট: জানুয়ারি 2026",
+  sections: [
+    {
+      heading: "১. আমরা কী তথ্য সংগ্রহ করি",
+      body: "আমরা আপনার নাম, ইমেইল, মোবাইল নম্বর ও কোর্স অগ্রগতির তথ্য সংগ্রহ করি যা একাউন্ট তৈরি ও কোর্স পরিচালনার জন্য প্রয়োজন।",
+    },
+    {
+      heading: "২. তথ্য কিভাবে ব্যবহৃত হয়",
+      body: "সংগৃহীত তথ্য একাউন্ট পরিচালনা, পেমেন্ট ভেরিফিকেশন, সার্টিফিকেট তৈরি ও উন্নত শিক্ষার অভিজ্ঞতা দিতে ব্যবহৃত হয়।",
+    },
+    {
+      heading: "৩. তথ্যের সুরক্ষা",
+      body: "আপনার তথ্য নিরাপদ সার্ভারে সংরক্ষণ করা হয়। আমরা আধুনিক নিরাপত্তা ব্যবস্থা ব্যবহার করি যাতে আপনার তথ্য সুরক্ষিত থাকে।",
+    },
+    {
+      heading: "৪. তথ্য শেয়ার",
+      body: "আমরা আপনার ব্যক্তিগত তথ্য কোনো তৃতীয় পক্ষের কাছে বিক্রি করি না। প্রয়োজনে আইন অনুযায়ী তথ্য প্রদান করা হয়।",
+    },
+    {
+      heading: "৫. যোগাযোগ",
+      body: "প্রাইভেসি সংক্রান্ত যেকোনো প্রশ্নে আমাদের সাথে ইমেইলের মাধ্যমে যোগাযোগ করুন।",
+    },
+  ],
+};
+
+export const refundPageDefaults: LegalPageContent = {
+  title: "Refund Policy",
+  intro:
+    "কোর্সে ভর্তির পর রিফান্ডের শর্তাবলি নিচে দেওয়া হলো। কেনার আগে মনোযোগ দিয়ে পড়ুন।",
+  updated: "সর্বশেষ আপডেট: জানুয়ারি 2026",
+  sections: [
+    {
+      heading: "১. ভর্তির ৭ দিনের মধ্যে",
+      body: "কোর্সে ভর্তির ৭ দিনের মধ্যে কোনো লেসন সম্পন্ন না করলে পূর্ণ রিফান্ডের আবেদন করা যাবে। রিফান্ড পেমেন্টের মাধ্যমেই ফেরত দেওয়া হবে।",
+    },
+    {
+      heading: "২. কখন রিফান্ড পাওয়া যাবে না",
+      body: "একাধিক লেসন সম্পন্ন করলে, সার্টিফিকেট ইস্যু হয়ে গেলে বা পেমেন্টের ৩০ দিন পর রিফান্ড দেওয়া হয় না।",
+    },
+    {
+      heading: "৩. ভুল ট্রানজেকশন",
+      body: "ভুল নম্বরে পেমেন্ট করলে ট্রানজেকশন আইডি সহ আমাদের সাপোর্ট টিমে জানালে ভেরিফাই করে ফেরতের ব্যবস্থা করা হবে।",
+    },
+    {
+      heading: "৪. রিফান্ড প্রসেসিং",
+      body: "রিফান্ড অনুমোদনের পর ৩-৭ কার্যদিবসের মধ্যে পেমেন্টের মাধ্যমে ফেরত দেওয়া হয়।",
+    },
+  ],
+};
+
+export const pageSections: SectionDef[] = [
+  {
+    key: "page.faq",
+    title: "FAQ পেজ",
+    description: "ফুটারের FAQ লিংকের পেজ — প্রশ্নোত্তর এডিট করুন।",
+    defaults: faqPageDefaults,
+    fields: [
+      { kind: "text", key: "title", label: "শিরোনাম" },
+      { kind: "textarea", key: "intro", label: "ভূমিকা" },
+      {
+        kind: "list",
+        key: "items",
+        label: "প্রশ্ন",
+        itemLabel: "প্রশ্ন",
+        fields: [
+          { kind: "text", key: "q", label: "প্রশ্ন" },
+          { kind: "textarea", key: "a", label: "উত্তর" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "page.terms",
+    title: "Terms & Conditions পেজ",
+    description: "শর্তাবলি — শিরোনাম, ভূমিকা ও সেকশন এডিট করুন।",
+    defaults: termsPageDefaults,
+    fields: [
+      { kind: "text", key: "title", label: "শিরোনাম" },
+      { kind: "textarea", key: "intro", label: "ভূমিকা" },
+      { kind: "text", key: "updated", label: "আপডেট তারিখ টেক্সট" },
+      {
+        kind: "list",
+        key: "sections",
+        label: "সেকশন",
+        itemLabel: "সেকশন",
+        fields: [
+          { kind: "text", key: "heading", label: "হেডিং" },
+          { kind: "textarea", key: "body", label: "বডি" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "page.privacy",
+    title: "Privacy Policy পেজ",
+    description: "প্রাইভেসি নীতি — শিরোনাম, ভূমিকা ও সেকশন এডিট করুন।",
+    defaults: privacyPageDefaults,
+    fields: [
+      { kind: "text", key: "title", label: "শিরোনাম" },
+      { kind: "textarea", key: "intro", label: "ভূমিকা" },
+      { kind: "text", key: "updated", label: "আপডেট তারিখ টেক্সট" },
+      {
+        kind: "list",
+        key: "sections",
+        label: "সেকশন",
+        itemLabel: "সেকশন",
+        fields: [
+          { kind: "text", key: "heading", label: "হেডিং" },
+          { kind: "textarea", key: "body", label: "বডি" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "page.refund",
+    title: "Refund Policy পেজ",
+    description: "রিফান্ড নীতি — শিরোনাম, ভূমিকা ও সেকশন এডিট করুন।",
+    defaults: refundPageDefaults,
+    fields: [
+      { kind: "text", key: "title", label: "শিরোনাম" },
+      { kind: "textarea", key: "intro", label: "ভূমিকা" },
+      { kind: "text", key: "updated", label: "আপডেট তারিখ টেক্সট" },
+      {
+        kind: "list",
+        key: "sections",
+        label: "সেকশন",
+        itemLabel: "সেকশন",
+        fields: [
+          { kind: "text", key: "heading", label: "হেডিং" },
+          { kind: "textarea", key: "body", label: "বডি" },
+        ],
+      },
+    ],
+  },
+];
+
+export const allSections = [...homeSections, ...globalSections, ...pageSections];

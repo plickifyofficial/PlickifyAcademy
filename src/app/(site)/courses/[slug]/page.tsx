@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
@@ -202,63 +203,82 @@ export default async function CourseDetailPage({
   return (
     <main className="flex-1">
       <section className="bg-gradient-to-br from-brand-600 to-purple-700 py-14 text-white">
-        <div className="mx-auto max-w-6xl px-4">
-          <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium capitalize">
-            {course.level}
-          </span>
-          <h1 className="mt-4 max-w-3xl text-3xl font-bold sm:text-4xl">
-            {course.title}
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg text-brand-100">
-            {course.description}
-          </p>
-
-          {isEnrolled && (
-            <div className="mt-6 max-w-md">
-              <div className="flex items-center justify-between text-sm text-brand-100">
-                <span>অগ্রগতি</span>
-                <span className="font-semibold">{progressPct}%</span>
-              </div>
-              <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/20">
-                <div
-                  className="h-full rounded-full bg-white transition-all"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-              <p className="mt-1.5 text-xs text-brand-100">
-                {completedCount}/{allTopicIds.length} টপিক সম্পন্ন
-              </p>
-            </div>
-          )}
-
-          <div className="mt-8 flex flex-wrap items-center gap-6">
-            <span className="text-3xl font-bold">
-              {formatPrice(course.price)}
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 lg:grid-cols-[1fr_400px]">
+          <div>
+            <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium capitalize">
+              {course.level}
             </span>
-            <span className="text-sm text-brand-200">
-              {allTopicIds.length} টি টপিক
-            </span>
-            {canAccess ? (
-              resumeTopic ? (
-                <Link
-                  href={`/courses/${course.slug}/lessons/${resumeTopic.id}`}
-                  className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50"
-                >
-                  {isEnrolled && lastLessonId ? "শেখা চালিয়ে যান" : "শেখা শুরু করুন"} →
-                </Link>
-              ) : null
-            ) : (
-              <>
-                <CheckoutButton courseId={course.id} price={course.price} />
-                <WishlistButton courseId={course.id} initialSaved={wishlisted} />
-              </>
-            )}
+            <h1 className="mt-4 max-w-3xl text-3xl font-bold sm:text-4xl">
+              {course.title}
+            </h1>
+            <p className="mt-4 max-w-2xl text-lg text-brand-100">
+              {course.description}
+            </p>
+
             {isEnrolled && (
-              <CertificateButton
-                courseId={course.id}
-                completed={progressPct === 100}
-                certificateId={certificateId}
+              <div className="mt-6 max-w-md">
+                <div className="flex items-center justify-between text-sm text-brand-100">
+                  <span>অগ্রগতি</span>
+                  <span className="font-semibold">{progressPct}%</span>
+                </div>
+                <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/20">
+                  <div
+                    className="h-full rounded-full bg-white transition-all"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs text-brand-100">
+                  {completedCount}/{allTopicIds.length} টপিক সম্পন্ন
+                </p>
+              </div>
+            )}
+
+            <div className="mt-8 flex flex-wrap items-center gap-6">
+              <span className="text-3xl font-bold">
+                {formatPrice(course.price)}
+              </span>
+              <span className="text-sm text-brand-200">
+                {allTopicIds.length} টি টপিক
+              </span>
+              {canAccess ? (
+                resumeTopic ? (
+                  <Link
+                    href={`/courses/${course.slug}/lessons/${resumeTopic.id}`}
+                    className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50"
+                  >
+                    {isEnrolled && lastLessonId ? "শেখা চালিয়ে যান" : "শেখা শুরু করুন"} →
+                  </Link>
+                ) : null
+              ) : (
+                <>
+                  <CheckoutButton courseId={course.id} price={course.price} />
+                  <WishlistButton courseId={course.id} initialSaved={wishlisted} />
+                </>
+              )}
+              {isEnrolled && (
+                <CertificateButton
+                  courseId={course.id}
+                  completed={progressPct === 100}
+                  certificateId={certificateId}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="relative hidden aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-800 to-purple-900 shadow-2xl shadow-black/20 lg:block">
+            {course.cover_image ? (
+              <Image
+                src={course.cover_image}
+                alt={course.title}
+                fill
+                priority
+                sizes="400px"
+                className="object-cover"
               />
+            ) : (
+              <div className="flex h-full items-center justify-center text-7xl text-white/30">
+                {course.title.charAt(0)}
+              </div>
             )}
           </div>
         </div>
