@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/format";
 import { getSiteContent } from "@/lib/site-content";
-import { coursePageDefaults } from "@/lib/content-schema";
+import {
+  coursePageDefaults,
+  type CoursePageContent,
+} from "@/lib/content-schema";
 import { CheckoutButton } from "@/components/checkout/checkout-button";
 import { ReviewsSection } from "@/components/courses/reviews-section";
 import { QnaSection } from "@/components/courses/qna-section";
@@ -37,7 +40,7 @@ export default async function CourseDetailPage({
 }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const content = await getSiteContent("page.course", coursePageDefaults);
+  const globalContent = await getSiteContent("page.course", coursePageDefaults);
 
   const { data: course } = await supabase
     .from("courses")
@@ -49,6 +52,15 @@ export default async function CourseDetailPage({
   if (!course) {
     notFound();
   }
+
+  const storedContent =
+    course.content && typeof course.content === "object" && !Array.isArray(course.content)
+      ? (course.content as Record<string, unknown>)
+      : {};
+  const content = {
+    ...globalContent,
+    ...storedContent,
+  } as CoursePageContent;
 
   const { data: sections } = await supabase
     .from("course_sections")
@@ -223,8 +235,7 @@ export default async function CourseDetailPage({
       ? Math.round((completedCount / allTopicIds.length) * 100)
       : 0;
 
-  const isFree = course.price === 0;
-  const canAccess = isEnrolled || isFree;
+  const canAccess = isEnrolled;
   const firstTopic = allTopics[0];
   const resumeTopic =
     allTopics.find((t) => t.id === lastLessonId) ?? firstTopic;
@@ -239,7 +250,7 @@ export default async function CourseDetailPage({
       duration_minutes: topic.duration_minutes,
       is_free: topic.is_free,
       done: completedIds.has(topic.id),
-      locked: (!canAccess && !topic.is_free) || isDripLocked(topic),
+      locked: !canAccess || isDripLocked(topic),
       drip: isDripLocked(topic),
     })),
   }));
@@ -753,16 +764,18 @@ No topics added yet
 
             <div className="relative">
               <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-                Start Your AI &amp; Digital Income Journey Today 🚀
+                {content.ctaTitle}
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-sm text-zinc-300">
-                Seats are limited — enroll today and start your digital career.
-              </p>
+              {content.ctaSubtitle && (
+                <p className="mx-auto mt-4 max-w-xl text-sm text-zinc-300">
+                  {content.ctaSubtitle}
+                </p>
+              )}
               <a
                 href="#pricing"
                 className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-brand-500/40 transition-all hover:-translate-y-0.5 hover:bg-brand-500"
               >
-                Enroll Now
+                {content.ctaButtonText}
                 <i className="fa-solid fa-arrow-right text-sm" />
               </a>
             </div>

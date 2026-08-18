@@ -75,7 +75,7 @@ export default async function LessonPage({
     enrollmentDate = enrollment?.created_at ?? null;
   }
 
-  const canAccess = isEnrolled || lesson.is_free || course.price === 0;
+  const canAccess = isEnrolled;
 
   // drip content: release N days after enrollment
   let dripLocked = false;
@@ -97,11 +97,7 @@ export default async function LessonPage({
         <p className="mt-3 text-zinc-600">
           {dripLocked && unlockAt
             ? `This topic will unlock on ${unlockAt.toLocaleDateString("en-US")}.`
-            : `You need to purchase the course to view this topic. ${
-                course.price === 0
-                  ? "The course is free — log in and start learning."
-                  : `The course costs ${course.price} taka.`
-              }`}
+            : `You need to enroll in this course to view this topic.`}
         </p>
         <Link
           href={`/courses/${course.slug}`}

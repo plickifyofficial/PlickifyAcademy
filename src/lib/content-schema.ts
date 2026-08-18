@@ -863,8 +863,69 @@ export const coursePageDefaults = {
     { q: "Is there any support/community?", a: "Yes, you get direct instructor support through the VIP community and weekly Q&A sessions." },
     { q: "What if I am a beginner?", a: "No problem at all — the course is arranged from beginner to advanced level, so even starting from zero you can become skilled." },
   ],
+  ctaTitle: "Start Your AI & Digital Income Journey Today 🚀",
+  ctaSubtitle: "Seats are limited — enroll today and start your digital career.",
+  ctaButtonText: "Enroll Now",
 };
 export type CoursePageContent = typeof coursePageDefaults;
+
+export const courseContentFields: FieldDef[] = [
+  {
+    kind: "list",
+    key: "highlights",
+    label: "Course Highlights",
+    itemLabel: "Highlight",
+    fields: [
+      iconFields("icon", "Icon"),
+      { kind: "text", key: "title", label: "Title" },
+    ],
+  },
+  { kind: "text", key: "descriptionHeading", label: "Description Heading" },
+  { kind: "textarea", key: "description", label: "Detailed Description" },
+  {
+    kind: "list",
+    key: "whoFor",
+    label: "Who This Course Is For",
+    itemLabel: "Card",
+    fields: [
+      iconFields("icon", "Icon"),
+      { kind: "text", key: "title", label: "Title" },
+      { kind: "text", key: "desc", label: "Description" },
+    ],
+  },
+  { kind: "text", key: "outcomeTitle", label: "Outcome Title" },
+  { kind: "text", key: "outcomeSubtitle", label: "Outcome Subtitle" },
+  {
+    kind: "stringlist",
+    key: "outcome",
+    label: "Outcome Points",
+    itemLabel: "Point",
+  },
+  { kind: "text", key: "instructorName", label: "Instructor Name" },
+  { kind: "text", key: "instructorRole", label: "Instructor Role" },
+  { kind: "textarea", key: "instructorDescription", label: "Instructor Description" },
+  { kind: "image", key: "instructorImage", label: "Instructor Image" },
+  { kind: "url", key: "instructorFacebook", label: "Facebook Link" },
+  { kind: "url", key: "instructorYoutube", label: "YouTube Link" },
+  { kind: "url", key: "instructorLinkedin", label: "LinkedIn Link" },
+  { kind: "text", key: "discountLabel", label: "Discount Badge" },
+  { kind: "text", key: "secureText", label: "Secure Payment Text" },
+  { kind: "text", key: "pricingNote", label: "Pricing Note" },
+  { kind: "text", key: "faqTitle", label: "FAQ Title" },
+  {
+    kind: "list",
+    key: "faqItems",
+    label: "FAQ Questions",
+    itemLabel: "Question",
+    fields: [
+      { kind: "text", key: "q", label: "Question" },
+      { kind: "textarea", key: "a", label: "Answer" },
+    ],
+  },
+  { kind: "text", key: "ctaTitle", label: "Final CTA Title" },
+  { kind: "textarea", key: "ctaSubtitle", label: "Final CTA Subtitle" },
+  { kind: "text", key: "ctaButtonText", label: "Final CTA Button Text" },
+];
 
 export const pageSections: SectionDef[] = [
   {
@@ -873,60 +934,7 @@ export const pageSections: SectionDef[] = [
     description:
       "Edit the course page highlights, description, who-for, outcome, instructor, pricing and FAQ. The curriculum and lessons come from the database.",
     defaults: coursePageDefaults,
-    fields: [
-      {
-        kind: "list",
-        key: "highlights",
-        label: "Course Highlights",
-        itemLabel: "Highlight",
-        fields: [
-          iconFields("icon", "Icon"),
-          { kind: "text", key: "title", label: "Title" },
-        ],
-      },
-      { kind: "text", key: "descriptionHeading", label: "Description Heading" },
-      { kind: "textarea", key: "description", label: "Detailed Description" },
-      {
-        kind: "list",
-        key: "whoFor",
-        label: "Who This Course Is For",
-        itemLabel: "Card",
-        fields: [
-          iconFields("icon", "Icon"),
-          { kind: "text", key: "title", label: "Title" },
-          { kind: "text", key: "desc", label: "Description" },
-        ],
-      },
-      { kind: "text", key: "outcomeTitle", label: "Outcome Title" },
-      { kind: "text", key: "outcomeSubtitle", label: "Outcome Subtitle" },
-      {
-        kind: "stringlist",
-        key: "outcome",
-        label: "Outcome Points",
-        itemLabel: "Point",
-      },
-      { kind: "text", key: "instructorName", label: "Instructor Name" },
-      { kind: "text", key: "instructorRole", label: "Instructor Role" },
-      { kind: "textarea", key: "instructorDescription", label: "Instructor Description" },
-      { kind: "image", key: "instructorImage", label: "Instructor Image" },
-      { kind: "url", key: "instructorFacebook", label: "Facebook Link" },
-      { kind: "url", key: "instructorYoutube", label: "YouTube Link" },
-      { kind: "url", key: "instructorLinkedin", label: "LinkedIn Link" },
-      { kind: "text", key: "discountLabel", label: "Discount Badge" },
-      { kind: "text", key: "secureText", label: "Secure Payment Text" },
-      { kind: "text", key: "pricingNote", label: "Pricing Note" },
-      { kind: "text", key: "faqTitle", label: "FAQ Title" },
-      {
-        kind: "list",
-        key: "faqItems",
-        label: "FAQ Questions",
-        itemLabel: "Question",
-        fields: [
-          { kind: "text", key: "q", label: "Question" },
-          { kind: "textarea", key: "a", label: "Answer" },
-        ],
-      },
-    ],
+    fields: courseContentFields,
   },
   {
     key: "page.faq",

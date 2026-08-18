@@ -115,11 +115,6 @@ export function Curriculum({
                           {topic.duration_minutes} min
                         </span>
                       )}
-                      {topic.is_free && (
-                        <span className="hidden rounded-full bg-green-100 px-2.5 py-1 text-[10px] font-semibold text-green-700 sm:inline">
-                          Free Preview
-                        </span>
-                      )}
                       {topic.locked ? (
                         <span
                           className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-400"

@@ -18,6 +18,17 @@ import { formatPrice } from "@/lib/format";
 import { useToast } from "@/components/ui/toaster";
 import { CurriculumBuilder } from "@/components/admin/curriculum-builder";
 import { VideoSourceFields } from "@/components/admin/video-source-fields";
+import {
+  FieldRenderer,
+  getPath,
+  setPath,
+  type Path,
+} from "@/components/admin/content-editor";
+import {
+  coursePageDefaults,
+  courseContentFields,
+} from "@/lib/content-schema";
+import { uploadContentImage } from "@/lib/actions/content";
 
 function Field({
   name,
@@ -92,6 +103,68 @@ function Group({
         {title}
       </p>
       {children}
+    </div>
+  );
+}
+
+function CourseContentFields({ course }: { course?: Course }) {
+  const { showToast } = useToast();
+  const [value, setValue] = useState<Record<string, unknown>>(() => {
+    const defaults = coursePageDefaults as unknown as Record<string, unknown>;
+    const stored =
+      course?.content && typeof course.content === "object"
+        ? (course.content as Record<string, unknown>)
+        : {};
+    return { ...defaults, ...stored };
+  });
+
+  async function handleImageUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+    path: Path,
+  ) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await uploadContentImage(fd);
+      setValue((v) => setPath(v, path as string[], res.url));
+      showToast("Image uploaded");
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Image upload failed",
+        "error",
+      );
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <input
+        type="hidden"
+        name="course_content"
+        value={JSON.stringify(value)}
+      />
+      <p className="rounded bg-[#f0f6fc] px-3 py-2 text-xs text-[#2271b1]">
+        Customize the course page content for this course only. Leave unchanged
+        to use the global "Course Detail Page" defaults.
+      </p>
+      {courseContentFields.map((field) => (
+        <FieldRenderer
+          key={field.key}
+          field={field}
+          value={getPath(value, [field.key])}
+          sectionKey="course-content"
+          onChange={(path, v) =>
+            setValue((prev) =>
+              setPath(prev, [field.key, ...path] as string[], v),
+            )
+          }
+          onImageUpload={(path, e) =>
+            handleImageUpload(e, [field.key, ...path])
+          }
+        />
+      ))}
     </div>
   );
 }
@@ -200,6 +273,10 @@ function CourseFormFields({ course }: { course?: Course }) {
           <i className="fa-solid fa-circle-info mr-1" />
           Private: not shown on course list/home page, but accessible directly via course link (e.g., /courses/ai-income-mastery).
         </p>
+      </Group>
+
+      <Group title="Course Page Content" icon="fa-solid fa-file-lines">
+        <CourseContentFields course={course} />
       </Group>
     </div>
   );

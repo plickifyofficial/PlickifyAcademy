@@ -133,6 +133,19 @@ function toNumber(value: unknown): number {
   return isNaN(n) ? 0 : n;
 }
 
+function courseContentFrom(formData: FormData): Record<string, unknown> {
+  const raw = String(formData.get("course_content") ?? "").trim();
+  if (!raw) return {};
+  try {
+    const v = JSON.parse(raw) as unknown;
+    return v && typeof v === "object" && !Array.isArray(v)
+      ? (v as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
+}
+
 export async function createCourse(formData: FormData) {
   const supabase = await requireCourseEditor();
 
@@ -156,10 +169,11 @@ export async function createCourse(formData: FormData) {
       title,
       slug,
       description,
+      price,
+      original_price,
       subtitle: optStr(formData, "subtitle"),
       category: optStr(formData, "category"),
       language: optStr(formData, "language"),
-      original_price,
       level,
       cover_image,
       tags: tagsFrom(formData),
@@ -170,6 +184,7 @@ export async function createCourse(formData: FormData) {
       promo_video_embed: optStr(formData, "promo_video_embed"),
       created_by: user?.id,
       is_published: formData.get("is_published") === "on",
+      content: courseContentFrom(formData),
     })
     .select("id")
     .single();
@@ -209,10 +224,11 @@ export async function updateCourse(formData: FormData) {
       title,
       slug,
       description,
+      price,
+      original_price,
       subtitle: optStr(formData, "subtitle"),
       category: optStr(formData, "category"),
       language: optStr(formData, "language"),
-      original_price,
       level,
       cover_image,
       tags: tagsFrom(formData),
@@ -222,6 +238,7 @@ export async function updateCourse(formData: FormData) {
       promo_video_url: optStr(formData, "promo_video_url"),
       promo_video_embed: optStr(formData, "promo_video_embed"),
       is_published: formData.get("is_published") === "on",
+      content: courseContentFrom(formData),
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);

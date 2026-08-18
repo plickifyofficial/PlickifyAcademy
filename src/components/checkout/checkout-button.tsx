@@ -29,6 +29,7 @@ export function CheckoutButton({ courseId, price }: Props) {
   const [trxId, setTrxId] = useState("");
 
   const finalPrice = discounted ?? price;
+  const isFree = price <= 0;
   const merchantNumber = method === "bkash" ? BKASH_NUMBER : NAGAD_NUMBER;
 
   async function handleApply() {
@@ -52,10 +53,10 @@ export function CheckoutButton({ courseId, price }: Props) {
     setPending(true);
     const result = await submitManualPayment({
       courseId,
-      couponCode,
-      method,
-      senderNumber,
-      trxId,
+      couponCode: isFree ? null : couponCode,
+      method: isFree ? "bkash" : method,
+      senderNumber: isFree ? "" : senderNumber,
+      trxId: isFree ? "" : trxId,
     });
 
     setPending(false);
@@ -76,11 +77,13 @@ export function CheckoutButton({ courseId, price }: Props) {
     return (
       <div className="rounded-xl border border-green-400/40 bg-green-500/15 p-4 text-white">
         <p className="font-semibold">
-          <i className="fa-solid fa-check-circle mr-1" /> Payment submitted!
+          <i className="fa-solid fa-check-circle mr-1" />{" "}
+          {isFree ? "Enrolled successfully!" : "Payment submitted!"}
         </p>
         <p className="mt-1 text-sm text-white/80">
-          We'll verify your TrxID ({trxId}) and enroll you in the course. It usually
-          takes 5–30 minutes. You'll get a notification once enrolled.
+          {isFree
+            ? "You now have access to this course. Start learning from your dashboard."
+            : `We'll verify your TrxID (${trxId}) and enroll you in the course. It usually takes 5–30 minutes. You'll get a notification once enrolled.`}
         </p>
       </div>
     );
@@ -88,7 +91,17 @@ export function CheckoutButton({ courseId, price }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      {couponCode ? (
+      {isFree ? (
+        <button
+          onClick={handleSubmitPayment}
+          disabled={pending}
+          className="rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
+        >
+          {pending ? "Please wait..." : "Enroll Free"}
+        </button>
+      ) : (
+        <>
+          {couponCode ? (
         <p className="text-sm font-medium text-green-200">
           <i className="fa-solid fa-ticket mr-1" />
           Coupon <b>{couponCode}</b> applied:{" "}
@@ -182,6 +195,8 @@ export function CheckoutButton({ courseId, price }: Props) {
             {pending ? "Submitting..." : "Submit Payment"}
           </button>
         </div>
+      )}
+        </>
       )}
     </div>
   );

@@ -53,7 +53,7 @@ const COMMON_ICONS = [
   "fa-brands fa-tiktok",
 ];
 
-function getPath(obj: Record<string, unknown>, path: string[]) {
+export function getPath(obj: Record<string, unknown>, path: string[]) {
   let cur: unknown = obj;
   for (const p of path) {
     if (cur && typeof cur === "object" && p in (cur as Record<string, unknown>)) {
@@ -65,7 +65,7 @@ function getPath(obj: Record<string, unknown>, path: string[]) {
   return cur;
 }
 
-function setPath(
+export function setPath(
   obj: Record<string, unknown>,
   path: string[],
   value: unknown,
@@ -81,7 +81,7 @@ function setPath(
   return clone;
 }
 
-function emptyItem(fields: FieldDef[]): Record<string, unknown> {
+export function emptyItem(fields: FieldDef[]): Record<string, unknown> {
   const item: Record<string, unknown> = {};
   for (const f of fields) {
     if (f.kind === "list") item[f.key] = [];
@@ -105,7 +105,7 @@ function fromLocalInput(v: string) {
   return v ? new Date(v).toISOString() : "";
 }
 
-type Path = (string | number)[];
+export type Path = (string | number)[];
 
 export function ContentEditor({
   sections,
@@ -251,7 +251,7 @@ export function ContentEditor({
   );
 }
 
-function FieldRenderer({
+export function FieldRenderer({
   field,
   value,
   sectionKey,
@@ -498,7 +498,7 @@ aria-label="Delete"
   }
 }
 
-function FieldWrapper({
+export function FieldWrapper({
   label,
   hint,
   children,

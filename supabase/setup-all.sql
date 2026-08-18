@@ -83,6 +83,9 @@ alter table public.courses
   add column if not exists visibility text not null default 'public'
   check (visibility in ('public', 'private'));
 
+alter table public.courses
+  add column if not exists content jsonb;
+
 -- ============================================================
 -- LESSONS (Topics)
 -- ============================================================

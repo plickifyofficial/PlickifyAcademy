@@ -26,8 +26,6 @@ export async function submitManualPayment(input: {
   const trxId = input.trxId.trim().toUpperCase();
 
   if (!courseId) return { error: "Course not found" };
-  if (!senderNumber || !trxId)
-    return { error: "Please provide your sender number and TrxID" };
 
   const { data: course } = await supabase
     .from("courses")
@@ -81,8 +79,12 @@ export async function submitManualPayment(input: {
         { user_id: user.id, course_id: courseId },
         { onConflict: "user_id,course_id" },
       );
+    revalidatePath("/dashboard");
     return {};
   }
+
+  if (!senderNumber || !trxId)
+    return { error: "Please provide your sender number and TrxID" };
 
   const { error } = await admin.from("orders").insert({
     user_id: user.id,
