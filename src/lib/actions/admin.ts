@@ -121,6 +121,18 @@ function tagsFrom(formData: FormData): string[] {
     .filter(Boolean) ?? [];
 }
 
+function toNumber(value: unknown): number {
+  if (value === null || value === undefined) return 0;
+  const s = String(value)
+    .replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .replace(/[,\s৳]/g, "")
+    .trim();
+  if (!s) return 0;
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
+}
+
 export async function createCourse(formData: FormData) {
   const supabase = await requireCourseEditor();
 
@@ -129,8 +141,8 @@ export async function createCourse(formData: FormData) {
   if (!title || !slug) throw new Error("শিরোনাম ও Slug দিন");
 
   const description = String(formData.get("description")).trim();
-  const price = Number(formData.get("price")) || 0;
-  const original_price = Number(formData.get("original_price")) || 0;
+  const price = toNumber(formData.get("price"));
+  const original_price = toNumber(formData.get("original_price"));
   const level = String(formData.get("level")) || "beginner";
   const cover_image = await resolveCoverImage(formData, null);
 
@@ -186,8 +198,8 @@ export async function updateCourse(formData: FormData) {
   if (!id || !title || !slug) throw new Error("শিরোনাম ও Slug দিন");
 
   const description = String(formData.get("description")).trim();
-  const price = Number(formData.get("price")) || 0;
-  const original_price = Number(formData.get("original_price")) || 0;
+  const price = toNumber(formData.get("price"));
+  const original_price = toNumber(formData.get("original_price"));
   const level = String(formData.get("level")) || "beginner";
   const cover_image = await resolveCoverImage(formData, null);
 
@@ -255,9 +267,9 @@ export async function createLesson(formData: FormData) {
   const description = String(formData.get("description")).trim();
   const video_url = String(formData.get("video_url")).trim() || null;
   const content = String(formData.get("content")).trim() || null;
-  const duration_minutes = Number(formData.get("duration_minutes")) || 0;
+  const duration_minutes = toNumber(formData.get("duration_minutes"));
   const is_free = formData.get("is_free") === "on";
-  const order = Number(formData.get("order")) || 0;
+  const order = toNumber(formData.get("order"));
 
   const { error } = await supabase.from("lessons").insert({
     course_id: courseId,
@@ -349,7 +361,7 @@ export async function moveSection(formData: FormData) {
   const courseId = String(formData.get("course_id"));
   const supabase = await requireCourseEditor(courseId);
   const id = String(formData.get("id"));
-  const direction = Number(formData.get("direction")) || 0;
+  const direction = toNumber(formData.get("direction"));
   if (!id || !courseId || direction === 0) return;
 
   const { data: sections } = await supabase
@@ -402,10 +414,10 @@ export async function createTopic(formData: FormData) {
     video_url: optStr(formData, "video_url"),
     video_embed: optStr(formData, "video_embed"),
     content: optStr(formData, "content"),
-    duration_minutes: Number(formData.get("duration_minutes")) || 0,
+    duration_minutes: toNumber(formData.get("duration_minutes")),
     is_free: formData.get("is_free") === "on",
-    pass_percent: Number(formData.get("pass_percent")) || 60,
-    release_days: Number(formData.get("release_days")) || 0,
+    pass_percent: toNumber(formData.get("pass_percent")) || 60,
+    release_days: toNumber(formData.get("release_days")),
     order: (last?.order ?? 0) + 1,
   });
 
@@ -433,10 +445,10 @@ export async function updateTopic(formData: FormData) {
       video_url: optStr(formData, "video_url"),
       video_embed: optStr(formData, "video_embed"),
       content: optStr(formData, "content"),
-      duration_minutes: Number(formData.get("duration_minutes")) || 0,
+      duration_minutes: toNumber(formData.get("duration_minutes")),
       is_free: formData.get("is_free") === "on",
-      pass_percent: Number(formData.get("pass_percent")) || 60,
-      release_days: Number(formData.get("release_days")) || 0,
+      pass_percent: toNumber(formData.get("pass_percent")) || 60,
+      release_days: toNumber(formData.get("release_days")),
     })
     .eq("id", id);
   if (error) throw new Error(error.message);
@@ -463,7 +475,7 @@ export async function moveTopic(formData: FormData) {
   await requireCourseEditor(await courseIdFor(supabase, "course_sections", sectionId));
 
   const id = String(formData.get("id"));
-  const direction = Number(formData.get("direction")) || 0;
+  const direction = toNumber(formData.get("direction"));
   if (!id || !sectionId || direction === 0) return;
 
   const { data: topics } = await supabase
@@ -502,7 +514,7 @@ export async function createQuizQuestion(formData: FormData) {
     .filter(Boolean);
   if (options.length < 2) throw new Error("কমপক্ষে ২টি অপশন দিন");
 
-  const correctIndex = Number(formData.get("correct_index")) || 0;
+  const correctIndex = toNumber(formData.get("correct_index"));
   if (correctIndex >= options.length)
     throw new Error("সঠিক উত্তরের সূচক ভুল");
 
@@ -547,7 +559,7 @@ export async function updateQuizQuestion(formData: FormData) {
     .filter(Boolean);
   if (options.length < 2) throw new Error("কমপক্ষে ২টি অপশন দিন");
 
-  const correctIndex = Number(formData.get("correct_index")) || 0;
+  const correctIndex = toNumber(formData.get("correct_index"));
   if (correctIndex >= options.length)
     throw new Error("সঠিক উত্তরের সূচক ভুল");
 
@@ -662,7 +674,7 @@ export async function createLiveClass(formData: FormData) {
     title,
     description: String(formData.get("description")).trim() || null,
     scheduled_at: String(formData.get("scheduled_at") || "").trim() || null,
-    duration_minutes: Number(formData.get("duration_minutes")) || 60,
+    duration_minutes: toNumber(formData.get("duration_minutes")) || 60,
     meeting_url: String(formData.get("meeting_url")).trim() || null,
   });
   if (error) throw new Error(error.message);

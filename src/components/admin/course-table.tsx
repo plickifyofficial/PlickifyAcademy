@@ -26,6 +26,7 @@ function Field({
   required,
   type = "text",
   placeholder,
+  inputMode,
   className = "",
 }: {
   name: string;
@@ -34,6 +35,7 @@ function Field({
   required?: boolean;
   type?: string;
   placeholder?: string;
+  inputMode?: "text" | "decimal" | "numeric" | "tel";
   className?: string;
 }) {
   return (
@@ -42,6 +44,7 @@ function Field({
       <input
         name={name}
         type={type}
+        inputMode={inputMode}
         defaultValue={defaultValue}
         required={required}
         placeholder={placeholder}
@@ -112,8 +115,8 @@ function CourseFormFields({ course }: { course?: Course }) {
 
       <Group title="মূল্য ও ডিসকাউন্ট" icon="fa-solid fa-tags">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field name="price" label="বর্তমান দাম (৳)" type="number" defaultValue={course?.price ?? 0} />
-          <Field name="original_price" label="আগের দাম (৳) — কাটা দাম দেখাতে" type="number" defaultValue={course?.original_price ?? 0} />
+          <Field name="price" label="বর্তমান দাম (৳)" type="text" inputMode="decimal" defaultValue={course?.price ?? 0} placeholder="যেমন: 3500" />
+          <Field name="original_price" label="আগের দাম (৳) — কাটা দাম দেখাতে" type="text" inputMode="decimal" defaultValue={course?.original_price ?? 0} placeholder="যেমন: 7000" />
         </div>
         <p className="mt-2 text-xs text-[#646970]">
           <i className="fa-solid fa-circle-info mr-1" />

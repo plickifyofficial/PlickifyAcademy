@@ -369,7 +369,7 @@ export function CurriculumBuilder({
             </button>
             <input name="description" placeholder="বর্ণনা (ঐচ্ছিক)" className="wp-input sm:col-span-2" />
             <input name="meeting_url" placeholder="Zoom/Meet লিংক (ঐচ্ছিক)" className="wp-input" />
-            <input name="duration_minutes" type="number" min={1} defaultValue={60} placeholder="সময় (মিনিট)" className="wp-input" />
+            <input name="duration_minutes" type="text" inputMode="numeric" defaultValue={60} placeholder="সময় (মিনিট)" className="wp-input" />
           </form>
         </div>
       </div>
@@ -523,7 +523,7 @@ function TopicForm({
         />
         <div>
           <label className="wp-label">সময় (মিনিট)</label>
-          <input name="duration_minutes" type="number" defaultValue={topic?.duration_minutes ?? 0} className="wp-input" />
+          <input name="duration_minutes" type="text" inputMode="numeric" defaultValue={topic?.duration_minutes ?? 0} className="wp-input" />
         </div>
       </div>
       <div className="mt-2">
@@ -533,11 +533,11 @@ function TopicForm({
       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div>
           <label className="wp-label">কুইজ পাস % (কুইজের জন্য)</label>
-          <input name="pass_percent" type="number" min={0} max={100} defaultValue={topic?.pass_percent ?? 60} className="wp-input" />
+          <input name="pass_percent" type="text" inputMode="numeric" defaultValue={topic?.pass_percent ?? 60} className="wp-input" />
         </div>
         <div>
           <label className="wp-label">ড্রিপ রিলিজ (এনরোলের পরে দিন)</label>
-          <input name="release_days" type="number" min={0} defaultValue={topic?.release_days ?? 0} className="wp-input" />
+          <input name="release_days" type="text" inputMode="numeric" defaultValue={topic?.release_days ?? 0} className="wp-input" />
         </div>
       </div>
       <div className="mt-2">
