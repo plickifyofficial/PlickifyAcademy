@@ -161,7 +161,7 @@ export const productsDefaults = {
   eyebrow: "Learning Products",
   title: "প্রিমিয়াম ডিজিটাল রিসোর্স",
   viewAllText: "সব রিসোর্স দেখুন",
-  viewAllLink: "/#contact",
+  viewAllLink: "/products",
   items: [
     { name: "AI Prompt Pack", price: "৳490", oldPrice: "", tag: "PROMPTS", icon: "fa-solid fa-bolt", gradient: "from-blue-600 to-indigo-600" },
     { name: "Canva Templates", price: "৳690", oldPrice: "৳990", tag: "DESIGN", icon: "fa-solid fa-palette", gradient: "from-violet-600 to-fuchsia-600" },
@@ -248,10 +248,10 @@ export const navDefaults = {
   links: [
     { label: "Home", href: "/" },
     { label: "Courses", href: "/courses" },
-    { label: "Live Batch", href: "/#live-batch" },
-    { label: "Digital Products", href: "/#products" },
-    { label: "About", href: "/#why" },
-    { label: "Contact", href: "/#contact" },
+    { label: "Live Batch", href: "/live-batch" },
+    { label: "Digital Products", href: "/products" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ],
 };
 export type NavContent = typeof navDefaults;
@@ -265,18 +265,18 @@ export const footerDefaults = {
   quickLinksTitle: "Quick Links",
   quickLinks: [
     { label: "Courses", href: "/courses" },
-    { label: "Live Batch", href: "/#live-batch" },
-    { label: "Digital Products", href: "/#products" },
-    { label: "Become Instructor", href: "/#contact" },
-    { label: "Blog", href: "/#contact" },
+    { label: "Live Batch", href: "/live-batch" },
+    { label: "Digital Products", href: "/products" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ],
   supportTitle: "Support",
   supportLinks: [
     { label: "FAQ", href: "/#faq" },
-    { label: "Contact Us", href: "/#contact" },
-    { label: "Terms & Conditions", href: "/#contact" },
-    { label: "Privacy Policy", href: "/#contact" },
-    { label: "Refund Policy", href: "/#contact" },
+    { label: "Contact Us", href: "/contact" },
+    { label: "Terms & Conditions", href: "/contact" },
+    { label: "Privacy Policy", href: "/contact" },
+    { label: "Refund Policy", href: "/contact" },
   ],
   socials: [
     { icon: "fa-brands fa-facebook-f", href: "#" },

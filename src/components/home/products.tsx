@@ -1,7 +1,13 @@
 import Link from "next/link";
 import type { ProductsContent } from "@/lib/content-schema";
 
-export function Products({ content }: { content: ProductsContent }) {
+export function Products({
+  content,
+  hideViewAll = false,
+}: {
+  content: ProductsContent;
+  hideViewAll?: boolean;
+}) {
   return (
     <section id="products" className="bg-zinc-50/70 px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-7xl">
@@ -49,15 +55,17 @@ export function Products({ content }: { content: ProductsContent }) {
           ))}
         </div>
 
-        <div className="mt-10 text-center" data-aos="fade-up">
-          <Link
-            href={content.viewAllLink || "/#contact"}
-            className="inline-flex items-center gap-2 rounded-full border border-brand-300 bg-white px-7 py-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
-          >
-            {content.viewAllText}
-            <i className="fa-solid fa-arrow-right text-xs" />
-          </Link>
-        </div>
+        {!hideViewAll && (
+          <div className="mt-10 text-center" data-aos="fade-up">
+            <Link
+              href={content.viewAllLink || "/products"}
+              className="inline-flex items-center gap-2 rounded-full border border-brand-300 bg-white px-7 py-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50"
+            >
+              {content.viewAllText}
+              <i className="fa-solid fa-arrow-right text-xs" />
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );
