@@ -77,10 +77,11 @@ export default async function MyCoursesPage() {
             const total = courseCounts[course.id] ?? 0;
             const pct = total > 0 ? Math.round((done / total) * 100) : 0;
             const resumeLessonId = resumeIds[course.id] ?? null;
+            const courseHref = `/dashboard/courses/${course.id}`;
             const continueHref =
               resumeLessonId && pct > 0 && pct < 100
-                ? `/courses/${course.slug}/lessons/${resumeLessonId}`
-                : `/courses/${course.slug}`;
+                ? `/dashboard/courses/${course.id}/lessons/${resumeLessonId}`
+                : courseHref;
 
             return (
               <div

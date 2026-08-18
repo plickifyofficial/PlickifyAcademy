@@ -8,6 +8,7 @@ type Props = {
   courseSlug: string;
   nextLessonId: string | null;
   isAuthenticated: boolean;
+  hrefPrefix?: string;
 };
 
 export function MarkCompleteButton({
@@ -15,6 +16,7 @@ export function MarkCompleteButton({
   courseSlug,
   nextLessonId,
   isAuthenticated,
+  hrefPrefix = "/courses",
 }: Props) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -32,7 +34,9 @@ export function MarkCompleteButton({
       if (!res.ok) throw new Error("progress save failed");
       router.refresh();
       if (nextLessonId) {
-        router.push(`/courses/${courseSlug}/lessons/${nextLessonId}`);
+        router.push(
+          `${hrefPrefix}/${courseSlug}/lessons/${nextLessonId}`,
+        );
       }
     } catch {
       // keep button usable if the request fails

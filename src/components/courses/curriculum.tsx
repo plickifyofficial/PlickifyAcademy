@@ -31,9 +31,11 @@ const TYPE_META: Record<CurItem["type"], { icon: string; label: string }> = {
 export function Curriculum({
   sections,
   courseSlug,
+  hrefPrefix = "/courses",
 }: {
   sections: CurSection[];
   courseSlug: string;
+  hrefPrefix?: string;
 }) {
   const [open, setOpen] = useState<Set<string>>(
     () => new Set(sections.map((s) => s.id)),
@@ -128,7 +130,7 @@ export function Curriculum({
                         </span>
                       ) : (
                         <Link
-                          href={`/courses/${courseSlug}/lessons/${topic.id}`}
+                          href={`${hrefPrefix}/${courseSlug}/lessons/${topic.id}`}
                           className="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700"
                         >
                           {topic.done ? "Watch Again" : "Watch"}

@@ -29,8 +29,8 @@ export function CheckoutPanel({ courseId, price }: Props) {
   const [senderNumber, setSenderNumber] = useState("");
   const [trxId, setTrxId] = useState("");
 
-  const isFree = price <= 0;
   const finalPrice = discounted ?? price;
+  const isFree = finalPrice <= 0;
   const merchantNumber = method === "bkash" ? BKASH_NUMBER : NAGAD_NUMBER;
 
   async function handleApply() {
@@ -54,7 +54,7 @@ export function CheckoutPanel({ courseId, price }: Props) {
     setPending(true);
     const result = await submitManualPayment({
       courseId,
-      couponCode: isFree ? null : couponCode,
+      couponCode,
       method: isFree ? "bkash" : method,
       senderNumber: isFree ? "" : senderNumber,
       trxId: isFree ? "" : trxId,
