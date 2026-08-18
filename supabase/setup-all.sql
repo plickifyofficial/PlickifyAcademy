@@ -435,8 +435,10 @@ create policy "site_content_public_read" on public.site_content
 drop policy if exists "site_content_app_admin_write" on public.site_content;
 create policy "site_content_app_admin_write" on public.site_content
   for insert to authenticated with check (true);
+drop policy if exists "site_content_app_admin_update" on public.site_content;
 create policy "site_content_app_admin_update" on public.site_content
   for update to authenticated using (true) with check (true);
+drop policy if exists "site_content_app_admin_delete" on public.site_content;
 create policy "site_content_app_admin_delete" on public.site_content
   for delete to authenticated using (true);
 
