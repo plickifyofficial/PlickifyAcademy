@@ -79,6 +79,10 @@ alter table public.courses
   add column if not exists promo_video_url text,
   add column if not exists promo_video_embed text;
 
+alter table public.courses
+  add column if not exists visibility text not null default 'public'
+  check (visibility in ('public', 'private'));
+
 -- ============================================================
 -- LESSONS (Topics)
 -- ============================================================

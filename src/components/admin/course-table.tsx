@@ -181,7 +181,18 @@ function CourseFormFields({ course }: { course?: Course }) {
             <input type="checkbox" name="certificate" value="on" defaultChecked={course?.certificate ?? true} className="h-4 w-4" />
             সার্টিফিকেট দেওয়া হবে
           </label>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-[#3c434a]">ভিজিবিলিটি</label>
+            <select name="visibility" defaultValue={course?.visibility ?? "public"} className="wp-input !w-auto !py-1.5">
+              <option value="public">পাবলিক (সব জায়গায় দেখাবে)</option>
+              <option value="private">প্রাইভেট (শুধু লিংকে দেখাবে)</option>
+            </select>
+          </div>
         </div>
+        <p className="mt-2 text-xs text-[#646970]">
+          <i className="fa-solid fa-circle-info mr-1" />
+          প্রাইভেট: কোর্স তালিকা/হোম পেজে দেখাবে না, তবে সরাসরি কোর্স লিংকে (যেমন /courses/ai-income-mastery) খুলবে।
+        </p>
       </Group>
     </div>
   );
@@ -319,6 +330,9 @@ export function AdminCourseTable({
                         </span>
                         {course.is_featured && (
                           <span className="wp-tag">ফিচার্ড</span>
+                        )}
+                        {course.visibility === "private" && (
+                          <span className="wp-tag wp-tag-amber">প্রাইভেট</span>
                         )}
                       </div>
                     </td>

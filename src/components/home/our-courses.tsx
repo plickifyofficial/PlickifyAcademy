@@ -9,6 +9,7 @@ export async function OurCourses({ content }: { content: OurCoursesContent }) {
     .from("courses")
     .select("*")
     .eq("is_published", true)
+    .eq("visibility", "public")
     .order("created_at", { ascending: false })
     .limit(content.limit || 6);
 

@@ -12,6 +12,7 @@ export default async function CoursesPage() {
     .from("courses")
     .select("*")
     .eq("is_published", true)
+    .eq("visibility", "public")
     .order("created_at", { ascending: false });
 
   const { data: reviews } = await supabase

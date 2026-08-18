@@ -18,6 +18,7 @@ export type Course = {
   is_featured: boolean;
   certificate: boolean;
   tags: string[];
+  visibility: "public" | "private";
   promo_video_url: string | null;
   promo_video_embed: string | null;
   cover_image: string | null;
