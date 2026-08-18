@@ -5,6 +5,7 @@ import { MarkCompleteButton } from "@/components/lessons/mark-complete-button";
 import { QuizPlayer } from "@/components/lessons/quiz-player";
 import { ResumeTracker } from "@/components/lessons/resume-tracker";
 import { VideoPlayer } from "@/components/lessons/video-player";
+import { buildProtectedRender } from "@/lib/video-access";
 import type { QuizQuestion } from "@/lib/types";
 
 export const metadata = { title: "Lesson" };
@@ -168,8 +169,12 @@ export default async function DashboardLessonPage({
           {lesson.video_url || lesson.video_embed ? (
             <div className="mt-6 overflow-hidden rounded-2xl bg-black">
               <VideoPlayer
-                url={lesson.video_url}
-                embed={lesson.video_embed}
+                render={buildProtectedRender(
+                  lesson.video_url,
+                  lesson.video_embed,
+                  course.id,
+                  lesson.id,
+                )}
                 poster={course.cover_image}
                 title={lesson.title}
               />

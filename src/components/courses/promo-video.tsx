@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { buildVideoRender } from "@/lib/video";
 import { VideoPlayer } from "@/components/lessons/video-player";
 
 export function PromoVideo({
@@ -21,7 +22,11 @@ export function PromoVideo({
   if (playing && hasVideo) {
     return (
       <div className="aspect-[16/10] bg-black">
-        <VideoPlayer url={url} embed={embed} poster={coverImage} title={title} />
+        <VideoPlayer
+          render={buildVideoRender(url, embed)}
+          poster={coverImage}
+          title={title}
+        />
       </div>
     );
   }

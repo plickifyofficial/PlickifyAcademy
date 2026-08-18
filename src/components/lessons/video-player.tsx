@@ -1,18 +1,14 @@
-import { buildVideoRender } from "@/lib/video";
+import type { VideoRender } from "@/lib/video";
 
 export function VideoPlayer({
-  url,
-  embed,
+  render,
   poster,
   title,
 }: {
-  url: string | null;
-  embed: string | null;
+  render: VideoRender;
   poster?: string | null;
   title?: string | null;
 }) {
-  const render = buildVideoRender(url, embed);
-
   if (!render) return null;
 
   if (render.kind === "embed") {
@@ -42,7 +38,10 @@ export function VideoPlayer({
     <video
       src={render.src}
       controls
+      controlsList="nodownload"
+      disablePictureInPicture
       poster={poster ?? undefined}
+      onContextMenu={(e) => e.preventDefault()}
       className="aspect-video w-full"
     />
   );
