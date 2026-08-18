@@ -103,7 +103,11 @@ function CourseFormFields({ course }: { course?: Course }) {
           <Field name="subtitle" label="সাব-টাইটেল / ট্যাগলাইন" defaultValue={course?.subtitle ?? ""} placeholder="যেমন: AI & Digital Income Mastery" />
           <Field name="category" label="ক্যাটাগরি" defaultValue={course?.category ?? "General"} placeholder="যেমন: AI, Freelancing" />
         </div>
-        <TextArea name="description" label="বিস্তারিত বর্ণনা" defaultValue={course?.description ?? ""} rows={4} className="mt-3" />
+        <TextArea name="description" label="বিস্তারিত বর্ণনা" defaultValue={course?.description ?? ""} rows={6} className="mt-3" />
+        <p className="mt-1 text-xs text-[#646970]">
+          <i className="fa-solid fa-circle-info mr-1" />
+          Markdown সমর্থিত — হেডিং (# / ##), বুলেট (*), বোল্ড (**text**), এমোজি। কোর্স পেজে সুন্দরভাবে দেখাবে।
+        </p>
       </Group>
 
       <Group title="মূল্য ও ডিসকাউন্ট" icon="fa-solid fa-tags">

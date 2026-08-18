@@ -18,6 +18,8 @@ import {
   type LearnModule,
 } from "@/components/courses/what-you-learn";
 import { Faq } from "@/components/home/faq";
+import { Markdown } from "@/components/ui/markdown";
+import { markdownToText } from "@/lib/markdown";
 import type { Lesson, Announcement, LiveClass } from "@/lib/types";
 
 export const metadata = { title: "কোর্স" };
@@ -264,6 +266,12 @@ export default async function CourseDetailPage({
       : course.price > 0
         ? course.price * 2
         : 0;
+
+  const courseHeroExcerpt = course.description
+    ? markdownToText(course.description).slice(0, 200)
+    : "";
+  const courseDescription =
+    course.description?.trim() || content.description || "";
   const instructorImage =
     content.instructorImage || instructor?.avatar_url || null;
 
@@ -321,7 +329,7 @@ export default async function CourseDetailPage({
                 </p>
               )}
               <p className="mt-4 max-w-2xl text-lg leading-relaxed text-brand-100">
-                {course.description}
+                {courseHeroExcerpt}
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-brand-100">
@@ -452,13 +460,11 @@ export default async function CourseDetailPage({
         </section>
 
         {/* 3. COURSE DESCRIPTION */}
-        {content.description && (
+        {courseDescription && (
           <section className="mt-14" data-aos="fade-up">
             <div className="mx-auto max-w-3xl">
               <div className="text-center">{sectionTitle("fa-solid fa-circle-info", content.descriptionHeading)}</div>
-              <p className="mt-6 text-base leading-relaxed text-zinc-600">
-                {content.description}
-              </p>
+              <Markdown source={courseDescription} className="mt-6" />
             </div>
           </section>
         )}
