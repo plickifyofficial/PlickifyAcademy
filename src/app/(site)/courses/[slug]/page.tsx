@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/format";
+import { getSiteContent } from "@/lib/site-content";
+import { coursePageDefaults } from "@/lib/content-schema";
 import { CheckoutButton } from "@/components/checkout/checkout-button";
 import { ReviewsSection } from "@/components/courses/reviews-section";
 import { QnaSection } from "@/components/courses/qna-section";
@@ -11,6 +13,11 @@ import { CertificateButton } from "@/components/courses/certificate-button";
 import { WishlistButton } from "@/components/courses/wishlist-button";
 import { LiveClassesSection } from "@/components/courses/live-classes-section";
 import { Curriculum, type CurSection } from "@/components/courses/curriculum";
+import {
+  WhatYouLearn,
+  type LearnModule,
+} from "@/components/courses/what-you-learn";
+import { Faq } from "@/components/home/faq";
 import type { Lesson, Announcement, LiveClass } from "@/lib/types";
 
 export const metadata = { title: "কোর্স" };
@@ -28,6 +35,7 @@ export default async function CourseDetailPage({
 }) {
   const { slug } = await params;
   const supabase = await createClient();
+  const content = await getSiteContent("page.course", coursePageDefaults);
 
   const { data: course } = await supabase
     .from("courses")
@@ -78,7 +86,7 @@ export default async function CourseDetailPage({
       .eq("course_id", course.id),
     admin
       .from("profiles")
-      .select("full_name, avatar_url, role")
+      .select("full_name, avatar_url")
       .eq("id", course.created_by ?? "")
       .maybeSingle(),
   ]);
@@ -234,44 +242,52 @@ export default async function CourseDetailPage({
     })),
   }));
 
-  const whatYouLearn = allTopics.slice(0, 6).map((t) => t.title);
-
-  const includes = [
-    "সম্পূর্ণ ভিডিও লেসন",
-    "লাইভ ক্লাস ও রেকর্ডিং",
-    "প্র্যাকটিক্যাল অ্যাসাইনমেন্ট",
-    "সাপ্তাহিক Q&A সেশন",
-    "ভেরিফায়েড সার্টিফিকেট",
-    "লাইফটাইম অ্যাক্সেস",
-  ];
+  const modules: LearnModule[] = (sections ?? []).map((section, i) => ({
+    id: section.id,
+    position: i + 1,
+    title: section.title,
+    items: (topicsBySection[section.id] ?? []).map((topic) => ({
+      id: topic.id,
+      title: topic.title,
+      duration_minutes: topic.duration_minutes,
+    })),
+  }));
 
   const durationText =
     totalMinutes >= 60
       ? `${Math.floor(totalMinutes / 60)} ঘণ্টা ${totalMinutes % 60} মিনিট`
       : `${totalMinutes} মিনিট`;
 
-  const hourMin = (totalMinutes / 60).toFixed(1);
+  const originalPrice = course.price > 0 ? course.price * 2 : 0;
+  const instructorImage =
+    content.instructorImage || instructor?.avatar_url || null;
+
+  const sectionTitle = (icon: string, title: string) => (
+    <div className="flex items-center gap-3">
+      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-lg text-brand-600">
+        <i className={icon} />
+      </span>
+      <h2 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{title}</h2>
+    </div>
+  );
 
   return (
     <main className="flex-1">
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-purple-800 py-10 text-white sm:py-14">
+      {/* 1. HERO */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-purple-800 pb-16 pt-10 text-white sm:pt-14">
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand-500/30 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" />
 
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <nav className="flex items-center gap-2 text-sm text-brand-200">
-            <Link href="/" className="transition-colors hover:text-white">
-              হোম
-            </Link>
+            <Link href="/" className="transition-colors hover:text-white">হোম</Link>
             <i className="fa-solid fa-chevron-right text-[10px]" />
-            <Link href="/courses" className="transition-colors hover:text-white">
-              কোর্সসমূহ
-            </Link>
+            <Link href="/courses" className="transition-colors hover:text-white">কোর্সসমূহ</Link>
             <i className="fa-solid fa-chevron-right text-[10px]" />
             <span className="truncate text-white/90">{course.title}</span>
           </nav>
 
-          <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
+          <div className="mt-8 grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_360px] lg:gap-12">
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
@@ -284,9 +300,7 @@ export default async function CourseDetailPage({
                 )}
                 {avg > 0 && (
                   <span className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-                    <span className="text-amber-300">
-                      <i className="fa-solid fa-star" />
-                    </span>
+                    <span className="text-amber-300"><i className="fa-solid fa-star" /></span>
                     {avg.toFixed(1)}
                     <span className="text-brand-200">({reviews.length} রিভিউ)</span>
                   </span>
@@ -302,20 +316,16 @@ export default async function CourseDetailPage({
 
               <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-brand-100">
                 <span className="flex items-center gap-2">
-                  <i className="fa-solid fa-play text-white/60" />
-                  {allTopicIds.length}টি লেসন
+                  <i className="fa-solid fa-play text-white/60" /> {allTopicIds.length}টি লেসন
                 </span>
                 <span className="flex items-center gap-2">
-                  <i className="fa-solid fa-clock text-white/60" />
-                  {durationText}
+                  <i className="fa-solid fa-clock text-white/60" /> {durationText}
                 </span>
                 <span className="flex items-center gap-2">
-                  <i className="fa-solid fa-user-group text-white/60" />
-                  {studentsCount}+ শিক্ষার্থী
+                  <i className="fa-solid fa-user-group text-white/60" /> {studentsCount}+ শিক্ষার্থী
                 </span>
                 <span className="flex items-center gap-2">
-                  <i className="fa-solid fa-certificate text-white/60" />
-                  সার্টিফিকেট
+                  <i className="fa-solid fa-certificate text-white/60" /> সার্টিফিকেট
                 </span>
               </div>
 
@@ -336,31 +346,11 @@ export default async function CourseDetailPage({
                   </p>
                 </div>
               )}
-
-              {isEnrolled && instructor?.full_name && (
-                <div className="mt-6 flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-sm font-bold">
-                    {instructor.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={instructor.avatar_url}
-                        alt={instructor.full_name}
-                        className="h-full w-full rounded-full object-cover"
-                      />
-                    ) : (
-                      instructor.full_name.charAt(0)
-                    )}
-                  </span>
-                  <div>
-                    <p className="text-xs text-brand-200">ইনস্ট্রাক্টর</p>
-                    <p className="text-sm font-semibold">{instructor.full_name}</p>
-                  </div>
-                </div>
-              )}
             </div>
 
-            <div className="hidden lg:block">
-              <div className="sticky top-24 overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/20">
+            {/* Purchase card */}
+            <div className="lg:sticky lg:top-24">
+              <div className="overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/30">
                 <div className="relative aspect-[16/10] bg-gradient-to-br from-brand-700 to-purple-800">
                   {course.cover_image ? (
                     <Image
@@ -376,21 +366,25 @@ export default async function CourseDetailPage({
                       {course.title.charAt(0)}
                     </div>
                   )}
+                  {course.price > 0 && originalPrice > course.price && (
+                    <span className="absolute right-3 top-3 rounded-full bg-amber-400 px-3 py-1 text-xs font-extrabold text-amber-950 shadow">
+                      {content.discountLabel}
+                    </span>
+                  )}
                 </div>
+
                 <div className="p-6">
                   <div className="flex items-baseline gap-3">
                     <span className="text-3xl font-extrabold text-zinc-900">
                       {formatPrice(course.price)}
                     </span>
-                    {course.price > 0 && (
+                    {course.price > 0 && originalPrice > course.price && (
                       <span className="text-sm text-zinc-400 line-through">
-                        {formatPrice(Math.round(course.price * 1.5))}
+                        {formatPrice(originalPrice)}
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-zinc-500">
-                    এককালীন ফি · লাইফটাইম অ্যাক্সেস
-                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">{content.pricingNote}</p>
 
                   <div className="mt-5 space-y-2.5">
                     {canAccess ? (
@@ -400,9 +394,7 @@ export default async function CourseDetailPage({
                           className="block rounded-xl bg-brand-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-700"
                         >
                           <i className="fa-solid fa-play mr-2" />
-                          {isEnrolled && lastLessonId
-                            ? "শেখা চালিয়ে যান"
-                            : "শেখা শুরু করুন"}
+                          {isEnrolled && lastLessonId ? "শেখা চালিয়ে যান" : "শেখা শুরু করুন"}
                         </Link>
                       ) : (
                         <p className="rounded-xl bg-zinc-100 py-3.5 text-center text-sm font-semibold text-zinc-600">
@@ -430,269 +422,345 @@ export default async function CourseDetailPage({
                     </div>
                   )}
 
-                  <div className="mt-6 border-t border-zinc-100 pt-5">
-                    <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-                      এই কোর্সে যা পাবেন
-                    </p>
-                    <ul className="mt-3 space-y-2.5">
-                      {includes.map((item) => (
-                        <li
-                          key={item}
-                          className="flex items-center gap-2.5 text-sm text-zinc-700"
-                        >
-                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-50">
-                            <i className="fa-solid fa-check text-[10px] text-brand-600" />
-                          </span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-5 space-y-2 border-t border-zinc-100 pt-4 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">লেভেল</span>
-                      <span className="font-semibold text-zinc-800">
-                        {LEVEL_LABEL[course.level ?? ""] ?? "সব লেভেল"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">লেসন</span>
-                      <span className="font-semibold text-zinc-800">
-                        {allTopicIds.length}টি
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">ডিউরেশন</span>
-                      <span className="font-semibold text-zinc-800">
-                        {durationText}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">শিক্ষার্থী</span>
-                      <span className="font-semibold text-zinc-800">
-                        {studentsCount}+
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">ভাষা</span>
-                      <span className="font-semibold text-zinc-800">বাংলা</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px] lg:gap-12">
-          <div className="min-w-0 space-y-14">
-            {whatYouLearn.length > 0 && (
-              <section>
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <i className="fa-solid fa-lightbulb" />
-                  </span>
-                  <h2 className="text-2xl font-bold text-zinc-900">
-                    শিখবেন যা যা
-                  </h2>
-                </div>
-                <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {whatYouLearn.map((t) => (
-                    <div
-                      key={t}
-                      className="flex items-start gap-3 rounded-xl border border-zinc-100 bg-white p-4"
-                    >
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-100">
-                        <i className="fa-solid fa-check text-[10px] text-green-700" />
-                      </span>
-                      <span className="text-sm font-medium text-zinc-700">
-                        {t}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <i className="fa-solid fa-list-ol" />
-                  </span>
-                  <div>
-                    <h2 className="text-2xl font-bold text-zinc-900">
-                      কোর্স কারিকুলাম
-                    </h2>
-                    <p className="text-sm text-zinc-500">
-                      {curriculum.length}টি সেকশন · {allTopicIds.length}টি টপিক ·{" "}
-                      {hourMin} ঘণ্টা
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                {curriculum.length > 0 ? (
-                  <Curriculum sections={curriculum} courseSlug={course.slug} />
-                ) : (
-                  <p className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center text-zinc-500">
-                    এখনো কোনো টপিক যোগ করা হয়নি।
+                  <p className="mt-5 flex items-center justify-center gap-2 border-t border-zinc-100 pt-4 text-xs font-medium text-zinc-500">
+                    <i className="fa-solid fa-shield-halved text-green-600" />
+                    {content.secureText}
                   </p>
-                )}
-              </div>
-            </section>
-
-            {isEnrolled && ((liveClasses ?? []) as LiveClass[]).length > 0 && (
-              <section>
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <i className="fa-solid fa-calendar-days" />
-                  </span>
-                  <h2 className="text-2xl font-bold text-zinc-900">
-                    লাইভ ক্লাস
-                  </h2>
                 </div>
-                <div className="mt-6">
-                  <LiveClassesSection
-                    classes={liveClasses as LiveClass[]}
-                    isEnrolled={isEnrolled}
-                  />
-                </div>
-              </section>
-            )}
-
-            {isEnrolled && (announcements ?? []).length > 0 && (
-              <section>
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <i className="fa-solid fa-bullhorn" />
-                  </span>
-                  <h2 className="text-2xl font-bold text-zinc-900">নোটিশ</h2>
-                </div>
-                <div className="mt-6 space-y-3">
-                  {(announcements as Announcement[]).map((a) => (
-                    <div
-                      key={a.id}
-                      className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5"
-                    >
-                      <div className="flex items-center gap-2 text-brand-700">
-                        <i className="fa-solid fa-bullhorn" />
-                        <span className="text-xs font-semibold uppercase tracking-wide">
-                          নোটিশ
-                        </span>
-                        <span className="text-xs text-zinc-500">
-                          {new Date(a.created_at).toLocaleDateString("bn-BD")}
-                        </span>
-                      </div>
-                      <p className="mt-1.5 font-semibold text-zinc-900">{a.title}</p>
-                      {a.body && (
-                        <p className="mt-1 text-sm text-zinc-600">{a.body}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section>
-              <ReviewsSection
-                courseId={course.id}
-                isEnrolled={isEnrolled}
-                reviews={reviews}
-                avg={avg}
-                count={reviews.length}
-                ownReview={ownReview}
-              />
-            </section>
-
-            <section>
-              <QnaSection
-                courseId={course.id}
-                isEnrolled={isEnrolled}
-                isAdmin={isAdmin}
-                items={qnaItems}
-              />
-            </section>
-          </div>
-
-          <div className="lg:hidden">
-            <div className="overflow-hidden rounded-2xl bg-white shadow-lg shadow-brand-100/50 ring-1 ring-zinc-200">
-              <div className="relative aspect-[16/10] bg-gradient-to-br from-brand-700 to-purple-800">
-                {course.cover_image ? (
-                  <Image
-                    src={course.cover_image}
-                    alt={course.title}
-                    fill
-                    sizes="100vw"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-6xl text-white/30">
-                    {course.title.charAt(0)}
-                  </div>
-                )}
-              </div>
-              <div className="p-6">
-                <div className="flex items-baseline gap-3">
-                  <span className="text-3xl font-extrabold text-zinc-900">
-                    {formatPrice(course.price)}
-                  </span>
-                  {course.price > 0 && (
-                    <span className="text-sm text-zinc-400 line-through">
-                      {formatPrice(Math.round(course.price * 1.5))}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-xs text-zinc-500">
-                  এককালীন ফি · লাইফটাইম অ্যাক্সেস
-                </p>
-
-                <div className="mt-5 space-y-2.5">
-                  {canAccess ? (
-                    resumeTopic ? (
-                      <Link
-                        href={`/courses/${course.slug}/lessons/${resumeTopic.id}`}
-                        className="block rounded-xl bg-brand-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:bg-brand-700"
-                      >
-                        <i className="fa-solid fa-play mr-2" />
-                        {isEnrolled && lastLessonId
-                          ? "শেখা চালিয়ে যান"
-                          : "শেখা শুরু করুন"}
-                      </Link>
-                    ) : (
-                      <p className="rounded-xl bg-zinc-100 py-3.5 text-center text-sm font-semibold text-zinc-600">
-                        টপিক যোগ করা হয়নি
-                      </p>
-                    )
-                  ) : (
-                    <CheckoutButton courseId={course.id} price={course.price} />
-                  )}
-                </div>
-
-                <div className="mt-3">
-                  {!isEnrolled && (
-                    <WishlistButton courseId={course.id} initialSaved={wishlisted} />
-                  )}
-                </div>
-
-                {isEnrolled && (
-                  <div className="mt-4">
-                    <CertificateButton
-                      courseId={course.id}
-                      completed={progressPct === 100}
-                      certificateId={certificateId}
-                    />
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        {/* 2. COURSE HIGHLIGHTS */}
+        <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5" data-aos="fade-up">
+          {content.highlights.map((h) => (
+            <div
+              key={h.title}
+              className="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-lg text-brand-600">
+                <i className={h.icon} />
+              </span>
+              <span className="text-sm font-semibold text-zinc-800">{h.title}</span>
+            </div>
+          ))}
+        </section>
+
+        {/* 3. COURSE DESCRIPTION */}
+        {content.description && (
+          <section className="mt-14" data-aos="fade-up">
+            <div className="mx-auto max-w-3xl">
+              <div className="text-center">{sectionTitle("fa-solid fa-circle-info", content.descriptionHeading)}</div>
+              <p className="mt-6 text-base leading-relaxed text-zinc-600">
+                {content.description}
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* 4. WHAT YOU'LL LEARN */}
+        {modules.length > 0 && (
+          <section className="mt-16" data-aos="fade-up">
+            <div className="text-center">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
+                Modules
+              </span>
+              <h2 className="mt-2 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
+                What You&apos;ll Learn
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-zinc-600">
+                প্রতিটা মডিউলে প্র্যাকটিক্যাল লেসন — ক্লিক করলে ভেতরের লেসন দেখুন।
+              </p>
+            </div>
+            <div className="mt-10">
+              <WhatYouLearn modules={modules} />
+            </div>
+          </section>
+        )}
+
+        {/* 5. CURRICULUM */}
+        <section className="mt-16" data-aos="fade-up">
+          <div className="text-center">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
+              Course Curriculum
+            </span>
+            <h2 className="mt-2 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
+              কোর্স কারিকুলাম
+            </h2>
+            <p className="mt-3 text-zinc-600">
+              {curriculum.length}টি মডিউল · {allTopicIds.length}টি লেসন · {durationText}
+            </p>
+          </div>
+
+          <div className="mx-auto mt-10 max-w-4xl">
+            {curriculum.length > 0 ? (
+              <Curriculum sections={curriculum} courseSlug={course.slug} />
+            ) : (
+              <p className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center text-zinc-500">
+                এখনো কোনো টপিক যোগ করা হয়নি।
+              </p>
+            )}
+          </div>
+        </section>
+
+        {isEnrolled && ((liveClasses ?? []) as LiveClass[]).length > 0 && (
+          <section className="mt-16" data-aos="fade-up">
+            {sectionTitle("fa-solid fa-calendar-days", "লাইভ ক্লাস")}
+            <div className="mt-6">
+              <LiveClassesSection
+                classes={liveClasses as LiveClass[]}
+                isEnrolled={isEnrolled}
+              />
+            </div>
+          </section>
+        )}
+
+        {isEnrolled && (announcements ?? []).length > 0 && (
+          <section className="mt-16" data-aos="fade-up">
+            {sectionTitle("fa-solid fa-bullhorn", "নোটিশ")}
+            <div className="mt-6 space-y-3">
+              {(announcements as Announcement[]).map((a) => (
+                <div key={a.id} className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5">
+                  <div className="flex items-center gap-2 text-brand-700">
+                    <i className="fa-solid fa-bullhorn" />
+                    <span className="text-xs font-semibold uppercase tracking-wide">নোটিশ</span>
+                    <span className="text-xs text-zinc-500">
+                      {new Date(a.created_at).toLocaleDateString("bn-BD")}
+                    </span>
+                  </div>
+                  <p className="mt-1.5 font-semibold text-zinc-900">{a.title}</p>
+                  {a.body && <p className="mt-1 text-sm text-zinc-600">{a.body}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 6. WHO IS THIS COURSE FOR */}
+        <section className="mt-16" data-aos="fade-up">
+          <div className="text-center">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
+              Who Is This Course For
+            </span>
+            <h2 className="mt-2 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
+              এই কোর্সটি কার জন্য?
+            </h2>
+          </div>
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {content.whoFor.map((item) => (
+              <div
+                key={item.title}
+                className="flex items-start gap-4 rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-brand-100"
+              >
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-800 text-xl text-white shadow-md shadow-brand-600/25">
+                  <i className={item.icon} />
+                </span>
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-900">{item.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-zinc-500">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 7. COURSE OUTCOME */}
+        <section className="mt-16" data-aos="zoom-in">
+          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 px-6 py-14 shadow-2xl shadow-blue-800/30 sm:px-14">
+            <span className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+            <span className="absolute -bottom-20 right-10 h-72 w-72 rounded-full bg-indigo-400/20 blur-3xl" />
+
+            <div className="relative mx-auto max-w-3xl text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-3xl text-white backdrop-blur">
+                <i className="fa-solid fa-rocket" />
+              </span>
+              <h2 className="mt-6 text-3xl font-extrabold text-white sm:text-4xl">
+                {content.outcomeTitle}
+              </h2>
+              {content.outcomeSubtitle && (
+                <p className="mt-3 text-blue-100">{content.outcomeSubtitle}</p>
+              )}
+
+              <div className="mt-8 grid grid-cols-1 gap-3 text-left sm:grid-cols-2">
+                {content.outcome.map((o) => (
+                  <div
+                    key={o}
+                    className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur"
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-400">
+                      <i className="fa-solid fa-check text-xs text-green-950" />
+                    </span>
+                    <span className="text-sm font-medium text-white">{o}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 8. INSTRUCTOR */}
+        <section className="mt-16" data-aos="fade-up">
+          <div className="mx-auto max-w-4xl">
+            <div className="text-center">{sectionTitle("fa-solid fa-chalkboard-user", "আপনার ইনস্ট্রাক্টর")}</div>
+            <div className="mt-8 flex flex-col items-center gap-6 rounded-2xl border border-zinc-100 bg-white p-8 shadow-sm sm:flex-row sm:gap-8">
+              <div className="relative h-28 w-28 shrink-0">
+                <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-600 to-purple-700 text-4xl font-bold text-white shadow-lg shadow-brand-600/30">
+                  {instructorImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={instructorImage}
+                      alt={content.instructorName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    content.instructorName.charAt(0)
+                  )}
+                </div>
+                <span className="absolute bottom-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-white ring-2 ring-white">
+                  <i className="fa-solid fa-check text-[10px]" />
+                </span>
+              </div>
+
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="text-xl font-bold text-zinc-900">{content.instructorName}</h3>
+                <p className="mt-1 text-sm font-semibold text-brand-600">{content.instructorRole}</p>
+                <p className="mt-3 text-sm leading-relaxed text-zinc-600">
+                  {content.instructorDescription}
+                </p>
+                <div className="mt-4 flex items-center justify-center gap-2 sm:justify-start">
+                  {[
+                    { icon: "fa-brands fa-facebook-f", href: content.instructorFacebook },
+                    { icon: "fa-brands fa-youtube", href: content.instructorYoutube },
+                    { icon: "fa-brands fa-linkedin-in", href: content.instructorLinkedin },
+                  ].map(
+                    (s) =>
+                      s.href &&
+                      s.href !== "#" && (
+                        <a
+                          key={s.icon}
+                          href={s.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label="সোশ্যাল"
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 text-zinc-500 transition-colors hover:border-brand-500 hover:bg-brand-600 hover:text-white"
+                        >
+                          <i className={`${s.icon} text-sm`} />
+                        </a>
+                      ),
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 9. REVIEWS */}
+        <section className="mt-16" data-aos="fade-up">
+          <ReviewsSection
+            courseId={course.id}
+            isEnrolled={isEnrolled}
+            reviews={reviews}
+            avg={avg}
+            count={reviews.length}
+            ownReview={ownReview}
+          />
+        </section>
+
+        {/* 9b. Q&A */}
+        <section className="mt-16" data-aos="fade-up">
+          <QnaSection
+            courseId={course.id}
+            isEnrolled={isEnrolled}
+            isAdmin={isAdmin}
+            items={qnaItems}
+          />
+        </section>
+
+        {/* 10. PRICING CTA */}
+        <section id="pricing" className="mt-16 scroll-mt-24" data-aos="zoom-in">
+          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-purple-800 px-6 py-14 text-center shadow-2xl shadow-brand-700/40 sm:px-14">
+            <span className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+            <span className="absolute -bottom-20 left-10 h-72 w-72 rounded-full bg-purple-400/20 blur-3xl" />
+
+            <div className="relative">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-200">
+                Limited Time Offer
+              </p>
+              <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-extrabold text-white sm:text-4xl">
+                {course.title}-এ আজই ভর্তি হন
+              </h2>
+
+              <div className="mt-6 flex items-baseline justify-center gap-4">
+                {course.price > 0 && originalPrice > course.price && (
+                  <span className="text-2xl text-brand-200 line-through">
+                    {formatPrice(originalPrice)}
+                  </span>
+                )}
+                <span className="text-5xl font-extrabold text-white">
+                  {formatPrice(course.price)}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-brand-100">{content.pricingNote}</p>
+
+              <div className="mt-8 flex justify-center">
+                {canAccess ? (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-9 py-4 text-base font-bold text-brand-700 shadow-lg">
+                    <i className="fa-solid fa-circle-check text-green-600" />
+                    আপনি ইতিমধ্যে ভর্তি হয়েছেন
+                  </span>
+                ) : (
+                  <a
+                    href={`/courses/${course.slug}`}
+                    className="inline-flex items-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-brand-700 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-50"
+                  >
+                    ভর্তি হন
+                    <i className="fa-solid fa-arrow-right text-sm" />
+                  </a>
+                )}
+              </div>
+
+              <p className="mt-5 flex items-center justify-center gap-2 text-xs font-medium text-brand-100">
+                <i className="fa-solid fa-shield-halved text-green-300" />
+                {content.secureText}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 11. FAQ */}
+        {content.faqItems.length > 0 && (
+          <section className="mt-16" data-aos="fade-up">
+            <Faq content={{ title: content.faqTitle, items: content.faqItems }} />
+          </section>
+        )}
+
+        {/* 12. FINAL CTA */}
+        <section className="mt-16 pb-4" data-aos="zoom-in">
+          <div className="relative overflow-hidden rounded-[2rem] bg-brand-900 px-8 py-14 text-center shadow-2xl shadow-brand-900/40 sm:px-14">
+            <span className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-brand-600/30 blur-3xl" />
+            <span className="absolute -bottom-20 right-10 h-72 w-72 rounded-full bg-brand-500/20 blur-3xl" />
+
+            <div className="relative">
+              <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+                আপনার AI &amp; Digital Income Journey আজই শুরু করুন 🚀
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-sm text-zinc-300">
+                সিট সংখ্যা সীমিত — আজই ভর্তি হয়ে আপনার ডিজিটাল ক্যারিয়ার শুরু করুন।
+              </p>
+              <a
+                href="#pricing"
+                className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-brand-500/40 transition-all hover:-translate-y-0.5 hover:bg-brand-500"
+              >
+                Enroll Now
+                <i className="fa-solid fa-arrow-right text-sm" />
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

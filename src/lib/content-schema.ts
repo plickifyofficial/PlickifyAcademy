@@ -812,7 +812,122 @@ export const refundPageDefaults: LegalPageContent = {
   ],
 };
 
+export const coursePageDefaults = {
+  highlights: [
+    { icon: "fa-solid fa-video", title: "25+ লাইভ ক্লাস" },
+    { icon: "fa-solid fa-infinity", title: "লাইফটাইম অ্যাক্সেস" },
+    { icon: "fa-solid fa-users", title: "VIP কমিউনিটি" },
+    { icon: "fa-solid fa-rotate", title: "ফিউচার আপডেট" },
+    { icon: "fa-solid fa-gift", title: "প্রিমিয়াম রিসোর্স প্যাক" },
+  ],
+  descriptionHeading: "AI Income Mastery 2026 সম্পর্কে",
+  description:
+    "AI Income Mastery 2026 হলো AI, Microstock, Freelancing, Content Creation, Digital Business এবং Vibe Code শেখার একটি সম্পূর্ণ প্র্যাকটিক্যাল কোর্স। এখানে শুধু তত্ত্ব নয় — প্রতিটা লেসনে বাস্তব কাজ, লাইভ ক্লাস ও প্র্যাকটিক্যাল অ্যাসাইনমেন্টের মাধ্যমে শেখানো হয়। কোর্স শেষে আপনি AI টুলস দিয়ে দক্ষভাবে কাজ করতে, মাইক্রোস্টক ও ফ্রিল্যান্সিং থেকে ইনকাম শুরু করতে এবং AI-পাওয়ার্ড ডিজিটাল প্রজেক্ট বানাতে সক্ষম হবেন।",
+  whoFor: [
+    { icon: "fa-solid fa-seedling", title: "Beginner", desc: "AI নিয়ে নতুন — কোথা থেকে শুরু করবেন বুঝতে পারছেন না" },
+    { icon: "fa-solid fa-briefcase", title: "Freelancer", desc: "ফ্রিল্যান্সিং ইনকাম আরও বাড়াতে চান" },
+    { icon: "fa-solid fa-graduation-cap", title: "Student", desc: "ডিজিটাল স্কিল দিয়ে ক্যারিয়ার গড়তে চান" },
+    { icon: "fa-solid fa-pen-nib", title: "Content Creator", desc: "AI-powered কনটেন্ট তৈরি করতে চান" },
+    { icon: "fa-solid fa-rocket", title: "Aspiring Entrepreneur", desc: "ডিজিটাল বিজনেস শুরু করতে চান" },
+    { icon: "fa-solid fa-laptop-code", title: "Digital Skill Learner", desc: "নতুন ডিজিটাল স্কিল শিখতে আগ্রহী" },
+  ],
+  outcomeTitle: "এই কোর্স শেষ করার পর আপনি কী করতে পারবেন?",
+  outcomeSubtitle: "শুধু শেখা নয় — বাস্তব কাজ ও ইনকামের পথে এগিয়ে যাবেন।",
+  outcome: [
+    "AI tools efficiently ব্যবহার করতে",
+    "Microstock workflow তৈরি করতে",
+    "Freelancing service শুরু করতে",
+    "AI-powered content তৈরি করতে",
+    "Digital business model তৈরি করতে",
+    "AI দিয়ে website/project তৈরি করতে",
+  ],
+  instructorName: "মোঃ মিনহাজুল ইসলাম",
+  instructorRole: "AI & Digital Skills Trainer",
+  instructorDescription:
+    "AI, Microstock, Freelancing ও Digital Marketing নিয়ে বছরের পর বছর কাজের অভিজ্ঞতা। শত শত শিক্ষার্থীকে AI-powered ইনকামের পথে গাইড করেছেন। কোর্সের প্রতিটা লেসনে বাস্তব অভিজ্ঞতা থেকে শেখানো হয়।",
+  instructorImage: "",
+  instructorFacebook: "#",
+  instructorYoutube: "#",
+  instructorLinkedin: "#",
+  discountLabel: "৫০% ছাড়",
+  secureText: "Secure Payment · Instant Enrollment · Lifetime Course Access",
+  pricingNote: "এককালীন ফি — কোনো লুকানো চার্জ নেই",
+  faqTitle: "সাধারণ কিছু প্রশ্ন",
+  faqItems: [
+    { q: "এই কোর্সটি কার জন্য?", a: "এই কোর্সটি AI, Microstock, Freelancing ও Digital Business শিখতে চাওয়া সবাই — শিক্ষার্থী, ফ্রিল্যান্সার, কনটেন্ট ক্রিয়েটর ও উদ্যোক্তাদের জন্য।" },
+    { q: "কোর্সের মেয়াদ কত?", a: "কোর্সটি সম্পূর্ণ করতে পারবেন নিজের গতিতে। রেকর্ডেড লেসন থাকায় যেকোনো সময়, যেকোনো জায়গা থেকে দেখতে পারবেন।" },
+    { q: "Live class কি থাকবে?", a: "হ্যাঁ, কোর্সে নিয়মিত লাইভ ক্লাস থাকে। লাইভ ক্লাস মিস করলে রেকর্ডিংও পাবেন।" },
+    { q: "Class recording পাব?", a: "হ্যাঁ, প্রতিটি লাইভ ক্লাসের রেকর্ডিং আপনার ড্যাশবোর্ডে থাকবে।" },
+    { q: "Course access কতদিন?", a: "একবার ভর্তি হলে কোর্সের অ্যাক্সেস লাইফটাইম থাকবে — ভবিষ্যতের সব আপডেটও পাবেন।" },
+    { q: "Payment করার পর কীভাবে course পাব?", a: "bKash/Nagad-এ পেমেন্ট করে TrxID জমা দিলে আমাদের টিম ভেরিফাই করে ৫-৩০ মিনিটের মধ্যে এনরোল করে দেবে।" },
+    { q: "কোনো support/community আছে?", a: "হ্যাঁ, VIP কমিউনিটি ও সাপ্তাহিক Q&A সেশনের মাধ্যমে সরাসরি ইনস্ট্রাক্টরের সাপোর্ট পাবেন।" },
+    { q: "Beginner হলে কি করতে পারব?", a: "একদমই সমস্যা নেই — কোর্সটি বিগিনার থেকে অ্যাডভান্সড লেভেল পর্যন্ত সাজানো, তাই শূন্য থেকে শুরু করেও দক্ষ হয়ে উঠতে পারবেন।" },
+  ],
+};
+export type CoursePageContent = typeof coursePageDefaults;
+
 export const pageSections: SectionDef[] = [
+  {
+    key: "page.course",
+    title: "কোর্স ডিটেইল পেজ",
+    description:
+      "কোর্স পেজের হাইলাইটস, বিবরণ, who-for, outcome, ইনস্ট্রাক্টর, প্রাইসিং ও FAQ এডিট করুন। কারিকুলাম ও লেসন ডাটাবেস থেকে আসে।",
+    defaults: coursePageDefaults,
+    fields: [
+      {
+        kind: "list",
+        key: "highlights",
+        label: "কোর্স হাইলাইটস",
+        itemLabel: "হাইলাইট",
+        fields: [
+          iconFields("icon", "আইকন"),
+          { kind: "text", key: "title", label: "টাইটেল" },
+        ],
+      },
+      { kind: "text", key: "descriptionHeading", label: "বিবরণ হেডিং" },
+      { kind: "textarea", key: "description", label: "বিস্তারিত বিবরণ" },
+      {
+        kind: "list",
+        key: "whoFor",
+        label: "কার জন্য এই কোর্স",
+        itemLabel: "কার্ড",
+        fields: [
+          iconFields("icon", "আইকন"),
+          { kind: "text", key: "title", label: "টাইটেল" },
+          { kind: "text", key: "desc", label: "বিবরণ" },
+        ],
+      },
+      { kind: "text", key: "outcomeTitle", label: "আউটকাম টাইটেল" },
+      { kind: "text", key: "outcomeSubtitle", label: "আউটকাম সাবটাইটেল" },
+      {
+        kind: "stringlist",
+        key: "outcome",
+        label: "আউটকাম পয়েন্ট",
+        itemLabel: "পয়েন্ট",
+      },
+      { kind: "text", key: "instructorName", label: "ইনস্ট্রাক্টর নাম" },
+      { kind: "text", key: "instructorRole", label: "ইনস্ট্রাক্টর রোল" },
+      { kind: "textarea", key: "instructorDescription", label: "ইনস্ট্রাক্টর বর্ণনা" },
+      { kind: "image", key: "instructorImage", label: "ইনস্ট্রাক্টর ছবি" },
+      { kind: "url", key: "instructorFacebook", label: "Facebook লিংক" },
+      { kind: "url", key: "instructorYoutube", label: "YouTube লিংক" },
+      { kind: "url", key: "instructorLinkedin", label: "LinkedIn লিংক" },
+      { kind: "text", key: "discountLabel", label: "ডিসকাউন্ট ব্যাজ" },
+      { kind: "text", key: "secureText", label: "Secure পেমেন্ট টেক্সট" },
+      { kind: "text", key: "pricingNote", label: "প্রাইসিং নোট" },
+      { kind: "text", key: "faqTitle", label: "FAQ শিরোনাম" },
+      {
+        kind: "list",
+        key: "faqItems",
+        label: "FAQ প্রশ্ন",
+        itemLabel: "প্রশ্ন",
+        fields: [
+          { kind: "text", key: "q", label: "প্রশ্ন" },
+          { kind: "textarea", key: "a", label: "উত্তর" },
+        ],
+      },
+    ],
+  },
   {
     key: "page.faq",
     title: "FAQ পেজ",
