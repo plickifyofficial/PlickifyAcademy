@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { EnrollmentsPanel } from "@/components/admin/enrollments-panel";
 
 export const metadata = { title: "Enrollments" };
@@ -10,9 +11,16 @@ export default async function AdminEnrollmentsPage() {
     supabase.from("courses").select("id, title").order("title", { ascending: true }),
     supabase
       .from("enrollments")
-      .select("id, created_at, user_id, course_id, profiles(email), courses(title)")
+      .select("id, created_at, user_id, course_id, courses(title)")
       .order("created_at", { ascending: false }),
   ]);
+
+  const emails: Record<string, string> = {};
+  const admin = createAdminClient();
+  const { data: authUsers } = await admin.auth.admin.listUsers({ perPage: 200 });
+  for (const u of authUsers?.users ?? []) {
+    emails[u.id] = u.email ?? "";
+  }
 
   return (
     <div>
@@ -22,13 +30,13 @@ export default async function AdminEnrollmentsPage() {
       </div>
       <EnrollmentsPanel
         courses={courses ?? []}
+        emails={emails}
         enrollments={
           (enrollments ?? []) as unknown as {
             id: string;
             created_at: string;
             user_id: string;
             course_id: string;
-            profiles: { email: string } | null;
             courses: { title: string } | null;
           }[]
         }

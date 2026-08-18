@@ -723,12 +723,38 @@ export async function enrollStudent(
     const email = String(formData.get("email")).trim().toLowerCase();
     if (!courseId || !email) throw new Error("Please provide a course and email");
 
-    const { data: user } = await admin
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
-    if (!user) return { error: "No user exists with this email" };
+    let userId: string | null = null;
+
+    for (let page = 1; page <= 5; page++) {
+      const { data } = await admin.auth.admin.listUsers({
+        page,
+        perPage: 1000,
+      });
+      const match = (data?.users ?? []).find(
+        (u) => (u.email ?? "").toLowerCase() === email,
+      );
+      if (match?.id) {
+        userId = match.id;
+        break;
+      }
+      if ((data?.users?.length ?? 0) < 1000) break;
+    }
+
+    if (!userId) {
+      const { data: profile, error: pErr } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+      if (pErr) throw new Error(pErr.message);
+      userId = profile?.id ?? null;
+    }
+
+    if (!userId)
+      return {
+        error:
+          "No account found with this email — the student needs to sign up first",
+      };
 
     const { data: course } = await admin
       .from("courses")
@@ -739,13 +765,13 @@ export async function enrollStudent(
     const { data: existing } = await admin
       .from("enrollments")
       .select("id")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("course_id", courseId)
       .maybeSingle();
     if (existing) return { error: "This student is already enrolled in this course" };
 
     const { error } = await admin.from("enrollments").insert({
-      user_id: user.id,
+      user_id: userId,
       course_id: courseId,
     });
     if (error) return { error: error.message };
@@ -753,7 +779,7 @@ export async function enrollStudent(
     if (course) {
       try {
         await createNotification(
-          user.id,
+          userId,
           "Enrolled in a course 🎉",
           `You have been enrolled in the "${course.title}" course.`,
           `/courses/${await slugOf(admin, courseId)}`,

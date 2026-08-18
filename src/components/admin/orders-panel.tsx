@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { verifyOrder, rejectOrder } from "@/lib/actions/payments";
 import { useToast } from "@/components/ui/toaster";
 
@@ -25,6 +26,7 @@ export function OrdersPanel({
 }) {
   const [pendingId, setPendingId] = useState<string | null>(null);
   const { showToast } = useToast();
+  const router = useRouter();
 
   async function run(
     id: string,
@@ -38,6 +40,7 @@ export function OrdersPanel({
       showToast(result.error, "error");
     } else {
       showToast(success);
+      router.refresh();
     }
   }
 

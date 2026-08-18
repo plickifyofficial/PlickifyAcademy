@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { enrollStudent, unenrollStudent } from "@/lib/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 
@@ -9,19 +10,21 @@ type Enrollment = {
   created_at: string;
   user_id: string;
   course_id: string;
-  profiles: { email: string } | null;
   courses: { title: string } | null;
 };
 
 export function EnrollmentsPanel({
   courses,
   enrollments,
+  emails,
 }: {
   courses: { id: string; title: string }[];
   enrollments: Enrollment[];
+  emails: Record<string, string>;
 }) {
   const [pending, setPending] = useState(false);
   const { showToast } = useToast();
+  const router = useRouter();
 
   async function handleEnroll(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,6 +37,7 @@ export function EnrollmentsPanel({
       } else {
         form.reset();
         showToast("Student enrolled");
+        router.refresh();
       }
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Could not enroll", "error");
@@ -53,6 +57,7 @@ export function EnrollmentsPanel({
         showToast(result.error, "error");
       } else {
         showToast("Enrollment deleted");
+        router.refresh();
       }
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Could not delete", "error");
@@ -125,7 +130,7 @@ export function EnrollmentsPanel({
               {enrollments.map((en) => (
                 <tr key={en.id}>
                   <td className="font-medium text-[#1d2327]">
-                    {en.profiles?.email ?? en.user_id}
+                    {emails[en.user_id] || en.user_id.slice(0, 8)}
                   </td>
                   <td className="text-[#3c434a]">{en.courses?.title ?? "—"}</td>
                   <td className="text-[#646970]">

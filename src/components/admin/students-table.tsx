@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { setUserRole } from "@/lib/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 
@@ -21,6 +22,7 @@ export function StudentsTable({
 }) {
   const [pendingId, setPendingId] = useState<string | null>(null);
   const { showToast } = useToast();
+  const router = useRouter();
 
   async function handleRole(e: React.FormEvent<HTMLFormElement>, id: string) {
     e.preventDefault();
@@ -28,6 +30,7 @@ export function StudentsTable({
     try {
       await setUserRole(new FormData(e.currentTarget));
       showToast("Role updated");
+      router.refresh();
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Could not update", "error");
     } finally {
