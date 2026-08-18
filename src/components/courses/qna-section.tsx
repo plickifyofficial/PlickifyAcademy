@@ -103,7 +103,7 @@ export function QnaSection({
                 <p className="font-medium text-zinc-900">{q.question}</p>
                 <p className="mt-0.5 text-xs text-zinc-400">
                   {q.profiles?.full_name ?? "Student"} ·{" "}
-                  {new Date(q.created_at).toLocaleDateString("bn-BD")}
+                  {new Date(q.created_at).toLocaleDateString("en-US")}
                 </p>
               </div>
             </div>

@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 
@@ -53,7 +53,7 @@ export default async function ProfilePage() {
             </dt>
             <dd className="mt-1 text-sm font-medium text-zinc-700">
               {user.created_at
-                ? new Date(user.created_at).toLocaleDateString("bn-BD")
+                ? new Date(user.created_at).toLocaleDateString("en-US")
                 : "—"}
             </dd>
           </div>

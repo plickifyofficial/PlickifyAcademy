@@ -326,7 +326,7 @@ export function CurriculumBuilder({
                 </p>
                 <p className="truncate text-xs text-[#646970]">
                   {c.scheduled_at
-                    ? new Date(c.scheduled_at).toLocaleString("bn-BD", {
+                    ? new Date(c.scheduled_at).toLocaleString("en-US", {
                         dateStyle: "medium",
                         timeStyle: "short",
                       })
@@ -396,7 +396,7 @@ export function CurriculumBuilder({
                 )}
               </div>
               <span className="shrink-0 text-xs text-[#646970]">
-                {new Date(a.created_at).toLocaleDateString("bn-BD")}
+                {new Date(a.created_at).toLocaleDateString("en-US")}
               </span>
               <button
                 onClick={() => {

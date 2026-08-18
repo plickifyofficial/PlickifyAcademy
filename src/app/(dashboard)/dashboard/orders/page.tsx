@@ -75,7 +75,7 @@ export default async function OrdersPage() {
                     </p>
                   )}
                   <p className="mt-1 text-xs text-zinc-400">
-                    {new Date(order.created_at).toLocaleDateString("bn-BD", {
+                    {new Date(order.created_at).toLocaleDateString("en-US", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",

@@ -85,7 +85,7 @@ export default async function CertificatePage({
             <div className="flex-1 border-t border-zinc-400 pt-2">
               <p className="text-xs text-zinc-500">Date</p>
               <p className="text-sm font-semibold text-zinc-800">
-                {issued.toLocaleDateString("bn-BD", {
+                {issued.toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",

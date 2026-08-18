@@ -144,7 +144,7 @@ export default async function AdminDashboardPage() {
                         ৳{Number(order.amount).toLocaleString("en-IN")}
                       </td>
                       <td className="text-[#646970]">
-                        {new Date(order.created_at).toLocaleDateString("bn-BD")}
+                        {new Date(order.created_at).toLocaleDateString("en-US")}
                       </td>
                     </tr>
                   ))}
@@ -193,7 +193,7 @@ export default async function AdminDashboardPage() {
                   New enrollment
                 </span>
                 <span className="text-xs text-[#646970]">
-                  {new Date(e.created_at).toLocaleDateString("bn-BD")}
+                  {new Date(e.created_at).toLocaleDateString("en-US")}
                 </span>
               </div>
             ))}

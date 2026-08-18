@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -536,7 +536,7 @@ No topics added yet
                     <i className="fa-solid fa-bullhorn" />
                     <span className="text-xs font-semibold uppercase tracking-wide">Announcement</span>
                     <span className="text-xs text-zinc-500">
-                      {new Date(a.created_at).toLocaleDateString("bn-BD")}
+                      {new Date(a.created_at).toLocaleDateString("en-US")}
                     </span>
                   </div>
                   <p className="mt-1.5 font-semibold text-zinc-900">{a.title}</p>

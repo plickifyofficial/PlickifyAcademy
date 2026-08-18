@@ -159,7 +159,7 @@ Inactive
                     <>
                       {" "}
                       • Expires:{" "}
-                      {new Date(coupon.expires_at).toLocaleDateString("bn-BD")}
+                      {new Date(coupon.expires_at).toLocaleDateString("en-US")}
                     </>
                   )}
                 </p>

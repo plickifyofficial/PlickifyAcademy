@@ -91,7 +91,7 @@ export function StudentsTable({
                   </span>
                 </td>
                 <td className="text-[#646970]">
-                  {new Date(s.created_at).toLocaleDateString("bn-BD")}
+                  {new Date(s.created_at).toLocaleDateString("en-US")}
                 </td>
                 <td>
                   {s.id !== currentUserId && (

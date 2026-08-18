@@ -42,7 +42,7 @@ export function LiveClassesSection({ classes, isEnrolled }: Props) {
                 <p className="mt-2 text-xs font-medium text-brand-600">
                   <i className="fa-regular fa-calendar mr-1" />
                   {c.scheduled_at
-                    ? new Date(c.scheduled_at).toLocaleString("bn-BD", {
+                    ? new Date(c.scheduled_at).toLocaleString("en-US", {
                         dateStyle: "medium",
                         timeStyle: "short",
                       })
@@ -82,7 +82,7 @@ export function LiveClassesSection({ classes, isEnrolled }: Props) {
                   <p className="text-sm font-medium text-zinc-700">{c.title}</p>
                   <p className="text-xs text-zinc-400">
                     {c.scheduled_at
-                      ? new Date(c.scheduled_at).toLocaleDateString("bn-BD", {
+                      ? new Date(c.scheduled_at).toLocaleDateString("en-US", {
                           dateStyle: "medium",
                         })
                       : ""}

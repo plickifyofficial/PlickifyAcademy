@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MarkCompleteButton } from "@/components/lessons/mark-complete-button";
@@ -96,7 +96,7 @@ export default async function LessonPage({
         </h1>
         <p className="mt-3 text-zinc-600">
           {dripLocked && unlockAt
-            ? `This topic will unlock on ${unlockAt.toLocaleDateString("bn-BD")}.`
+            ? `This topic will unlock on ${unlockAt.toLocaleDateString("en-US")}.`
             : `You need to purchase the course to view this topic. ${
                 course.price === 0
                   ? "The course is free — log in and start learning."

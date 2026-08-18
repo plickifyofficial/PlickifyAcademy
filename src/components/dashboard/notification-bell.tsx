@@ -117,7 +117,7 @@ export function NotificationBell() {
                     </p>
                   )}
                   <p className="mt-1 text-[10px] text-zinc-400">
-                    {new Date(n.created_at).toLocaleDateString("bn-BD", {
+                    {new Date(n.created_at).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                       hour: "2-digit",

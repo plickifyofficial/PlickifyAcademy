@@ -98,7 +98,7 @@ export function OrdersPanel({
                     <span className={`wp-tag ${meta.cls}`}>{meta.label}</span>
                   </td>
                   <td className="text-[#646970]">
-                    {new Date(order.created_at).toLocaleDateString("bn-BD", {
+                    {new Date(order.created_at).toLocaleDateString("en-US", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",

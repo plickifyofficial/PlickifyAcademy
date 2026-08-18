@@ -129,7 +129,7 @@ export function EnrollmentsPanel({
                   </td>
                   <td className="text-[#3c434a]">{en.courses?.title ?? "—"}</td>
                   <td className="text-[#646970]">
-                    {new Date(en.created_at).toLocaleDateString("bn-BD")}
+                    {new Date(en.created_at).toLocaleDateString("en-US")}
                   </td>
                   <td className="text-right">
                     <button

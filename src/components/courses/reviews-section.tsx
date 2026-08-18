@@ -137,7 +137,7 @@ export function ReviewsSection({
                 </div>
               </div>
               <span className="text-xs text-zinc-400">
-                {new Date(r.created_at).toLocaleDateString("bn-BD")}
+                {new Date(r.created_at).toLocaleDateString("en-US")}
               </span>
             </div>
             {r.comment && (
