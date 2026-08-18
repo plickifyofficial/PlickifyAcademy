@@ -23,15 +23,21 @@ export function MarkCompleteButton({
 
   async function handleComplete() {
     setPending(true);
-    await fetch("/api/progress", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lessonId }),
-    });
-    setPending(false);
-    router.refresh();
-    if (nextLessonId) {
-      router.push(`/courses/${courseSlug}/lessons/${nextLessonId}`);
+    try {
+      const res = await fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonId }),
+      });
+      if (!res.ok) throw new Error("progress save failed");
+      router.refresh();
+      if (nextLessonId) {
+        router.push(`/courses/${courseSlug}/lessons/${nextLessonId}`);
+      }
+    } catch {
+      // keep button usable if the request fails
+    } finally {
+      setPending(false);
     }
   }
 

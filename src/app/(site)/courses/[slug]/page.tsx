@@ -357,7 +357,7 @@ export default async function CourseDetailPage({
         </div>
       </section>
 
-      {isEnrolled && (liveClasses as LiveClass[]).length > 0 && (
+      {isEnrolled && ((liveClasses ?? []) as LiveClass[]).length > 0 && (
         <section className="mx-auto max-w-6xl px-4 py-8">
           <LiveClassesSection
             classes={liveClasses as LiveClass[]}

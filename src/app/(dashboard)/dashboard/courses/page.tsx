@@ -37,8 +37,9 @@ export default async function MyCoursesPage() {
 
   const perCourse: Record<string, number> = {};
   for (const row of progressRows ?? []) {
-    const cid = (row.lessons as unknown as { course_id: string }).course_id;
-    perCourse[cid] = (perCourse[cid] ?? 0) + 1;
+    const l = row.lessons as unknown as { course_id: string } | null;
+    if (!l) continue;
+    perCourse[l.course_id] = (perCourse[l.course_id] ?? 0) + 1;
   }
 
   return (
@@ -50,14 +51,16 @@ export default async function MyCoursesPage() {
 
       {enrollments && enrollments.length > 0 ? (
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {enrollments.map((enrollment) => {
-            const course = enrollment.courses as unknown as {
-              id: string;
-              title: string;
-              slug: string;
-              description: string | null;
-              cover_image: string | null;
-            };
+          {(enrollments ?? [])
+            .filter((e) => e.courses)
+            .map((enrollment) => {
+              const course = enrollment.courses as unknown as {
+                id: string;
+                title: string;
+                slug: string;
+                description: string | null;
+                cover_image: string | null;
+              };
             const done = perCourse[course.id] ?? 0;
             const total = courseCounts[course.id] ?? 0;
             const pct = total > 0 ? Math.round((done / total) * 100) : 0;

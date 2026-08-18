@@ -50,7 +50,9 @@ export default async function DashboardPage() {
 
   for (const row of progressRows ?? []) {
     totalDone++;
-    const cid = (row.lessons as unknown as { course_id: string }).course_id;
+    const l = row.lessons as unknown as { course_id: string } | null;
+    if (!l) continue;
+    const cid = l.course_id;
     perCourse[cid] ??= { done: 0, total: 0 };
     perCourse[cid].done++;
   }
@@ -114,12 +116,15 @@ export default async function DashboardPage() {
 
         {enrollments && enrollments.length > 0 ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {enrollments.slice(0, 3).map((enrollment) => {
-              const course = enrollment.courses as unknown as {
-                id: string;
-                title: string;
-                slug: string;
-              };
+            {(enrollments ?? [])
+              .filter((e) => e.courses)
+              .slice(0, 3)
+              .map((enrollment) => {
+                const course = enrollment.courses as unknown as {
+                  id: string;
+                  title: string;
+                  slug: string;
+                };
               const pc = perCourse[course.id] ?? { done: 0, total: 0 };
               const pct = pc.total > 0 ? Math.round((pc.done / pc.total) * 100) : 0;
 

@@ -9,6 +9,7 @@ import { signOut } from "@/lib/actions/auth";
 const navItems = [
   { href: "/dashboard", label: "ড্যাশবোর্ড", icon: "fa-solid fa-chart-line" },
   { href: "/dashboard/courses", label: "আমার কোর্স", icon: "fa-solid fa-graduation-cap" },
+  { href: "/dashboard/orders", label: "আমার অর্ডার", icon: "fa-solid fa-receipt" },
   { href: "/dashboard/wishlist", label: "পছন্দের তালিকা", icon: "fa-solid fa-heart" },
   { href: "/dashboard/profile", label: "প্রোফাইল", icon: "fa-solid fa-user" },
 ];
