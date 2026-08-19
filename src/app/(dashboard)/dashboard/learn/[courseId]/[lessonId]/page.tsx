@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { MarkCompleteButton } from "@/components/lessons/mark-complete-button";
-import { QuizPlayer } from "@/components/lessons/quiz-player";
+import { PlayerShell } from "@/components/dashboard/player-shell";
+import { PlayerContent } from "@/components/lessons/player-content";
 import { ResumeTracker } from "@/components/lessons/resume-tracker";
-import { VideoPlayer } from "@/components/lessons/video-player";
+import type { PlayerCurSection } from "@/components/dashboard/player-curriculum";
 import { buildProtectedRender } from "@/lib/video-access";
 import type { QuizQuestion } from "@/lib/types";
 
@@ -47,19 +47,64 @@ export default async function LearnLessonPage({
     .single();
   if (!lesson) notFound();
 
-  const { data: allTopics } = await supabase
-    .from("lessons")
-    .select("id, title, section_id, order")
-    .eq("course_id", courseId);
-
-  const { data: sections } = await supabase
-    .from("course_sections")
-    .select("id, position")
-    .eq("course_id", courseId);
+  const [
+    { data: allTopics },
+    { data: sections },
+    { data: progressRows },
+    { data: state },
+    { data: resources },
+    { data: notes },
+    { data: comments },
+    { data: settings },
+  ] = await Promise.all([
+    supabase
+      .from("lessons")
+      .select("id, title, section_id, order, duration_minutes, type")
+      .eq("course_id", courseId),
+    supabase
+      .from("course_sections")
+      .select("id, title, position")
+      .eq("course_id", courseId)
+      .order("position", { ascending: true }),
+    supabase
+      .from("lesson_progress")
+      .select("lesson_id, completed, position_seconds")
+      .eq("user_id", user.id),
+    supabase
+      .from("user_course_state")
+      .select("last_lesson_id")
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .maybeSingle(),
+    supabase
+      .from("lesson_resources")
+      .select("id, title, file_type, file_size")
+      .eq("lesson_id", lessonId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("lesson_notes")
+      .select("note")
+      .eq("user_id", user.id)
+      .eq("lesson_id", lessonId)
+      .maybeSingle(),
+    supabase
+      .from("lesson_comments")
+      .select("id, comment, created_at, user_id, profiles(full_name)")
+      .eq("lesson_id", lessonId)
+      .order("created_at", { ascending: true })
+      .limit(200),
+    supabase
+      .from("site_settings")
+      .select("auto_next_lesson")
+      .eq("id", 1)
+      .single(),
+  ]);
 
   const sectionPos: Record<string, number> = {};
+  const sectionTitles: Record<string, string> = {};
   for (const s of sections ?? []) {
     sectionPos[s.id] = s.position;
+    sectionTitles[s.id] = s.title;
   }
 
   const allLessons = (allTopics ?? [])
@@ -84,6 +129,59 @@ export default async function LearnLessonPage({
     dripLocked = new Date() < unlockAt;
   }
 
+  const doneSet = new Set(
+    (progressRows ?? [])
+      .filter((p) => p.completed)
+      .map((p) => p.lesson_id),
+  );
+  const doneCount = allLessons.filter((l) => doneSet.has(l.id)).length;
+  const percent =
+    allLessons.length > 0 ? Math.round((doneCount / allLessons.length) * 100) : 0;
+
+  const resumeLesson =
+    allLessons.find((t) => t.id === state?.last_lesson_id) ?? allLessons[0];
+
+  const curriculum: PlayerCurSection[] = (sections ?? []).map((section) => ({
+    id: section.id,
+    title: section.title,
+    items: (allTopics ?? [])
+      .filter((t) => t.section_id === section.id)
+      .map((topic) => ({
+        id: topic.id,
+        title: topic.title,
+        type: topic.type,
+        duration_minutes: topic.duration_minutes,
+        done: doneSet.has(topic.id),
+        locked: false,
+        current: topic.id === lesson.id,
+      })),
+  }));
+
+  const idx = allLessons.findIndex((l) => l.id === lesson.id);
+  const prevLesson = idx > 0 ? allLessons[idx - 1] : null;
+  const nextLesson =
+    allLessons && idx < allLessons.length - 1 ? allLessons[idx + 1] : null;
+
+  const currentProgress = (progressRows ?? []).find(
+    (p) => p.lesson_id === lesson.id,
+  );
+  const completed = currentProgress?.completed === true;
+  const initialPosition = currentProgress?.position_seconds ?? 0;
+
+  const myNote = (notes as unknown as { note: string } | null)?.note ?? "";
+
+  const commentList = (comments ?? [])
+    .map((c) => {
+      const p = c.profiles as unknown as { full_name: string | null } | null;
+      return {
+        id: c.id,
+        comment: c.comment,
+        created_at: c.created_at,
+        author: p?.full_name || "Student",
+      };
+    })
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+
   if (dripLocked) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center">
@@ -99,7 +197,7 @@ export default async function LearnLessonPage({
             : "This topic will unlock later."}
         </p>
         <Link
-          href={`/dashboard/learn/${courseId}/${allLessons?.[0]?.id ?? ""}`}
+          href={`/dashboard/learn/${courseId}/${resumeLesson?.id ?? ""}`}
           className="mt-6 inline-block rounded-lg bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700"
         >
           Back to Course
@@ -107,11 +205,6 @@ export default async function LearnLessonPage({
       </div>
     );
   }
-
-  const idx = allLessons?.findIndex((l) => l.id === lesson.id) ?? 0;
-  const prevLesson = idx > 0 ? allLessons?.[idx - 1] : null;
-  const nextLesson =
-    allLessons && idx < allLessons.length - 1 ? allLessons?.[idx + 1] : null;
 
   let questions: QuizQuestion[] = [];
   if (lesson.type === "quiz") {
@@ -123,116 +216,88 @@ export default async function LearnLessonPage({
     questions = (qs ?? []) as unknown as QuizQuestion[];
   }
 
+  const autoNext = settings?.auto_next_lesson === true;
+
   return (
     <div>
       <ResumeTracker courseId={course.id} lessonId={lesson.id} />
 
-      <div className="flex items-center justify-between gap-3">
+      <header className="sticky top-16 z-20 -mx-4 mb-5 flex items-center gap-3 border-b border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
         <Link
           href={`/dashboard/courses/${courseId}`}
-          className="text-sm font-medium text-brand-600 hover:underline"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
+          title="Back to Course"
         >
-          ← {course.title}
+          <i className="fa-solid fa-arrow-left" />
         </Link>
-        {lesson.type !== "lesson" && (
-          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold capitalize text-brand-700">
-            <i
-              className={`mr-1 ${
-                lesson.type === "quiz"
-                  ? "fa-solid fa-circle-question"
-                  : lesson.type === "video"
-                    ? "fa-solid fa-video"
-                    : "fa-solid fa-clipboard-check"
-              }`}
-            />
-            {lesson.type === "quiz"
-              ? "Quiz"
-              : lesson.type === "video"
-                ? "Video"
-                : "Assignment"}
-          </span>
-        )}
-      </div>
-
-      <h1 className="mt-4 text-2xl font-bold text-zinc-900">{lesson.title}</h1>
-
-      {lesson.type === "quiz" ? (
-        <div className="mt-6">
-          <QuizPlayer
-            lessonId={lesson.id}
-            passPercent={lesson.pass_percent ?? 60}
-            questions={questions}
-          />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-zinc-900">
+            {course.title}
+          </p>
+          <p className="truncate text-xs text-zinc-500">
+            {sectionTitles[lesson.section_id ?? ""] ?? "Course"} ·{" "}
+            {lesson.title}
+          </p>
         </div>
-      ) : (
-        <>
-          {lesson.video_url || lesson.video_embed ? (
-            <div className="mt-6 overflow-hidden rounded-2xl bg-black">
-              <VideoPlayer
-                render={buildProtectedRender(
-                  lesson.video_url,
-                  lesson.video_embed,
-                  course.id,
-                  lesson.id,
-                )}
-                poster={course.cover_image}
-                title={lesson.title}
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="hidden items-center gap-2 sm:flex">
+            <div className="h-2 w-24 overflow-hidden rounded-full bg-zinc-200">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-700"
+                style={{ width: `${percent}%` }}
               />
             </div>
-          ) : null}
-
-          {lesson.content && (
-            <div className="prose prose-zinc mt-8 max-w-none">
-              <div className="whitespace-pre-wrap rounded-xl border border-zinc-200 bg-white p-6 text-zinc-700">
-                {lesson.content}
-              </div>
-            </div>
-          )}
-
-          {lesson.description && (
-            <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5 text-zinc-600">
-              {lesson.description}
-            </div>
-          )}
-        </>
-      )}
-
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-        {prevLesson ? (
+            <span className="text-xs font-bold text-zinc-700">{percent}%</span>
+          </div>
           <Link
-            href={`/dashboard/learn/${courseId}/${prevLesson.id}`}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+            href={`/dashboard/courses/${courseId}`}
+            className="rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-600 hover:bg-zinc-100"
           >
-            ← Previous Topic
+            Exit Course
           </Link>
-        ) : (
-          <span />
-        )}
+        </div>
+      </header>
 
-        {lesson.type !== "quiz" && (
-          <MarkCompleteButton
-            lessonId={lesson.id}
-            courseSlug={courseId}
-            nextLessonId={nextLesson?.id ?? null}
-            nextHref={
-              nextLesson
-                ? `/dashboard/learn/${courseId}/${nextLesson.id}`
-                : undefined
-            }
-            isAuthenticated={!!user}
-            hrefPrefix="/dashboard/learn"
-          />
-        )}
-
-        {nextLesson && (
-          <Link
-            href={`/dashboard/learn/${courseId}/${nextLesson.id}`}
-            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-          >
-            Next Topic →
-          </Link>
-        )}
-      </div>
+      <PlayerShell
+        courseId={courseId}
+        percent={percent}
+        doneCount={doneCount}
+        totalCount={allLessons.length}
+        sections={curriculum}
+      >
+        <PlayerContent
+          courseId={courseId}
+          lessonId={lesson.id}
+          lessonTitle={lesson.title}
+          isQuiz={lesson.type === "quiz"}
+          render={buildProtectedRender(
+            lesson.video_url,
+            lesson.video_embed,
+            courseId,
+            lesson.id,
+          )}
+          poster={course.cover_image}
+          initialPosition={initialPosition}
+          completed={completed}
+          passPercent={lesson.pass_percent ?? 60}
+          questions={questions}
+          description={lesson.description}
+          content={lesson.content}
+          resources={
+            (resources ?? []) as unknown as {
+              id: string;
+              title: string;
+              file_type: string | null;
+              file_size: string | null;
+            }[]
+          }
+          initialNote={myNote}
+          comments={commentList}
+          prevLesson={prevLesson}
+          nextLesson={nextLesson}
+          autoNext={autoNext}
+        />
+      </PlayerShell>
     </div>
   );
 }

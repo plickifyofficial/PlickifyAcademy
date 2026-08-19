@@ -126,6 +126,136 @@ export async function updateCourseState(courseId: string, lessonId: string) {
   );
 }
 
+export type ProgressUpdateInput = {
+  lessonId: string;
+  positionSeconds?: number;
+  watchedDelta?: number;
+  complete?: boolean;
+};
+
+export async function updateLessonProgress(input: ProgressUpdateInput) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: lesson } = await supabase
+    .from("lessons")
+    .select("id, course_id, duration_minutes, completion_rule, completion_percent")
+    .eq("id", input.lessonId)
+    .single();
+  if (!lesson) throw new Error("Lesson not found");
+
+  const { data: enrollment } = await supabase
+    .from("enrollments")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("course_id", lesson.course_id)
+    .maybeSingle();
+  if (!enrollment) throw new Error("Not enrolled");
+
+  const { data: existing } = await supabase
+    .from("lesson_progress")
+    .select("completed, completed_at, video_watch_seconds")
+    .eq("user_id", user.id)
+    .eq("lesson_id", input.lessonId)
+    .maybeSingle();
+
+  const alreadyDone = existing?.completed === true;
+  const watchedSeconds =
+    (existing?.video_watch_seconds ?? 0) + (input.watchedDelta ?? 0);
+
+  const durationSeconds = (lesson.duration_minutes ?? 0) * 60;
+  const autoComplete =
+    lesson.completion_rule === "video_percent" &&
+    durationSeconds > 0 &&
+    watchedSeconds >= (durationSeconds * (lesson.completion_percent ?? 80)) / 100;
+
+  const complete = alreadyDone || input.complete === true || autoComplete;
+
+  await supabase.from("lesson_progress").upsert(
+    {
+      user_id: user.id,
+      lesson_id: input.lessonId,
+      completed: complete,
+      completed_at: complete && !alreadyDone ? new Date().toISOString() : existing?.completed_at ?? null,
+      position_seconds: input.positionSeconds ?? undefined,
+      video_watch_seconds: watchedSeconds,
+      last_watched_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id, lesson_id" },
+  );
+
+  await supabase.from("user_course_state").upsert(
+    {
+      user_id: user.id,
+      course_id: lesson.course_id,
+      last_lesson_id: input.lessonId,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id, course_id" },
+  );
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/courses");
+  revalidatePath(`/dashboard/courses/${lesson.course_id}`);
+  revalidatePath(`/dashboard/learn/${lesson.course_id}/${input.lessonId}`);
+
+  return {
+    completed: complete,
+    autoCompleted: autoComplete && !alreadyDone,
+    watchedSeconds,
+    positionSeconds: input.positionSeconds ?? 0,
+  };
+}
+
+export async function saveLessonNote(lessonId: string, note: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase.from("lesson_notes").upsert(
+    {
+      user_id: user.id,
+      lesson_id: lessonId,
+      note: note.trim(),
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id, lesson_id" },
+  );
+  if (error) throw new Error(error.message);
+}
+
+export async function addLessonComment(lessonId: string, comment: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  if (!comment.trim()) throw new Error("Please write a comment");
+
+  const { data: lesson } = await supabase
+    .from("lessons")
+    .select("course_id")
+    .eq("id", lessonId)
+    .single();
+  if (!lesson) throw new Error("Lesson not found");
+
+  const { error } = await supabase.from("lesson_comments").insert({
+    lesson_id: lessonId,
+    user_id: user.id,
+    comment: comment.trim(),
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/dashboard/learn/${lesson.course_id}/${lessonId}`);
+  revalidatePath("/dashboard");
+}
+
 export async function submitReview(
   courseId: string,
   rating: number,
