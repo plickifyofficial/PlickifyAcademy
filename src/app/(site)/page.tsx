@@ -12,6 +12,7 @@ import { Testimonials } from "@/components/home/testimonials";
 import { Faq } from "@/components/home/faq";
 import { FinalCta } from "@/components/home/final-cta";
 import { getSiteContent } from "@/lib/site-content";
+import { getPublishedProducts } from "@/lib/products";
 import {
   ctaDefaults,
   faqDefaults,
@@ -33,7 +34,7 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta] =
+  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts] =
     await Promise.all([
       getSiteContent("home.hero", heroDefaults),
       getSiteContent("home.stats", statsDefaults),
@@ -48,6 +49,7 @@ export default async function HomePage() {
       getSiteContent("home.testimonials", testimonialsDefaults),
       getSiteContent("home.faq", faqDefaults),
       getSiteContent("home.cta", ctaDefaults),
+      getPublishedProducts(),
     ]);
 
   return (
@@ -61,7 +63,7 @@ export default async function HomePage() {
       <WhyUs content={why} />
       <LearningProcess content={process} />
       <LiveBatch content={liveBatch} />
-      <Products content={products} />
+      <Products content={products} products={dbProducts} />
       <Testimonials content={testimonials} />
       <Faq content={faq} />
       <FinalCta content={cta} />

@@ -368,6 +368,28 @@ create table if not exists public.wishlist (
 alter table public.wishlist enable row level security;
 
 -- ============================================================
+-- DIGITAL PRODUCTS
+-- ============================================================
+create table if not exists public.products (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug text not null unique,
+  description text,
+  price numeric(10, 2) not null default 0,
+  old_price numeric(10, 2) not null default 0,
+  tag text,
+  icon text not null default 'fa-solid fa-file',
+  gradient text not null default 'from-blue-600 to-indigo-600',
+  cover_image text,
+  file_url text,
+  is_published boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.products enable row level security;
+
+-- ============================================================
 -- COUPONS
 -- ============================================================
 create table if not exists public.coupons (
@@ -908,6 +930,9 @@ drop policy if exists "Only admins can insert coupons" on public.coupons;
 create policy "Only admins can insert coupons"
   on public.coupons for insert
   with check (public.is_admin());
+create policy "Only admins can insert coupons"
+  on public.coupons for insert
+  with check (public.is_admin());
 
 drop policy if exists "Only admins can update coupons" on public.coupons;
 create policy "Only admins can update coupons"
@@ -917,6 +942,27 @@ create policy "Only admins can update coupons"
 drop policy if exists "Only admins can delete coupons" on public.coupons;
 create policy "Only admins can delete coupons"
   on public.coupons for delete
+  using (public.is_admin());
+
+-- products
+drop policy if exists "Published products are viewable by everyone" on public.products;
+create policy "Published products are viewable by everyone"
+  on public.products for select
+  using (is_published = true or public.is_admin());
+
+drop policy if exists "Only admins can insert products" on public.products;
+create policy "Only admins can insert products"
+  on public.products for insert
+  with check (public.is_admin());
+
+drop policy if exists "Only admins can update products" on public.products;
+create policy "Only admins can update products"
+  on public.products for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete products" on public.products;
+create policy "Only admins can delete products"
+  on public.products for delete
   using (public.is_admin());
 
 -- notifications

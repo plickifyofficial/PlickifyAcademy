@@ -28,6 +28,7 @@ const menu = [
     group: "Sales",
     items: [
       { href: "/admin/orders", label: "Orders", icon: "fa-solid fa-cart-shopping" },
+      { href: "/admin/products", label: "Products", icon: "fa-solid fa-cube" },
       { href: "/admin/enrollments", label: "Enrollments", icon: "fa-solid fa-user-plus" },
       { href: "/admin/coupons", label: "Coupons", icon: "fa-solid fa-ticket" },
     ],

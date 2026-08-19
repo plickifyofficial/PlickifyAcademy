@@ -170,6 +170,9 @@ export default async function AdminDashboardPage() {
             <Link href="/admin/students" className="wp-btn w-full">
               <i className="fa-solid fa-users" /> Manage Students
             </Link>
+            <Link href="/admin/products" className="wp-btn w-full">
+              <i className="fa-solid fa-cube" /> Digital Products
+            </Link>
             <Link href="/admin/media" className="wp-btn w-full">
               <i className="fa-solid fa-images" /> Media Library
             </Link>

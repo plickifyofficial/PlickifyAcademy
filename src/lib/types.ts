@@ -31,6 +31,23 @@ export type Course = {
   content: Record<string, unknown> | null;
 };
 
+export type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  old_price: number;
+  tag: string | null;
+  icon: string | null;
+  gradient: string | null;
+  cover_image: string | null;
+  file_url: string | null;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Lesson = {
   id: string;
   course_id: string;
