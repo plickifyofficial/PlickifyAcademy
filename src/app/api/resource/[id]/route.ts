@@ -84,6 +84,16 @@ export async function GET(
 
   const filename = filenameFromPath(resource.file_path, resource.title);
 
+  try {
+    await admin.from("download_logs").insert({
+      user_id: user.id,
+      resource_id: id,
+      file_name: filename,
+    });
+  } catch {
+    // non-critical
+  }
+
   const headers = new Headers();
   headers.set(
     "Content-Type",

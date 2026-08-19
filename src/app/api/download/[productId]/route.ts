@@ -124,6 +124,11 @@ export async function GET(
       .from("products")
       .update({ download_count: (product.download_count ?? 0) + 1 })
       .eq("id", productId);
+    await admin.from("download_logs").insert({
+      user_id: user.id,
+      product_id: productId,
+      file_name: filename,
+    });
   } catch {
     // non-critical
   }

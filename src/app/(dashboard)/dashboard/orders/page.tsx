@@ -64,11 +64,7 @@ export default async function OrdersPage() {
               >
                 <div className="min-w-0">
                   <Link
-                    href={
-                      isProduct
-                        ? `/digital-products/${product?.slug ?? ""}`
-                        : `/courses/${course?.slug ?? ""}`
-                    }
+                    href={`/dashboard/orders/${order.id}`}
                     className="font-semibold text-zinc-900 hover:text-brand-700"
                   >
                     {isProduct ? product?.name ?? "Product" : course?.title ?? "Course"}
@@ -102,6 +98,12 @@ export default async function OrdersPage() {
                   <span className={`rounded-full px-3 py-1 text-xs font-semibold ${meta.cls}`}>
                     {meta.label}
                   </span>
+                  <Link
+                    href={`/dashboard/orders/${order.id}`}
+                    className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-50"
+                  >
+                    Details
+                  </Link>
                 </div>
               </div>
             );

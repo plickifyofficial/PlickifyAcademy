@@ -44,6 +44,7 @@ const menu = [
   {
     group: "Support",
     items: [
+      { href: "/admin/messages", label: "Messages", icon: "fa-solid fa-comment-dots" },
       { href: "/admin/contact", label: "Contact Messages", icon: "fa-solid fa-envelope" },
     ],
   },
