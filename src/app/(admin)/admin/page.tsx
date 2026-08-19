@@ -167,6 +167,12 @@ export default async function AdminDashboardPage() {
             <Link href="/admin/courses" className="wp-btn w-full">
               <i className="fa-solid fa-book-open" /> Manage Courses
             </Link>
+            <Link href="/admin/batches" className="wp-btn w-full">
+              <i className="fa-solid fa-calendar-days" /> Live Batches
+            </Link>
+            <Link href="/admin/instructors" className="wp-btn w-full">
+              <i className="fa-solid fa-chalkboard-user" /> Instructors
+            </Link>
             <Link href="/admin/students" className="wp-btn w-full">
               <i className="fa-solid fa-users" /> Manage Students
             </Link>

@@ -18,6 +18,8 @@ const menu = [
       { href: "/admin/pages", label: "Pages", icon: "fa-solid fa-file-lines" },
       { href: "/admin/courses", label: "Courses", icon: "fa-solid fa-book-open" },
       { href: "/admin/courses?add=1", label: "New Course", icon: "fa-solid fa-file-circle-plus" },
+      { href: "/admin/batches", label: "Live Batches", icon: "fa-solid fa-calendar-days" },
+      { href: "/admin/instructors", label: "Instructors", icon: "fa-solid fa-chalkboard-user" },
       { href: "/admin/categories", label: "Categories", icon: "fa-solid fa-folder" },
       { href: "/admin/faqs", label: "FAQs", icon: "fa-solid fa-circle-question" },
       { href: "/admin/testimonials", label: "Testimonials", icon: "fa-solid fa-quote-right" },

@@ -1205,6 +1205,121 @@ select * from (values
 ) as v(name, role, course, quote, rating, initials, color, sort_order)
 where not exists (select 1 from public.testimonials);
 
+-- ============================================================
+-- LIVE BATCHES (Phase 2)
+-- ============================================================
+create table if not exists public.batches (
+  id uuid primary key default gen_random_uuid(),
+  course_id uuid references public.courses(id) on delete set null,
+  title text not null,
+  description text not null default '',
+  start_date date,
+  duration text not null default '',
+  schedule text not null default '',
+  class_count integer not null default 0,
+  seats_total integer not null default 30,
+  seats_filled integer not null default 0,
+  price numeric(10,2) not null default 0,
+  old_price numeric(10,2) not null default 0,
+  status text not null default 'open'
+    check (status in ('open', 'upcoming', 'ongoing', 'closed')),
+  is_featured boolean not null default false,
+  is_published boolean not null default true,
+  meeting_info text not null default '',
+  features text[] not null default '{}',
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.batches enable row level security;
+
+drop policy if exists "Published batches are viewable by everyone" on public.batches;
+create policy "Published batches are viewable by everyone"
+  on public.batches for select
+  using (is_published = true or public.is_admin());
+
+drop policy if exists "Only admins can insert batches" on public.batches;
+create policy "Only admins can insert batches"
+  on public.batches for insert
+  with check (public.is_admin());
+
+drop policy if exists "Only admins can update batches" on public.batches;
+create policy "Only admins can update batches"
+  on public.batches for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete batches" on public.batches;
+create policy "Only admins can delete batches"
+  on public.batches for delete
+  using (public.is_admin());
+
+insert into public.batches (course_id, title, description, start_date, duration, schedule, class_count, seats_total, seats_filled, price, old_price, status, is_featured, is_published, features, sort_order)
+select c.id, b.title, b.description, b.start_date, b.duration, b.schedule, b.class_count, b.seats_total, b.seats_filled, b.price, b.old_price, b.status, b.is_featured, b.is_published, b.features, b.sort_order
+from (
+  values
+    ('AI Income Mastery Live Batch', 'AI tools, automation এবং freelancing-এর complete live training। Class recording সহ lifetime access।', '2026-10-01', '3 Months', 'Weekly 2 Live Classes', 25, 40, 23, 4990, 7990, 'open', true, true, array['Weekly 2 Live Classes','Class Recording Included','Daily Homework & Practice','VIP Community Support','Resource Pack'], 0),
+    ('Freelancing Masterclass Batch', 'Marketplace থেকে client পাওয়া থেকে payment নেওয়া — সবকিছু step-by-step।', '2026-11-05', '2 Months', 'Weekly 1 Live Class', 10, 30, 12, 2990, 4990, 'upcoming', false, true, array['Live Class','Resume & Profile Review','Portfolio Guidance','Support Community'], 1),
+    ('Graphic Design Pro Batch', 'AI-powered graphic design এবং client work-এর practical training।', '2026-09-01', '2 Months', 'Weekly 2 Live Classes', 16, 35, 35, 3990, 5990, 'closed', false, true, array['Live Class','Design Assignments','Portfolio Feedback','Job-ready Skills'], 2)
+  ) as b(title, description, start_date, duration, schedule, class_count, seats_total, seats_filled, price, old_price, status, is_featured, is_published, features, sort_order)
+cross join lateral (
+  select id from public.courses where is_published = true order by created_at limit 1
+) c
+where not exists (select 1 from public.batches);
+
+-- ============================================================
+-- INSTRUCTORS (Phase 2)
+-- ============================================================
+create table if not exists public.instructors (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug text not null unique,
+  role text not null default '',
+  bio text not null default '',
+  photo text,
+  initials text not null default '',
+  color text not null default 'bg-blue-600',
+  expertise text[] not null default '{}',
+  facebook text not null default '',
+  youtube text not null default '',
+  linkedin text not null default '',
+  instagram text not null default '',
+  is_featured boolean not null default false,
+  is_published boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.instructors enable row level security;
+
+drop policy if exists "Published instructors are viewable by everyone" on public.instructors;
+create policy "Published instructors are viewable by everyone"
+  on public.instructors for select
+  using (is_published = true or public.is_admin());
+
+drop policy if exists "Only admins can insert instructors" on public.instructors;
+create policy "Only admins can insert instructors"
+  on public.instructors for insert
+  with check (public.is_admin());
+
+drop policy if exists "Only admins can update instructors" on public.instructors;
+create policy "Only admins can update instructors"
+  on public.instructors for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete instructors" on public.instructors;
+create policy "Only admins can delete instructors"
+  on public.instructors for delete
+  using (public.is_admin());
+
+insert into public.instructors (name, slug, role, bio, initials, color, expertise, facebook, youtube, linkedin, is_featured, is_published, sort_order)
+select * from (values
+  ('মোঃ মিনহাজুল ইসলাম', 'minhajul-islam', 'Founder & Lead Instructor', 'AI, Design ও Freelancing-এ কাজের অভিজ্ঞতা নিয়ে শিক্ষার্থীদের practical skill শেখান।', 'MI', 'bg-blue-600', array['AI','Graphic Design','Freelancing','Digital Business'], '', '', '', true, true, 0),
+  ('মোঃ সজীব শেখ', 'sojib-sheikh', 'Trainer & Mentor', 'শিক্ষার্থীদের hands-on training ও mentorship-এর মাধ্যমে skill develop করতে সাহায্য করেন।', 'SS', 'bg-violet-600', array['Digital Skills','Freelancing','AI Tools','Practical Training'], '', '', '', false, true, 1)
+) as v(name, slug, role, bio, initials, color, expertise, facebook, youtube, linkedin, is_featured, is_published, sort_order)
+where not exists (select 1 from public.instructors);
+
 -- notifications
 drop policy if exists "Users can view own notifications" on public.notifications;
 create policy "Users can view own notifications"

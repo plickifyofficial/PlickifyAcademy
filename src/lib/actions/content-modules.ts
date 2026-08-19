@@ -55,7 +55,7 @@ function invalidate(...paths: string[]) {
 
 async function moveRow(
   supabase: DbClient,
-  table: "categories" | "faqs" | "testimonials",
+  table: "categories" | "faqs" | "testimonials" | "batches" | "instructors",
   id: string,
   direction: "up" | "down",
 ) {
@@ -379,5 +379,283 @@ export async function moveCategory(id: string, direction: "up" | "down") {
   const supabase = await requireAdmin();
   await moveRow(supabase, "categories", id, direction);
   invalidate("/admin/categories");
+  return { success: true };
+}
+
+// ============================================================
+// BATCHES
+// ============================================================
+const BATCH_STATUSES = ["open", "upcoming", "ongoing", "closed"];
+
+function parseFeatures(raw: string): string[] {
+  return raw
+    .split(",")
+    .map((s) => clean(s))
+    .filter(Boolean)
+    .slice(0, 20);
+}
+
+export async function createBatch(formData: FormData) {
+  const supabase = await requireAdmin();
+  const title = clean(String(formData.get("title") ?? "")).slice(0, 150);
+  if (!title) return { error: "Title is required." };
+  const course_id = clean(String(formData.get("course_id") ?? "")) || null;
+  const description = clean(String(formData.get("description") ?? "")).slice(0, 2000);
+  const start_date = clean(String(formData.get("start_date") ?? "")) || null;
+  const duration = clean(String(formData.get("duration") ?? "")).slice(0, 80);
+  const schedule = clean(String(formData.get("schedule") ?? "")).slice(0, 120);
+  const class_count = Math.max(0, Number(formData.get("class_count")) || 0);
+  const seats_total = Math.max(1, Number(formData.get("seats_total")) || 1);
+  const seats_filled = Math.max(0, Number(formData.get("seats_filled")) || 0);
+  const price = Math.max(0, Number(formData.get("price")) || 0);
+  const old_price = Math.max(0, Number(formData.get("old_price")) || 0);
+  const status = BATCH_STATUSES.includes(String(formData.get("status")))
+    ? String(formData.get("status"))
+    : "open";
+  const is_featured = formData.get("is_featured") === "on";
+  const is_published = formData.get("is_published") === "on";
+  const meeting_info = clean(String(formData.get("meeting_info") ?? "")).slice(0, 500);
+  const features = parseFeatures(String(formData.get("features") ?? ""));
+
+  const { count } = await supabase
+    .from("batches")
+    .select("id", { count: "exact", head: true });
+  const { error } = await supabase.from("batches").insert({
+    course_id,
+    title,
+    description,
+    start_date,
+    duration,
+    schedule,
+    class_count,
+    seats_total,
+    seats_filled,
+    price,
+    old_price,
+    status,
+    is_featured,
+    is_published,
+    meeting_info,
+    features,
+    sort_order: (count ?? 0) + 1,
+  });
+  if (error) return { error: error.message };
+  invalidate("/admin/batches", "/live-batch");
+  return { success: true };
+}
+
+export async function updateBatch(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "Missing id." };
+  const title = clean(String(formData.get("title") ?? "")).slice(0, 150);
+  if (!title) return { error: "Title is required." };
+  const course_id = clean(String(formData.get("course_id") ?? "")) || null;
+  const description = clean(String(formData.get("description") ?? "")).slice(0, 2000);
+  const start_date = clean(String(formData.get("start_date") ?? "")) || null;
+  const duration = clean(String(formData.get("duration") ?? "")).slice(0, 80);
+  const schedule = clean(String(formData.get("schedule") ?? "")).slice(0, 120);
+  const class_count = Math.max(0, Number(formData.get("class_count")) || 0);
+  const seats_total = Math.max(1, Number(formData.get("seats_total")) || 1);
+  const seats_filled = Math.max(0, Number(formData.get("seats_filled")) || 0);
+  const price = Math.max(0, Number(formData.get("price")) || 0);
+  const old_price = Math.max(0, Number(formData.get("old_price")) || 0);
+  const status = BATCH_STATUSES.includes(String(formData.get("status")))
+    ? String(formData.get("status"))
+    : "open";
+  const is_featured = formData.get("is_featured") === "on";
+  const is_published = formData.get("is_published") === "on";
+  const meeting_info = clean(String(formData.get("meeting_info") ?? "")).slice(0, 500);
+  const features = parseFeatures(String(formData.get("features") ?? ""));
+
+  const { error } = await supabase
+    .from("batches")
+    .update({
+      course_id,
+      title,
+      description,
+      start_date,
+      duration,
+      schedule,
+      class_count,
+      seats_total,
+      seats_filled,
+      price,
+      old_price,
+      status,
+      is_featured,
+      is_published,
+      meeting_info,
+      features,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  invalidate("/admin/batches", "/live-batch");
+  return { success: true };
+}
+
+export async function deleteBatch(id: string) {
+  const supabase = await requireAdmin();
+  const { error } = await supabase.from("batches").delete().eq("id", id);
+  if (error) return { error: error.message };
+  invalidate("/admin/batches", "/live-batch");
+  return { success: true };
+}
+
+export async function toggleBatch(id: string, field: "is_published" | "is_featured") {
+  const supabase = await requireAdmin();
+  const { data: row } = await supabase
+    .from("batches")
+    .select(field)
+    .eq("id", id)
+    .single();
+  const rowData = row as { is_published?: boolean; is_featured?: boolean };
+  const current =
+    field === "is_published" ? rowData.is_published : rowData.is_featured;
+  if (typeof current !== "boolean") return { error: "Not found." };
+  const { error } = await supabase
+    .from("batches")
+    .update({ [field]: !current, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  invalidate("/admin/batches", "/live-batch");
+  return { success: true };
+}
+
+export async function moveBatch(id: string, direction: "up" | "down") {
+  const supabase = await requireAdmin();
+  await moveRow(supabase, "batches", id, direction);
+  invalidate("/admin/batches", "/live-batch");
+  return { success: true };
+}
+
+// ============================================================
+// INSTRUCTORS
+// ============================================================
+export async function createInstructor(formData: FormData) {
+  const supabase = await requireAdmin();
+  const name = clean(String(formData.get("name") ?? "")).slice(0, 150);
+  if (!name) return { error: "Name is required." };
+  const slug = slugify(clean(String(formData.get("slug") ?? "")).slice(0, 80)) || slugify(name);
+  const role = clean(String(formData.get("role") ?? "")).slice(0, 150);
+  const bio = clean(String(formData.get("bio") ?? "")).slice(0, 3000);
+  const photo = clean(String(formData.get("photo") ?? "")).slice(0, 500);
+  const initials = clean(String(formData.get("initials") ?? "")).slice(0, 4);
+  const color = PRESET_COLORS.includes(String(formData.get("color")))
+    ? String(formData.get("color"))
+    : "bg-blue-600";
+  const expertise = parseFeatures(String(formData.get("expertise") ?? ""));
+  const facebook = clean(String(formData.get("facebook") ?? "")).slice(0, 300);
+  const youtube = clean(String(formData.get("youtube") ?? "")).slice(0, 300);
+  const linkedin = clean(String(formData.get("linkedin") ?? "")).slice(0, 300);
+  const instagram = clean(String(formData.get("instagram") ?? "")).slice(0, 300);
+  const is_featured = formData.get("is_featured") === "on";
+  const is_published = formData.get("is_published") === "on";
+
+  const { count } = await supabase
+    .from("instructors")
+    .select("id", { count: "exact", head: true });
+  const { error } = await supabase.from("instructors").insert({
+    name,
+    slug,
+    role,
+    bio,
+    photo: photo || null,
+    initials,
+    color,
+    expertise,
+    facebook,
+    youtube,
+    linkedin,
+    instagram,
+    is_featured,
+    is_published,
+    sort_order: (count ?? 0) + 1,
+  });
+  if (error) return { error: error.message };
+  invalidate("/admin/instructors", "/about");
+  return { success: true };
+}
+
+export async function updateInstructor(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "Missing id." };
+  const name = clean(String(formData.get("name") ?? "")).slice(0, 150);
+  if (!name) return { error: "Name is required." };
+  const slug = slugify(clean(String(formData.get("slug") ?? "")).slice(0, 80)) || slugify(name);
+  const role = clean(String(formData.get("role") ?? "")).slice(0, 150);
+  const bio = clean(String(formData.get("bio") ?? "")).slice(0, 3000);
+  const photo = clean(String(formData.get("photo") ?? "")).slice(0, 500);
+  const initials = clean(String(formData.get("initials") ?? "")).slice(0, 4);
+  const color = PRESET_COLORS.includes(String(formData.get("color")))
+    ? String(formData.get("color"))
+    : "bg-blue-600";
+  const expertise = parseFeatures(String(formData.get("expertise") ?? ""));
+  const facebook = clean(String(formData.get("facebook") ?? "")).slice(0, 300);
+  const youtube = clean(String(formData.get("youtube") ?? "")).slice(0, 300);
+  const linkedin = clean(String(formData.get("linkedin") ?? "")).slice(0, 300);
+  const instagram = clean(String(formData.get("instagram") ?? "")).slice(0, 300);
+  const is_featured = formData.get("is_featured") === "on";
+  const is_published = formData.get("is_published") === "on";
+
+  const { error } = await supabase
+    .from("instructors")
+    .update({
+      name,
+      slug,
+      role,
+      bio,
+      photo: photo || null,
+      initials,
+      color,
+      expertise,
+      facebook,
+      youtube,
+      linkedin,
+      instagram,
+      is_featured,
+      is_published,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  invalidate("/admin/instructors", "/about");
+  return { success: true };
+}
+
+export async function deleteInstructor(id: string) {
+  const supabase = await requireAdmin();
+  const { error } = await supabase.from("instructors").delete().eq("id", id);
+  if (error) return { error: error.message };
+  invalidate("/admin/instructors", "/about");
+  return { success: true };
+}
+
+export async function toggleInstructor(id: string, field: "is_published" | "is_featured") {
+  const supabase = await requireAdmin();
+  const { data: row } = await supabase
+    .from("instructors")
+    .select(field)
+    .eq("id", id)
+    .single();
+  const rowData = row as { is_published?: boolean; is_featured?: boolean };
+  const current =
+    field === "is_published" ? rowData.is_published : rowData.is_featured;
+  if (typeof current !== "boolean") return { error: "Not found." };
+  const { error } = await supabase
+    .from("instructors")
+    .update({ [field]: !current, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  invalidate("/admin/instructors", "/about");
+  return { success: true };
+}
+
+export async function moveInstructor(id: string, direction: "up" | "down") {
+  const supabase = await requireAdmin();
+  await moveRow(supabase, "instructors", id, direction);
+  invalidate("/admin/instructors", "/about");
   return { success: true };
 }

@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Category, Faq, Testimonial } from "@/lib/types";
+import type { Batch, Category, Faq, Instructor, Testimonial } from "@/lib/types";
 
 export const contentModuleTag = "content-modules";
 
@@ -57,6 +57,38 @@ export async function readCategories(type: Category["type"]): Promise<Category[]
   }
 }
 
+export async function readPublishedBatches(): Promise<Batch[]> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("batches")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) return [];
+    return (data ?? []) as Batch[];
+  } catch {
+    return [];
+  }
+}
+
+export async function readPublishedInstructors(): Promise<Instructor[]> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("instructors")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) return [];
+    return (data ?? []) as Instructor[];
+  } catch {
+    return [];
+  }
+}
+
 export const getPublishedTestimonials = unstable_cache(
   readPublishedTestimonials,
   ["content-modules-testimonials"],
@@ -72,5 +104,17 @@ export const getPublishedFaqs = unstable_cache(
 export const getCategories = unstable_cache(
   async (type: Category["type"]) => readCategories(type),
   ["content-modules-categories"],
+  { revalidate: 60, tags: [contentModuleTag] },
+);
+
+export const getPublishedBatches = unstable_cache(
+  readPublishedBatches,
+  ["content-modules-batches"],
+  { revalidate: 60, tags: [contentModuleTag] },
+);
+
+export const getPublishedInstructors = unstable_cache(
+  readPublishedInstructors,
+  ["content-modules-instructors"],
   { revalidate: 60, tags: [contentModuleTag] },
 );

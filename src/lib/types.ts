@@ -229,6 +229,50 @@ export type Testimonial = {
   updated_at: string;
 };
 
+export type Batch = {
+  id: string;
+  course_id: string | null;
+  title: string;
+  description: string;
+  start_date: string | null;
+  duration: string;
+  schedule: string;
+  class_count: number;
+  seats_total: number;
+  seats_filled: number;
+  price: number;
+  old_price: number;
+  status: "open" | "upcoming" | "ongoing" | "closed";
+  is_featured: boolean;
+  is_published: boolean;
+  meeting_info: string;
+  features: string[];
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Instructor = {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+  bio: string;
+  photo: string | null;
+  initials: string;
+  color: string;
+  expertise: string[];
+  facebook: string;
+  youtube: string;
+  linkedin: string;
+  instagram: string;
+  is_featured: boolean;
+  is_published: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type LessonProgress = {
   id: string;
   user_id: string;

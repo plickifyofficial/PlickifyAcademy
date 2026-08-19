@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Faq } from "@/components/home/faq";
 import { getSiteContent } from "@/lib/site-content";
-import { getPublishedFaqs } from "@/lib/content-modules";
+import { getPublishedFaqs, getPublishedInstructors } from "@/lib/content-modules";
 import { aboutDefaults, type AboutContent } from "@/lib/content-schema";
 
 export const metadata = {
@@ -39,10 +39,69 @@ function Avatar({
 }
 
 export default async function AboutPage() {
-  const [content, dbFaqs] = await Promise.all([
+  const [content, dbFaqs, dbInstructors] = await Promise.all([
     getSiteContent("about", aboutDefaults) as Promise<AboutContent>,
     getPublishedFaqs("about"),
+    getPublishedInstructors(),
   ]);
+
+  const GRADIENT_MAP: Record<string, string> = {
+    "bg-blue-600": "from-blue-600 to-indigo-600",
+    "bg-violet-600": "from-violet-600 to-fuchsia-600",
+    "bg-emerald-600": "from-emerald-600 to-teal-600",
+    "bg-rose-500": "from-rose-500 to-pink-600",
+    "bg-amber-500": "from-amber-500 to-orange-600",
+    "bg-cyan-600": "from-cyan-600 to-blue-700",
+    "bg-fuchsia-600": "from-fuchsia-600 to-purple-700",
+    "bg-slate-700": "from-slate-600 to-slate-800",
+    "bg-indigo-600": "from-indigo-600 to-blue-700",
+    "bg-orange-500": "from-orange-500 to-red-600",
+  };
+
+  const SOCIAL_META: Record<
+    string,
+    { icon: string; hover: string }
+  > = {
+    facebook: { icon: "fa-brands fa-facebook-f", hover: "hover:bg-brand-600" },
+    youtube: { icon: "fa-brands fa-youtube", hover: "hover:bg-red-600" },
+    linkedin: { icon: "fa-brands fa-linkedin-in", hover: "hover:bg-blue-600" },
+    instagram: { icon: "fa-brands fa-instagram", hover: "hover:bg-pink-600" },
+  };
+
+  const instructors = dbInstructors.length > 0
+    ? dbInstructors.map((i) => ({
+        name: i.name,
+        role: i.role,
+        bio: i.bio,
+        expertise: i.expertise ?? [],
+        initials: i.initials || i.name.slice(0, 2).toUpperCase(),
+        gradient: GRADIENT_MAP[i.color] ?? "from-blue-600 to-indigo-600",
+        photo: i.photo,
+        socials: (
+          ["facebook", "youtube", "linkedin", "instagram"] as const
+        )
+          .filter((k) => i[k] && i[k] !== "#")
+          .map((k) => ({
+            url: i[k],
+            icon: SOCIAL_META[k].icon,
+            hover: SOCIAL_META[k].hover,
+            label: k,
+          })),
+      }))
+    : (content.instructors ?? []).map((inst) => ({
+        name: inst.name,
+        role: inst.role,
+        bio: inst.bio,
+        expertise: inst.expertise ?? [],
+        initials: inst.initials,
+        gradient: inst.color,
+        photo: null,
+        socials: [
+          { url: "https://facebook.com", icon: "fa-brands fa-facebook-f", hover: "hover:bg-brand-600", label: "Facebook" },
+          { url: "https://youtube.com", icon: "fa-brands fa-youtube", hover: "hover:bg-red-600", label: "YouTube" },
+          { url: "https://linkedin.com", icon: "fa-brands fa-linkedin-in", hover: "hover:bg-blue-600", label: "LinkedIn" },
+        ],
+      }));
 
   return (
     <main className="bg-white">
@@ -388,22 +447,31 @@ export default async function AboutPage() {
             </h2>
           </div>
           <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {(content.instructors ?? []).map((inst, i) => (
+            {instructors.map((inst, i) => (
               <div
                 key={inst.name}
                 className="overflow-hidden rounded-3xl border border-zinc-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-100"
                 data-aos="fade-up"
                 data-aos-delay={i * 100}
               >
-                <div className={`flex h-40 items-center justify-center bg-gradient-to-br ${inst.color}`}>
-                  <div className="relative">
-                    <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white/40 bg-white/20 text-3xl font-extrabold text-white shadow-xl backdrop-blur">
-                      {inst.initials}
+                <div className={`flex h-40 items-center justify-center bg-gradient-to-br ${inst.gradient}`}>
+                  {inst.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={inst.photo}
+                      alt={inst.name}
+                      className="h-28 w-28 rounded-full border-4 border-white/40 object-cover shadow-xl"
+                    />
+                  ) : (
+                    <div className="relative">
+                      <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white/40 bg-white/20 text-3xl font-extrabold text-white shadow-xl backdrop-blur">
+                        {inst.initials}
+                      </div>
+                      <span className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm text-brand-600 shadow-md">
+                        <i className="fa-solid fa-circle-check" />
+                      </span>
                     </div>
-                    <span className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm text-brand-600 shadow-md">
-                      <i className="fa-solid fa-circle-check" />
-                    </span>
-                  </div>
+                  )}
                 </div>
                 <div className="p-7">
                   <h3 className="text-xl font-extrabold text-zinc-900">
@@ -425,35 +493,22 @@ export default async function AboutPage() {
                   <p className="mt-4 text-sm leading-relaxed text-zinc-500">
                     {inst.bio}
                   </p>
-                  <div className="mt-5 flex items-center gap-2">
-                    <a
-                      href="https://facebook.com"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-brand-600 hover:text-white"
-                      aria-label="Facebook"
-                    >
-                      <i className="fa-brands fa-facebook-f" />
-                    </a>
-                    <a
-                      href="https://youtube.com"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-red-600 hover:text-white"
-                      aria-label="YouTube"
-                    >
-                      <i className="fa-brands fa-youtube" />
-                    </a>
-                    <a
-                      href="https://linkedin.com"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-blue-600 hover:text-white"
-                      aria-label="LinkedIn"
-                    >
-                      <i className="fa-brands fa-linkedin-in" />
-                    </a>
-                  </div>
+                  {inst.socials.length > 0 && (
+                    <div className="mt-5 flex items-center gap-2">
+                      {inst.socials.map((s) => (
+                        <a
+                          key={s.label}
+                          href={s.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={s.label}
+                          className={`flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:text-white ${s.hover}`}
+                        >
+                          <i className={s.icon} />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
