@@ -844,3 +844,66 @@ export async function setUserRole(formData: FormData) {
 
   revalidatePath("/admin/students");
 }
+
+export async function saveAssignmentMeta(formData: FormData) {
+  const lessonId = String(formData.get("lesson_id"));
+  const courseId = String(formData.get("course_id"));
+  const supabase = await requireCourseEditor(courseId);
+
+  const payload = {
+    lesson_id: lessonId,
+    course_id: courseId,
+    due_date: String(formData.get("due_date") || "").trim() || null,
+    total_points: toNumber(formData.get("total_points")) || 100,
+    instructions: String(formData.get("instructions")).trim() || null,
+  };
+
+  const { error } = await supabase.from("assignments").upsert(payload, {
+    onConflict: "lesson_id",
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/assignments");
+}
+
+export async function updateAssignmentGrade(formData: FormData) {
+  const id = String(formData.get("submission_id"));
+  const courseId = String(formData.get("course_id"));
+  if (!id) throw new Error("Submission ID missing");
+  const supabase = await requireCourseEditor(courseId);
+
+  const gradeInput = String(formData.get("grade")).trim();
+  const grade = gradeInput === "" ? null : toNumber(gradeInput);
+  const feedback = String(formData.get("feedback")).trim() || null;
+
+  const { error } = await supabase
+    .from("assignment_submissions")
+    .update({
+      grade,
+      feedback,
+      graded_at: grade != null ? new Date().toISOString() : null,
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/assignments");
+}
+
+export async function deleteAssignmentGrade(formData: FormData) {
+  const id = String(formData.get("submission_id"));
+  const courseId = String(formData.get("course_id"));
+  if (!id) throw new Error("Submission ID missing");
+  const supabase = await requireCourseEditor(courseId);
+
+  const { error } = await supabase
+    .from("assignment_submissions")
+    .update({
+      grade: null,
+      feedback: null,
+      graded_at: null,
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/assignments");
+}

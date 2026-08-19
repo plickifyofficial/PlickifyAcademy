@@ -428,3 +428,66 @@ export async function removeFromWishlist(courseId: string) {
 
   revalidatePath("/dashboard/wishlist");
 }
+
+export async function submitAssignment(lessonId: string, text: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: assignment } = await supabase
+    .from("assignments")
+    .select("id, course_id, total_points")
+    .eq("lesson_id", lessonId)
+    .single();
+  if (!assignment) throw new Error("Assignment not found");
+
+  const { data: enrollment } = await supabase
+    .from("enrollments")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("course_id", assignment.course_id)
+    .maybeSingle();
+  if (!enrollment) throw new Error("Not enrolled");
+
+  const { data: existing } = await supabase
+    .from("assignment_submissions")
+    .select("id, grade, submitted_at")
+    .eq("assignment_id", assignment.id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing?.grade != null) {
+    throw new Error("This assignment has already been graded.");
+  }
+
+  const { error } = await supabase.from("assignment_submissions").upsert(
+    {
+      id: existing?.id,
+      assignment_id: assignment.id,
+      lesson_id: lessonId,
+      user_id: user.id,
+      submission_text: text.trim(),
+      submitted_at: new Date().toISOString(),
+    },
+    { onConflict: "assignment_id, user_id" },
+  );
+  if (error) throw new Error(error.message);
+
+  await supabase.from("lesson_progress").upsert(
+    {
+      user_id: user.id,
+      lesson_id: lessonId,
+      completed: true,
+      completed_at: new Date().toISOString(),
+      last_watched_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id, lesson_id" },
+  );
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/courses");
+  revalidatePath("/dashboard/assignments");
+  revalidatePath(`/dashboard/learn/${assignment.course_id}/${lessonId}`);
+}

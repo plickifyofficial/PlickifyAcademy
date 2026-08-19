@@ -446,3 +446,292 @@ export async function getContinueLearning(
     moduleIndex,
   };
 }
+
+export async function getAllLiveClasses(
+  userId: string,
+  courseIds: string[],
+): Promise<{ upcoming: LiveClassItem[]; past: LiveClassItem[] }> {
+  if (courseIds.length === 0) return { upcoming: [], past: [] };
+  const supabase = await createClient();
+
+  const { data: rowsRaw } = await supabase
+    .from("live_classes")
+    .select(
+      "id, title, description, scheduled_at, duration_minutes, meeting_url, course_id, courses(id, title, slug, cover_image, created_by)",
+    )
+    .in("course_id", courseIds)
+    .order("scheduled_at", { ascending: true })
+    .limit(200);
+
+  const rows = (rowsRaw ?? []) as unknown as Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    scheduled_at: string | null;
+    duration_minutes: number;
+    meeting_url: string | null;
+    course_id: string;
+    courses: {
+      id: string;
+      title: string;
+      slug: string;
+      cover_image: string | null;
+      created_by: string | null;
+    } | null;
+  }>;
+
+  const creatorIds = Array.from(
+    new Set(
+      rows
+        .map((r) => r.courses?.created_by)
+        .filter((v): v is string => Boolean(v)),
+    ),
+  );
+
+  const { data: creators } =
+    creatorIds.length > 0
+      ? await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", creatorIds)
+      : { data: [] };
+
+  const nameMap: Record<string, string> = {};
+  for (const c of creators ?? []) nameMap[c.id] = c.full_name || "Instructor";
+
+  const map = (r: (typeof rows)[number]): LiveClassItem => ({
+    id: r.id,
+    title: r.title,
+    description: r.description,
+    scheduled_at: r.scheduled_at,
+    duration_minutes: r.duration_minutes,
+    meeting_url: r.meeting_url,
+    course: r.courses,
+    instructor: nameMap[r.courses?.created_by ?? ""] || "Instructor",
+  });
+
+  const now = new Date();
+  const upcoming = rows
+    .filter((r) => r.scheduled_at && new Date(r.scheduled_at) >= now)
+    .sort(
+      (a, b) =>
+        new Date(a.scheduled_at as string).getTime() -
+        new Date(b.scheduled_at as string).getTime(),
+    )
+    .map(map);
+  const past = rows
+    .filter(
+      (r) => r.scheduled_at && new Date(r.scheduled_at) < now,
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.scheduled_at as string).getTime() -
+        new Date(a.scheduled_at as string).getTime(),
+    )
+    .map(map);
+
+  void userId;
+  return { upcoming, past };
+}
+
+export type QuizListItem = {
+  id: string;
+  title: string;
+  course: { id: string; title: string; slug: string; cover_image: string | null };
+  passPercent: number;
+  totalQuestions: number;
+  attempts: number;
+  bestScore: number | null;
+  passed: boolean;
+  lastAttemptAt: string | null;
+};
+
+export async function getQuizList(userId: string): Promise<QuizListItem[]> {
+  const supabase = await createClient();
+
+  const { data: enrolledRaw } = await supabase
+    .from("enrollments")
+    .select("course_id, courses(id, title, slug, cover_image)")
+    .eq("user_id", userId);
+  const enrolled = (enrolledRaw ?? []) as unknown as Array<{
+    course_id: string;
+    courses: {
+      id: string;
+      title: string;
+      slug: string;
+      cover_image: string | null;
+    } | null;
+  }>;
+  const courseIds = enrolled
+    .map((e) => e.courses?.id)
+    .filter((v): v is string => Boolean(v));
+  if (courseIds.length === 0) return [];
+
+  const [{ data: quizLessons }, { data: attempts }] = await Promise.all([
+    supabase
+      .from("lessons")
+      .select("id, title, pass_percent, section_id, course_id")
+      .eq("type", "quiz")
+      .in("course_id", courseIds),
+    supabase
+      .from("quiz_attempts")
+      .select("lesson_id, score, total, passed, created_at")
+      .eq("user_id", userId),
+  ]);
+
+  const courseMap = new Map(enrolled.map((e) => [e.course_id, e.courses]));
+  const attemptMap = new Map<string, { score: number; passed: boolean; at: string }[]>();
+  for (const a of attempts ?? []) {
+    const arr = attemptMap.get(a.lesson_id) ?? [];
+    arr.push({ score: a.score, passed: a.passed, at: a.created_at });
+    attemptMap.set(a.lesson_id, arr);
+  }
+
+  const items: QuizListItem[] = [];
+  for (const q of quizLessons ?? []) {
+    const course = courseMap.get(q.course_id);
+    if (!course) continue;
+    const attemptsList = attemptMap.get(q.id) ?? [];
+    const best = attemptsList.length
+      ? Math.max(...attemptsList.map((a) => a.score))
+      : null;
+    const passed = attemptsList.some((a) => a.passed);
+    items.push({
+      id: q.id,
+      title: q.title,
+      course: { id: course.id, title: course.title, slug: course.slug, cover_image: course.cover_image },
+      passPercent: q.pass_percent ?? 60,
+      totalQuestions: 0,
+      attempts: attemptsList.length,
+      bestScore: best,
+      passed,
+      lastAttemptAt: attemptsList.length
+        ? attemptsList.map((a) => a.at).sort().at(-1) ?? null
+        : null,
+    });
+  }
+
+  const { data: counts } = await supabase
+    .from("quiz_questions")
+    .select("lesson_id, id")
+    .in(
+      "lesson_id",
+      items.map((i) => i.id),
+    );
+  const countMap = new Map<string, number>();
+  for (const c of counts ?? []) countMap.set(c.lesson_id, (countMap.get(c.lesson_id) ?? 0) + 1);
+  for (const i of items) i.totalQuestions = countMap.get(i.id) ?? 0;
+
+  return items;
+}
+
+export type AssignmentListItem = {
+  id: string;
+  title: string;
+  course: { id: string; title: string; slug: string; cover_image: string | null };
+  dueDate: string | null;
+  totalPoints: number;
+  submittedAt: string | null;
+  grade: number | null;
+  feedback: string | null;
+  graded: boolean;
+};
+
+export async function getAssignmentList(
+  userId: string,
+): Promise<AssignmentListItem[]> {
+  const supabase = await createClient();
+
+  const { data: enrolledRaw } = await supabase
+    .from("enrollments")
+    .select("course_id, courses(id, title, slug, cover_image)")
+    .eq("user_id", userId);
+  const enrolled = (enrolledRaw ?? []) as unknown as Array<{
+    course_id: string;
+    courses: {
+      id: string;
+      title: string;
+      slug: string;
+      cover_image: string | null;
+    } | null;
+  }>;
+  const courseIds = enrolled
+    .map((e) => e.courses?.id)
+    .filter((v): v is string => Boolean(v));
+  if (courseIds.length === 0) return [];
+
+  const { data: assignmentLessons } = await supabase
+    .from("lessons")
+    .select("id, title, course_id")
+    .eq("type", "assignment")
+    .in("course_id", courseIds);
+
+  const lessonIds = (assignmentLessons ?? []).map((l) => l.id);
+  if (lessonIds.length === 0) return [];
+
+  const [{ data: assignments }, { data: submissions }] = await Promise.all([
+    supabase
+      .from("assignments")
+      .select("id, lesson_id, due_date, total_points")
+      .in("lesson_id", lessonIds),
+    supabase
+      .from("assignment_submissions")
+      .select("lesson_id, submitted_at, grade, feedback")
+      .eq("user_id", userId),
+  ]);
+
+  const courseMap = new Map(enrolled.map((e) => [e.course_id, e.courses]));
+  const assignmentMap = new Map((assignments ?? []).map((a) => [a.lesson_id, a]));
+  const submissionMap = new Map(
+    (submissions ?? []).map((s) => [s.lesson_id, s] as const),
+  );
+
+  const items: AssignmentListItem[] = [];
+  for (const l of assignmentLessons ?? []) {
+    const course = courseMap.get(l.course_id);
+    if (!course) continue;
+    const assignment = assignmentMap.get(l.id);
+    const sub = submissionMap.get(l.id);
+    items.push({
+      id: l.id,
+      title: l.title,
+      course: { id: course.id, title: course.title, slug: course.slug, cover_image: course.cover_image },
+      dueDate: assignment?.due_date ?? null,
+      totalPoints: assignment?.total_points ?? 100,
+      submittedAt: sub?.submitted_at ?? null,
+      grade: sub?.grade ?? null,
+      feedback: sub?.feedback ?? null,
+      graded: sub?.grade != null,
+    });
+  }
+
+  return items;
+}
+
+export type CertificateItem = {
+  id: string;
+  certificate_number: string;
+  issued_at: string;
+  course: { id: string; title: string; slug: string } | null;
+};
+
+export async function getCertificatesList(userId: string): Promise<CertificateItem[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("certificates")
+    .select("id, certificate_number, issued_at, courses(id, title, slug)")
+    .eq("user_id", userId)
+    .order("issued_at", { ascending: false });
+
+  return ((data ?? []) as unknown as Array<{
+    id: string;
+    certificate_number: string;
+    issued_at: string;
+    courses: { id: string; title: string; slug: string } | null;
+  }>).map((c) => ({
+    id: c.id,
+    certificate_number: c.certificate_number,
+    issued_at: c.issued_at,
+    course: c.courses,
+  }));
+}

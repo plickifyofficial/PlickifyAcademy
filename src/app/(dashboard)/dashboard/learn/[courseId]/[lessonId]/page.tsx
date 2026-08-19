@@ -10,6 +10,8 @@ import type { QuizQuestion } from "@/lib/types";
 
 export const metadata = { title: "Lesson" };
 
+const SERVER_NOW_ISO = new Date().toISOString();
+
 export default async function LearnLessonPage({
   params,
 }: {
@@ -216,6 +218,48 @@ export default async function LearnLessonPage({
     questions = (qs ?? []) as unknown as QuizQuestion[];
   }
 
+  let assignment: {
+    dueDate: string | null;
+    totalPoints: number;
+    instructions: string | null;
+    submission: {
+      text: string;
+      submittedAt: string | null;
+      grade: number | null;
+      feedback: string | null;
+    } | null;
+  } | null = null;
+  if (lesson.type === "assignment") {
+    const [{ data: assignmentRow }, { data: submission }] = await Promise.all([
+      supabase
+        .from("assignments")
+        .select("due_date, total_points, instructions")
+        .eq("lesson_id", lesson.id)
+        .maybeSingle(),
+      supabase
+        .from("assignment_submissions")
+        .select("submission_text, submitted_at, grade, feedback")
+        .eq("user_id", user.id)
+        .eq("lesson_id", lesson.id)
+        .maybeSingle(),
+    ]);
+    if (assignmentRow) {
+      assignment = {
+        dueDate: assignmentRow.due_date,
+        totalPoints: assignmentRow.total_points,
+        instructions: assignmentRow.instructions,
+        submission: submission
+          ? {
+              text: submission.submission_text,
+              submittedAt: submission.submitted_at,
+              grade: submission.grade,
+              feedback: submission.feedback,
+            }
+          : null,
+      };
+    }
+  }
+
   const autoNext = settings?.auto_next_lesson === true;
 
   return (
@@ -270,6 +314,9 @@ export default async function LearnLessonPage({
           lessonId={lesson.id}
           lessonTitle={lesson.title}
           isQuiz={lesson.type === "quiz"}
+          isAssignment={lesson.type === "assignment"}
+          assignment={assignment}
+          nowIso={SERVER_NOW_ISO}
           render={buildProtectedRender(
             lesson.video_url,
             lesson.video_embed,

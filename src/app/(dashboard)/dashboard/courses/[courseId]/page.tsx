@@ -7,6 +7,7 @@ import {
 } from "@/components/dashboard/course-curriculum";
 import type { Lesson } from "@/lib/types";
 import { formatDuration } from "@/lib/student";
+import { CertificateButton } from "@/components/courses/certificate-button";
 
 export const metadata = { title: "My Course" };
 
@@ -116,6 +117,13 @@ export default async function DashboardCoursePage({
   const isCompleted = allTopics.length > 0 && done >= allTopics.length;
   const isNotStarted = done === 0;
 
+  const { data: certificate } = await supabase
+    .from("certificates")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("course_id", courseId)
+    .maybeSingle();
+
   return (
     <div>
       <nav className="flex items-center gap-2 text-sm text-zinc-500">
@@ -223,6 +231,11 @@ export default async function DashboardCoursePage({
             </p>
           </div>
           <div className="flex gap-3">
+            <CertificateButton
+              courseId={courseId}
+              completed={isCompleted}
+              certificateId={certificate?.id ?? null}
+            />
             <Link
               href="/dashboard/courses"
               className="rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-green-700 hover:bg-green-50"

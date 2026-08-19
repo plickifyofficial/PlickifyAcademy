@@ -18,6 +18,15 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    title: "Learning",
+    items: [
+      { href: "/dashboard/live-classes", label: "Live Classes", icon: "fa-solid fa-video" },
+      { href: "/dashboard/quizzes", label: "Quizzes", icon: "fa-solid fa-circle-question" },
+      { href: "/dashboard/assignments", label: "Assignments", icon: "fa-solid fa-clipboard-check" },
+      { href: "/dashboard/certificates", label: "Certificates", icon: "fa-solid fa-award" },
+    ],
+  },
+  {
     title: "My Store",
     items: [
       { href: "/dashboard/my-products", label: "Digital Products", icon: "fa-solid fa-box-open" },

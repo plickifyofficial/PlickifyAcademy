@@ -6,6 +6,7 @@ import { VideoPlayer } from "@/components/lessons/video-player";
 import { LessonTabs } from "@/components/lessons/lesson-tabs";
 import { PlayerNav } from "@/components/lessons/player-nav";
 import { QuizPlayer } from "@/components/lessons/quiz-player";
+import { AssignmentPanel } from "@/components/lessons/assignment-panel";
 import type { VideoRender } from "@/lib/video";
 import type { QuizQuestion } from "@/lib/types";
 
@@ -16,6 +17,9 @@ export function PlayerContent({
   lessonId,
   lessonTitle,
   isQuiz,
+  isAssignment,
+  assignment,
+  nowIso,
   render,
   poster,
   initialPosition,
@@ -35,6 +39,19 @@ export function PlayerContent({
   lessonId: string;
   lessonTitle: string;
   isQuiz: boolean;
+  isAssignment: boolean;
+  assignment: {
+    dueDate: string | null;
+    totalPoints: number;
+    instructions: string | null;
+    submission: {
+      text: string;
+      submittedAt: string | null;
+      grade: number | null;
+      feedback: string | null;
+    } | null;
+  } | null;
+  nowIso: string;
   render: VideoRender;
   poster?: string | null;
   initialPosition?: number;
@@ -121,6 +138,15 @@ export function PlayerContent({
               questions={questions ?? []}
             />
           </div>
+        ) : isAssignment && assignment ? (
+          <AssignmentPanel
+            lessonId={lessonId}
+            dueDate={assignment.dueDate}
+            totalPoints={assignment.totalPoints}
+            instructions={assignment.instructions}
+            nowIso={nowIso}
+            submission={assignment.submission}
+          />
         ) : (
           <VideoPlayer
             render={render}
