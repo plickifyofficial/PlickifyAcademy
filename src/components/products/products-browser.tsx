@@ -397,7 +397,7 @@ export function ProductsBrowser({
     }
     if (rating > 0 && (p.rating_avg ?? 0) < rating) return false;
     if (availability) {
-      if (availability === "instant" && !p.file_url) return false;
+      if (availability === "instant" && !p.has_file) return false;
       if (availability === "free" && p.price > 0) return false;
       if (availability === "premium" && p.price <= 0) return false;
     }
@@ -519,7 +519,7 @@ export function ProductsBrowser({
                 {p.file_count}+ Resources
               </span>
             )}
-            {p.file_url && (
+            {p.has_file && (
               <span className="inline-flex items-center gap-1">
                 <i className="fa-solid fa-download text-brand-400" />
                 Instant Download
@@ -689,7 +689,7 @@ export function ProductsBrowser({
                   {[
                     `${featured.file_count || 0}+ Resources`,
                     featured.file_format || "Premium Files",
-                    featured.file_url ? "Instant Download" : "Lifetime Access",
+                    featured.has_file ? "Instant Download" : "Lifetime Access",
                     "Lifetime Access",
                   ].map((f) => (
                     <li
@@ -1318,9 +1318,12 @@ export function ProductsBrowser({
                   >
                     বিস্তারিত দেখুন
                   </Link>
-                  <button className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700">
+                  <Link
+                    href={`/checkout/product/${quickView.slug}`}
+                    className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+                  >
                     এখনই কিনুন
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

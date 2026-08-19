@@ -9,6 +9,7 @@ import { signOut } from "@/lib/actions/auth";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "fa-solid fa-chart-line" },
   { href: "/dashboard/courses", label: "My Courses", icon: "fa-solid fa-graduation-cap" },
+  { href: "/dashboard/my-products", label: "My Digital Products", icon: "fa-solid fa-box-open" },
   { href: "/dashboard/orders", label: "My Orders", icon: "fa-solid fa-receipt" },
   { href: "/dashboard/wishlist", label: "Wishlist", icon: "fa-solid fa-heart" },
   { href: "/dashboard/profile", label: "Profile", icon: "fa-solid fa-user" },

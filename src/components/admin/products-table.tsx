@@ -9,6 +9,7 @@ import {
   deleteProduct,
   toggleProductPublish,
   uploadProductImage,
+  uploadProductFile,
 } from "@/lib/actions/products";
 import { formatPrice } from "@/lib/format";
 import { useToast } from "@/components/ui/toaster";
@@ -237,6 +238,29 @@ export function ProductsTable({ products }: { products: Product[] }) {
     }
     if (result?.url) setForm({ ...form, cover_image: result.url });
     showToast("Image uploaded");
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.set("file", file);
+    const result = await uploadProductFile(fd);
+    setUploading(false);
+    if (result?.error) {
+      showToast(result.error, "error");
+      return;
+    }
+    if (result?.path) {
+      setForm({
+        ...form,
+        file_url: result.path,
+        file_format: result.format ?? form.file_format,
+        file_size: result.size ?? form.file_size,
+      });
+    }
+    showToast("File uploaded to secure storage");
   }
 
   const modalOpen = creating || editing;
@@ -519,13 +543,32 @@ export function ProductsTable({ products }: { products: Product[] }) {
                 </div>
               </div>
               <div className="sm:col-span-2">
-                <label className="wp-label">Download File URL</label>
-                <input
-                  value={form.file_url}
-                  onChange={(e) => setForm({ ...form, file_url: e.target.value })}
-                  className="wp-input"
-                  placeholder="https://... (uploaded file link)"
-                />
+                <label className="wp-label">Download File</label>
+                <div className="flex gap-2">
+                  <input
+                    value={form.file_url}
+                    onChange={(e) => setForm({ ...form, file_url: e.target.value })}
+                    className="wp-input flex-1"
+                    placeholder="Upload a file OR paste https:// URL"
+                  />
+                  <label
+                    className="wp-btn cursor-pointer whitespace-nowrap"
+                    style={{ margin: 0 }}
+                  >
+                    <i className="fa-solid fa-upload" />{" "}
+                    {uploading ? "..." : "Upload"}
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+                <p className="mt-1 text-xs text-[#646970]">
+                  Files upload to secure private storage — buyers download through
+                  the protected download link only.
+                </p>
               </div>
               <div>
                 <label className="wp-label">File Format</label>

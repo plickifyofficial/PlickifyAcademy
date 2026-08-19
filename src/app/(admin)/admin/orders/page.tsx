@@ -9,7 +9,7 @@ export default async function AdminOrdersPage() {
 
   const { data: orders } = await supabase
     .from("orders")
-    .select("*, courses(title)")
+    .select("*, courses(title), products(name)")
     .order("created_at", { ascending: false });
 
   const userIds = [...new Set((orders ?? []).map((o) => o.user_id))];
@@ -28,8 +28,8 @@ export default async function AdminOrdersPage() {
     <div>
       <h1 className="wp-page-title">Orders</h1>
       <p className="wp-subtitle">
-        Verify manual payments (bKash/Nagad) — verification auto-enrolls the
-        course
+        Verify manual payments (bKash/Nagad) — verification auto-enrolls courses
+        and unlocks products
       </p>
 
       <div className="wp-panel">
@@ -45,12 +45,14 @@ export default async function AdminOrdersPage() {
               id: string;
               created_at: string;
               user_id: string;
-              course_id: string;
+              course_id: string | null;
+              product_id: string | null;
               amount: number;
               status: string;
               payment_method?: string | null;
               trx_id?: string | null;
               courses: { title: string } | null;
+              products: { name: string } | null;
             }[]
           }
           emails={emails}

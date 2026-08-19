@@ -45,7 +45,8 @@ export type Product = {
   icon: string | null;
   gradient: string | null;
   cover_image: string | null;
-  file_url: string | null;
+  file_url?: string | null;
+  has_file?: boolean;
   file_format: string | null;
   file_size: string | null;
   file_count: number | null;
@@ -57,6 +58,30 @@ export type Product = {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+};
+
+export type Order = {
+  id: string;
+  user_id: string;
+  course_id: string | null;
+  product_id: string | null;
+  stripe_session_id: string | null;
+  amount: number;
+  status: "pending" | "paid" | "failed";
+  payment_method: string | null;
+  trx_id: string | null;
+  coupon_id: string | null;
+  created_at: string;
+};
+
+export type ProductPurchase = {
+  id: string;
+  user_id: string;
+  product_id: string;
+  order_id: string | null;
+  price: number;
+  created_at: string;
+  products?: Product | null;
 };
 
 export type Lesson = {

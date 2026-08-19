@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/format";
 import { BuyButton } from "@/components/products/buy-button";
@@ -41,6 +42,22 @@ export default async function ProductDetailPage({
     .maybeSingle();
 
   if (!product) notFound();
+
+  const serverSupabase = await createClient();
+  const {
+    data: { user },
+  } = await serverSupabase.auth.getUser();
+
+  let owned = false;
+  if (user) {
+    const { data: purchase } = await serverSupabase
+      .from("product_purchases")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_id", product.id)
+      .maybeSingle();
+    owned = !!purchase;
+  }
 
   const discount =
     product.old_price > product.price
@@ -169,7 +186,7 @@ export default async function ProductDetailPage({
                   Instant Download · Lifetime Access
                 </p>
                 <div className="mt-5">
-                  <BuyButton />
+                  <BuyButton slug={product.slug} name={product.name} owned={owned} />
                 </div>
               </div>
             </div>

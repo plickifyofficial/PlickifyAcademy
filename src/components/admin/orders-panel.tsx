@@ -9,12 +9,14 @@ type Order = {
   id: string;
   created_at: string;
   user_id: string;
-  course_id: string;
+  course_id: string | null;
+  product_id: string | null;
   amount: number;
   status: string;
   payment_method?: string | null;
   trx_id?: string | null;
   courses: { title: string } | null;
+  products: { name: string } | null;
 };
 
 export function OrdersPanel({
@@ -56,7 +58,7 @@ export function OrdersPanel({
       <table className="wp-table min-w-[860px]">
         <thead>
           <tr>
-            <th>Course</th>
+            <th>Item</th>
             <th>Student</th>
             <th>Method / TrxID</th>
             <th>Amount</th>
@@ -70,10 +72,13 @@ export function OrdersPanel({
             orders.map((order) => {
               const meta = statusMeta(order.status);
               const pending = pendingId === order.id;
+              const isProduct = !!order.products;
               return (
                 <tr key={order.id}>
                   <td className="font-semibold text-[#1d2327]">
-                    {order.courses?.title ?? "—"}
+                    {isProduct
+                      ? `${order.products?.name ?? "Product"} (Product)`
+                      : order.courses?.title ?? "—"}
                   </td>
                   <td className="text-[#3c434a]">
                     {emails[order.user_id] ?? order.user_id.slice(0, 8)}
@@ -116,7 +121,9 @@ export function OrdersPanel({
                               run(
                                 order.id,
                                 verifyOrder,
-                                "Payment confirmed — course enrolled",
+                                isProduct
+                                  ? "Payment confirmed — product unlocked"
+                                  : "Payment confirmed — course enrolled",
                               )
                             }
                             disabled={pending}

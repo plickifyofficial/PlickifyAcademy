@@ -8,5 +8,11 @@ export async function getPublishedProducts(): Promise<Product[]> {
     .select("*")
     .eq("is_published", true)
     .order("created_at", { ascending: false });
-  return (data ?? []) as Product[];
+
+  return ((data ?? []) as Array<Product & { file_url?: string | null }>).map(
+    (p) => {
+      const { file_url, ...rest } = p;
+      return { ...rest, file_url: null, has_file: !!file_url } as Product;
+    },
+  );
 }

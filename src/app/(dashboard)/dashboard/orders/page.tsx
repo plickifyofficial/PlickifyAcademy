@@ -14,7 +14,9 @@ export default async function OrdersPage() {
 
   const { data: orders } = await supabase
     .from("orders")
-    .select("id, amount, status, payment_method, trx_id, created_at, courses(title, slug)")
+    .select(
+      "id, amount, status, payment_method, trx_id, created_at, courses(title, slug), products(name, slug)",
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -49,6 +51,11 @@ export default async function OrdersPage() {
               title: string;
               slug: string;
             } | null;
+            const product = order.products as unknown as {
+              name: string;
+              slug: string;
+            } | null;
+            const isProduct = !!product;
             const meta = statusMeta(order.status);
             return (
               <div
@@ -57,10 +64,14 @@ export default async function OrdersPage() {
               >
                 <div className="min-w-0">
                   <Link
-                    href={`/courses/${course?.slug ?? ""}`}
+                    href={
+                      isProduct
+                        ? `/digital-products/${product?.slug ?? ""}`
+                        : `/courses/${course?.slug ?? ""}`
+                    }
                     className="font-semibold text-zinc-900 hover:text-brand-700"
                   >
-                    {course?.title ?? "Course"}
+                    {isProduct ? product?.name ?? "Product" : course?.title ?? "Course"}
                   </Link>
                   {order.payment_method && (
                     <p className="mt-1 text-sm text-zinc-500">
@@ -98,8 +109,9 @@ export default async function OrdersPage() {
 
           <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
             <i className="fa-solid fa-circle-info mr-1" />
-            "Under Review" means your payment is being verified by an admin. Once verified,
-            your course will be enrolled automatically and you will receive a notification.
+            &ldquo;Under Review&rdquo; means your payment is being verified by an
+            admin. Once verified, your course/product will be unlocked
+            automatically and you will receive a notification.
           </p>
         </div>
       )}

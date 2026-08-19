@@ -48,6 +48,38 @@ const ALLOWED_IMAGE = [
   "image/svg+xml",
 ];
 
+const MAX_FILE = 200 * 1024 * 1024;
+
+export async function uploadProductFile(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0)
+    return { error: "Please select a file" };
+  if (file.size > MAX_FILE)
+    return { error: "File must be within 200MB" };
+
+  const ext = (file.name.split(".").pop() || "zip").toLowerCase();
+  const path = `product-${Date.now()}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from("product-files")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (error) return { error: error.message };
+
+  const sizeMB = (file.size / (1024 * 1024)).toFixed(1).replace(/\.0$/, "");
+  return {
+    success: true,
+    path,
+    format: ext.toUpperCase(),
+    size: `${sizeMB} MB`,
+  };
+}
+
 export async function uploadProductImage(formData: FormData) {
   const supabase = await createClient();
   const {

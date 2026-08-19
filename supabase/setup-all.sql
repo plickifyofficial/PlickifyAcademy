@@ -1258,9 +1258,9 @@ insert into public.batches (course_id, title, description, start_date, duration,
 select c.id, b.title, b.description, b.start_date, b.duration, b.schedule, b.class_count, b.seats_total, b.seats_filled, b.price, b.old_price, b.status, b.is_featured, b.is_published, b.features, b.sort_order
 from (
   values
-    ('AI Income Mastery Live Batch', 'AI tools, automation এবং freelancing-এর complete live training। Class recording সহ lifetime access।', '2026-10-01', '3 Months', 'Weekly 2 Live Classes', 25, 40, 23, 4990, 7990, 'open', true, true, array['Weekly 2 Live Classes','Class Recording Included','Daily Homework & Practice','VIP Community Support','Resource Pack'], 0),
-    ('Freelancing Masterclass Batch', 'Marketplace থেকে client পাওয়া থেকে payment নেওয়া — সবকিছু step-by-step।', '2026-11-05', '2 Months', 'Weekly 1 Live Class', 10, 30, 12, 2990, 4990, 'upcoming', false, true, array['Live Class','Resume & Profile Review','Portfolio Guidance','Support Community'], 1),
-    ('Graphic Design Pro Batch', 'AI-powered graphic design এবং client work-এর practical training।', '2026-09-01', '2 Months', 'Weekly 2 Live Classes', 16, 35, 35, 3990, 5990, 'closed', false, true, array['Live Class','Design Assignments','Portfolio Feedback','Job-ready Skills'], 2)
+    ('AI Income Mastery Live Batch', 'AI tools, automation এবং freelancing-এর complete live training। Class recording সহ lifetime access।', '2026-10-01'::date, '3 Months', 'Weekly 2 Live Classes', 25, 40, 23, 4990, 7990, 'open', true, true, array['Weekly 2 Live Classes','Class Recording Included','Daily Homework & Practice','VIP Community Support','Resource Pack'], 0),
+    ('Freelancing Masterclass Batch', 'Marketplace থেকে client পাওয়া থেকে payment নেওয়া — সবকিছু step-by-step।', '2026-11-05'::date, '2 Months', 'Weekly 1 Live Class', 10, 30, 12, 2990, 4990, 'upcoming', false, true, array['Live Class','Resume & Profile Review','Portfolio Guidance','Support Community'], 1),
+    ('Graphic Design Pro Batch', 'AI-powered graphic design এবং client work-এর practical training।', '2026-09-01'::date, '2 Months', 'Weekly 2 Live Classes', 16, 35, 35, 3990, 5990, 'closed', false, true, array['Live Class','Design Assignments','Portfolio Feedback','Job-ready Skills'], 2)
   ) as b(title, description, start_date, duration, schedule, class_count, seats_total, seats_filled, price, old_price, status, is_featured, is_published, features, sort_order)
 cross join lateral (
   select id from public.courses where is_published = true order by created_at limit 1
@@ -1528,3 +1528,73 @@ alter table public.orders
 alter table public.orders
   add constraint orders_user_id_profiles_fkey
   foreign key (user_id) references public.profiles (id) on delete cascade;
+
+-- ============================================================
+-- STORE (Phase 3): product purchases + protected downloads
+-- ============================================================
+
+-- orders: support product purchases (course_id becomes optional)
+alter table public.orders alter column course_id drop not null;
+alter table public.orders add column if not exists product_id uuid references public.products(id) on delete set null;
+alter table public.orders drop constraint if exists orders_item_check;
+alter table public.orders add constraint orders_item_check check (course_id is not null or product_id is not null);
+create index if not exists orders_product_id_idx on public.orders (product_id);
+
+-- product purchases (entitlement record, mirrors enrollments for courses)
+create table if not exists public.product_purchases (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  product_id uuid not null references public.products(id) on delete cascade,
+  order_id uuid references public.orders(id) on delete set null,
+  price numeric(10,2) not null default 0,
+  created_at timestamptz not null default now(),
+  unique (user_id, product_id)
+);
+
+alter table public.product_purchases enable row level security;
+
+drop policy if exists "Users can view own purchases" on public.product_purchases;
+create policy "Users can view own purchases"
+  on public.product_purchases for select
+  using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "Only admins can insert purchases" on public.product_purchases;
+create policy "Only admins can insert purchases"
+  on public.product_purchases for insert
+  with check (public.is_admin());
+
+drop policy if exists "Only admins can update purchases" on public.product_purchases;
+create policy "Only admins can update purchases"
+  on public.product_purchases for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete purchases" on public.product_purchases;
+create policy "Only admins can delete purchases"
+  on public.product_purchases for delete
+  using (public.is_admin());
+
+alter table public.product_purchases
+  drop constraint if exists product_purchases_user_id_profiles_fkey;
+alter table public.product_purchases
+  add constraint product_purchases_user_id_profiles_fkey
+  foreign key (user_id) references public.profiles (id) on delete cascade;
+
+-- private storage bucket for product files (served only via protected API route)
+insert into storage.buckets (id, name, public)
+values ('product-files', 'product-files', false)
+on conflict (id) do nothing;
+
+drop policy if exists "Admins can insert product-files" on storage.objects;
+create policy "Admins can insert product-files"
+  on storage.objects for insert
+  with check (bucket_id = 'product-files' and public.is_admin());
+
+drop policy if exists "Admins can update product-files" on storage.objects;
+create policy "Admins can update product-files"
+  on storage.objects for update
+  using (bucket_id = 'product-files' and public.is_admin());
+
+drop policy if exists "Admins can delete product-files" on storage.objects;
+create policy "Admins can delete product-files"
+  on storage.objects for delete
+  using (bucket_id = 'product-files' and public.is_admin());

@@ -101,6 +101,87 @@ export async function submitManualPayment(input: {
   return {};
 }
 
+export async function submitProductPayment(input: {
+  productId: string;
+  method: string;
+  senderNumber: string;
+  trxId: string;
+}): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Please login to make a payment" };
+
+  const productId = input.productId;
+  const method = input.method === "nagad" ? "nagad" : "bkash";
+  const senderNumber = input.senderNumber.trim();
+  const trxId = input.trxId.trim().toUpperCase();
+
+  if (!productId) return { error: "Product not found" };
+
+  const { data: product } = await supabase
+    .from("products")
+    .select("id, price, name")
+    .eq("id", productId)
+    .eq("is_published", true)
+    .single();
+  if (!product) return { error: "Product not found" };
+
+  const admin = createAdminClient();
+
+  const { data: purchased } = await admin
+    .from("product_purchases")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("product_id", productId)
+    .maybeSingle();
+  if (purchased) return { error: "You already own this product" };
+
+  const { data: pendingOrder } = await admin
+    .from("orders")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("product_id", productId)
+    .eq("status", "pending")
+    .maybeSingle();
+  if (pendingOrder)
+    return { error: "Your payment is under review — please wait" };
+
+  const amount = Number(product.price);
+
+  if (amount <= 0) {
+    const { error: insErr } = await admin
+      .from("product_purchases")
+      .upsert(
+        { user_id: user.id, product_id: productId, price: 0 },
+        { onConflict: "user_id,product_id" },
+      );
+    if (insErr) return { error: insErr.message };
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/my-products");
+    return {};
+  }
+
+  if (!senderNumber || !trxId)
+    return { error: "Please provide your sender number and TrxID" };
+
+  const { error } = await admin.from("orders").insert({
+    user_id: user.id,
+    product_id: productId,
+    amount,
+    status: "pending",
+    payment_method: method,
+    trx_id: trxId,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/orders");
+  return {};
+}
+
 export async function verifyOrder(
   orderId: string,
 ): Promise<{ error?: string }> {
@@ -124,12 +205,26 @@ export async function verifyOrder(
     .eq("id", orderId);
   if (error) return { error: error.message };
 
-  await admin
-    .from("enrollments")
-    .upsert(
-      { user_id: order.user_id, course_id: order.course_id },
-      { onConflict: "user_id,course_id" },
-    );
+  if (order.product_id) {
+    await admin
+      .from("product_purchases")
+      .upsert(
+        {
+          user_id: order.user_id,
+          product_id: order.product_id,
+          order_id: order.id,
+          price: Number(order.amount),
+        },
+        { onConflict: "user_id,product_id" },
+      );
+  } else {
+    await admin
+      .from("enrollments")
+      .upsert(
+        { user_id: order.user_id, course_id: order.course_id },
+        { onConflict: "user_id,course_id" },
+      );
+  }
 
   if (order.coupon_id) {
     try {
@@ -143,14 +238,17 @@ export async function verifyOrder(
     await admin.from("notifications").insert({
       user_id: order.user_id,
       title: "Payment confirmed ✅",
-      body: "Your payment has been verified — the course is enrolled. Start learning!",
-      link: "/dashboard",
+      body: order.product_id
+        ? "Your payment has been verified — the product is unlocked. Download it from My Digital Products!"
+        : "Your payment has been verified — the course is enrolled. Start learning!",
+      link: order.product_id ? "/dashboard/my-products" : "/dashboard",
     });
   } catch {
     // non-critical
   }
 
   revalidatePath("/admin/orders");
+  revalidatePath("/dashboard/my-products");
   return {};
 }
 
