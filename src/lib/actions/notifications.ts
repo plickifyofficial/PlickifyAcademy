@@ -74,6 +74,7 @@ export async function markAllNotificationsRead() {
     .eq("read", false);
 
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/notifications");
 }
 
 export async function markNotificationRead(id: string) {
