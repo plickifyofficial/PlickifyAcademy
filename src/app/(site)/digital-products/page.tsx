@@ -1,5 +1,6 @@
 import { ProductsBrowser } from "@/components/products/products-browser";
 import { getPublishedProducts } from "@/lib/products";
+import { getCategories, getPublishedFaqs } from "@/lib/content-modules";
 
 export const metadata = {
   title: "Digital Products | Plickify Academy",
@@ -14,9 +15,11 @@ export default async function DigitalProductsPage({
 }: {
   searchParams: Promise<{ q?: string; category?: string }>;
 }) {
-  const [{ q, category }, products] = await Promise.all([
+  const [{ q, category }, products, categories, faqItems] = await Promise.all([
     searchParams,
     getPublishedProducts(),
+    getCategories("product"),
+    getPublishedFaqs("products"),
   ]);
 
   return (
@@ -24,6 +27,13 @@ export default async function DigitalProductsPage({
       products={products}
       initialQuery={q ?? undefined}
       initialCategory={category ?? undefined}
+      categories={categories.map((c) => ({
+        name: c.name,
+        slug: c.slug,
+        icon: c.icon ?? "fa-solid fa-tag",
+        desc: c.description ?? "",
+      }))}
+      faqItems={faqItems.map((f) => ({ q: f.question, a: f.answer }))}
     />
   );
 }

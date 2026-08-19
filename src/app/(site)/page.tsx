@@ -13,6 +13,7 @@ import { Faq } from "@/components/home/faq";
 import { FinalCta } from "@/components/home/final-cta";
 import { getSiteContent } from "@/lib/site-content";
 import { getPublishedProducts } from "@/lib/products";
+import { getPublishedFaqs, getPublishedTestimonials } from "@/lib/content-modules";
 import {
   ctaDefaults,
   faqDefaults,
@@ -34,7 +35,7 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts] =
+  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts, dbTestimonials, dbFaqs] =
     await Promise.all([
       getSiteContent("home.hero", heroDefaults),
       getSiteContent("home.stats", statsDefaults),
@@ -50,6 +51,8 @@ export default async function HomePage() {
       getSiteContent("home.faq", faqDefaults),
       getSiteContent("home.cta", ctaDefaults),
       getPublishedProducts(),
+      getPublishedTestimonials(),
+      getPublishedFaqs("homepage"),
     ]);
 
   return (
@@ -64,8 +67,22 @@ export default async function HomePage() {
       <LearningProcess content={process} />
       <LiveBatch content={liveBatch} />
       <Products content={products} products={dbProducts} />
-      <Testimonials content={testimonials} />
-      <Faq content={faq} />
+      <Testimonials
+        content={testimonials}
+        items={dbTestimonials.map((t) => ({
+          name: t.name,
+          role: t.role,
+          quote: t.quote,
+          initials: t.initials,
+          color: t.color,
+          rating: t.rating,
+          course: t.course,
+        }))}
+      />
+      <Faq
+        content={faq}
+        items={dbFaqs.map((f) => ({ q: f.question, a: f.answer }))}
+      />
       <FinalCta content={cta} />
     </>
   );

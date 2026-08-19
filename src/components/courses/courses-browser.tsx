@@ -153,11 +153,24 @@ const TESTIMONIALS = [
   },
 ];
 
+export type CategoryOption = {
+  name: string;
+  slug: string;
+  icon: string;
+  desc?: string;
+};
+
 function categorize(category: string) {
   const c = (category || "").toLowerCase();
   if (!c) return "General";
   const match = CATEGORIES.find((x) => x.keyword.test(c));
   return match ? match.key : "Other";
+}
+
+function matchesCategory(category: string, name: string) {
+  const a = (category || "").toLowerCase();
+  const b = name.toLowerCase();
+  return a.includes(b) || b.includes(a);
 }
 
 function discountPercent(price: number, original: number) {
@@ -322,10 +335,14 @@ export function CoursesBrowser({
   initialCourses,
   initialQuery,
   stats,
+  categories,
+  faqItems,
 }: {
   initialCourses: CourseItem[];
   initialQuery: string;
   stats: { courses: number; students: number; resources: number; rating: number };
+  categories?: CategoryOption[];
+  faqItems?: { q: string; a: string }[];
 }) {
   const [query, setQuery] = useState(initialQuery);
   const [cats, setCats] = useState<string[]>([]);
@@ -337,7 +354,25 @@ export function CoursesBrowser({
   const [visible, setVisible] = useState(9);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const categoryKey = (c: CourseItem) => categorize(c.category);
+  const dbCats = categories ?? [];
+  const CAT_LIST: CategoryOption[] =
+    dbCats.length > 0
+      ? dbCats
+      : CATEGORIES.map((c) => ({
+          name: c.key,
+          slug: c.key.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          icon: c.icon,
+          desc: c.desc,
+        }));
+
+  const categoryKey = (c: CourseItem) => {
+    const raw = c.category || "";
+    if (dbCats.length > 0) {
+      const m = CAT_LIST.find((x) => matchesCategory(raw, x.name));
+      return m ? m.name : "Other";
+    }
+    return categorize(raw);
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -447,20 +482,20 @@ export function CoursesBrowser({
             />
             All Courses
           </label>
-          {CATEGORIES.map((c) => (
+          {CAT_LIST.map((c) => (
             <label
-              key={c.key}
+              key={c.name}
               className="flex cursor-pointer items-center gap-2 text-sm text-zinc-700"
             >
               <input
                 type="checkbox"
-                checked={cats.includes(c.key)}
-                onChange={() => setCats((prev) => toggle(prev, c.key))}
+                checked={cats.includes(c.name)}
+                onChange={() => setCats((prev) => toggle(prev, c.name))}
                 className="h-4 w-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
               />
-              {c.key}
+              {c.name}
               <span className="ml-auto text-xs text-zinc-400">
-                {catCounts[c.key] ?? 0}
+                {catCounts[c.name] ?? 0}
               </span>
             </label>
           ))}
@@ -846,11 +881,11 @@ export function CoursesBrowser({
             </h2>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {CATEGORIES.map((c) => (
+            {CAT_LIST.map((c) => (
               <button
-                key={c.key}
+                key={c.name}
                 onClick={() => {
-                  setCats((prev) => (hasMatch(prev, c.key) ? prev : [c.key]));
+                  setCats((prev) => (hasMatch(prev, c.name) ? prev : [c.name]));
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 className="group flex items-start gap-4 rounded-2xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-lg"
@@ -859,10 +894,10 @@ export function CoursesBrowser({
                   <i className={c.icon} />
                 </span>
                 <div className="min-w-0">
-                  <p className="font-bold text-zinc-900">{c.key}</p>
-                  <p className="mt-0.5 text-sm text-zinc-500">{c.desc}</p>
+                  <p className="font-bold text-zinc-900">{c.name}</p>
+                  {c.desc && <p className="mt-0.5 text-sm text-zinc-500">{c.desc}</p>}
                   <p className="mt-1.5 text-xs font-semibold text-brand-600">
-                    {catCounts[c.key] ?? 0} courses
+                    {catCounts[c.name] ?? 0} courses
                   </p>
                 </div>
               </button>
@@ -1002,7 +1037,7 @@ export function CoursesBrowser({
             </h2>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {FAQS.map((f) => (
+            {(faqItems && faqItems.length > 0 ? faqItems : FAQS).map((f) => (
               <FaqItem key={f.q} q={f.q} a={f.a} />
             ))}
           </div>

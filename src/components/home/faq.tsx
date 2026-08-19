@@ -39,8 +39,14 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-export function Faq({ content }: { content: FaqContent }) {
-  const items = content.items ?? [];
+export function Faq({
+  content,
+  items: dbItems,
+}: {
+  content: FaqContent;
+  items?: { q: string; a: string }[];
+}) {
+  const items = (dbItems && dbItems.length > 0 ? dbItems : content.items) ?? [];
   const left = items.filter((_, i) => i % 2 === 0);
   const right = items.filter((_, i) => i % 2 === 1);
 

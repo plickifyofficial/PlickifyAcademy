@@ -200,6 +200,19 @@ function categoryOf(p: Product): string {
   return "Other";
 }
 
+function categoryOfWith(p: Product, names: string[]): string {
+  const c = (p.category || "").toLowerCase().trim();
+  const lower = (x: string) => x.toLowerCase();
+  if (c) {
+    const exact = names.find((x) => lower(x) === c || lower(x).includes(c));
+    if (exact) return exact;
+  }
+  const s =
+    `${p.name} ${p.description ?? ""} ${(p.tags ?? []).join(" ")}`.toLowerCase();
+  const m = names.find((x) => s.includes(lower(x)));
+  return m ?? "Other";
+}
+
 function CategoryCard({ title, desc, count, icon }: { title: string; desc: string; count: number; icon: string }) {
   return (
     <Link
@@ -269,10 +282,14 @@ export function ProductsBrowser({
   products,
   initialQuery,
   initialCategory,
+  categories,
+  faqItems,
 }: {
   products: Product[];
   initialQuery?: string;
   initialCategory?: string;
+  categories?: { name: string; slug: string; icon: string; desc?: string }[];
+  faqItems?: { q: string; a: string }[];
 }) {
   const [query, setQuery] = useState(initialQuery ?? "");
   const [chip, setChip] = useState(
@@ -294,21 +311,46 @@ export function ProductsBrowser({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [quickView, setQuickView] = useState<Product | null>(null);
 
+  const dbCats = categories ?? [];
+  const dbCatNames = dbCats.map((c) => c.name);
+  const dbCatKey = dbCatNames.join("|");
+  const catOf = (p: Product) =>
+    dbCatNames.length > 0 ? categoryOfWith(p, dbCatNames) : categoryOf(p);
+  const sidebarCats = dbCatNames.length > 0 ? dbCatNames : SIDEBAR_CATEGORIES;
+  const heroCats = dbCatNames.length > 0 ? dbCatNames : HERO_CATEGORIES;
+  const categoryGrid =
+    dbCats.length > 0
+      ? dbCats.map((c) => ({
+          title: c.name,
+          desc: c.desc ?? "",
+          icon: c.icon,
+        }))
+      : [
+          { title: "AI Tools", desc: "AI productivity resources.", icon: "fa-solid fa-brain" },
+          { title: "Prompt Packs", desc: "Ready-to-use AI prompts.", icon: "fa-solid fa-bolt" },
+          { title: "Canva Templates", desc: "Editable design templates.", icon: "fa-solid fa-palette" },
+          { title: "eBooks", desc: "Practical digital guides.", icon: "fa-solid fa-book" },
+          { title: "Freelancing", desc: "Freelancing resources.", icon: "fa-solid fa-briefcase" },
+          { title: "Design Resources", desc: "Premium creative assets.", icon: "fa-solid fa-wand-magic-sparkles" },
+        ];
+
   const chips = useMemo(() => {
-    const present = HERO_CATEGORIES.filter((c) =>
-      products.some((p) => categoryOf(p) === c),
+    const present = heroCats.filter((c) =>
+      products.some((p) => catOf(p) === c),
     );
     return ["All Products", ...present];
-  }, [products]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, dbCatKey]);
 
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
     for (const p of products) {
-      const c = categoryOf(p);
+      const c = catOf(p);
       counts.set(c, (counts.get(c) ?? 0) + 1);
     }
     return counts;
-  }, [products]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, dbCatKey]);
 
   const totalDownloads = useMemo(
     () => products.reduce((s, p) => s + (p.download_count ?? 0), 0),
@@ -341,11 +383,11 @@ export function ProductsBrowser({
     const q = query.trim().toLowerCase();
     if (q) {
       const hay =
-        `${p.name} ${categoryOf(p)} ${p.product_type ?? ""} ${p.description ?? ""} ${(p.tags ?? []).join(" ")}`.toLowerCase();
+        `${p.name} ${catOf(p)} ${p.product_type ?? ""} ${p.description ?? ""} ${(p.tags ?? []).join(" ")}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     const activeCat = chip !== "All Products" ? chip : category;
-    if (activeCat !== "All Products" && categoryOf(p) !== activeCat) return false;
+    if (activeCat !== "All Products" && catOf(p) !== activeCat) return false;
     if (type && (p.product_type ?? "") !== type) return false;
     if (price) {
       if (price === "free" && p.price > 0) return false;
@@ -457,7 +499,7 @@ export function ProductsBrowser({
         </button>
         <div className="flex flex-1 flex-col p-4">
           <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600">
-            {categoryOf(p)}
+            {catOf(p)}
           </span>
           <button
             onClick={() => setQuickView(p)}
@@ -637,7 +679,7 @@ export function ProductsBrowser({
               </div>
               <div className="flex flex-col justify-center p-8 lg:w-1/2 lg:p-12">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600">
-                  {categoryOf(featured)}
+                  {catOf(featured)}
                 </span>
                 <h2 className="mt-2 text-2xl font-extrabold text-zinc-900 sm:text-3xl">
                   {featured.name}
@@ -719,7 +761,7 @@ export function ProductsBrowser({
 
                 <FilterGroup title="Category">
                   <div className="space-y-1.5">
-                    {SIDEBAR_CATEGORIES.map((c) => {
+                    {sidebarCats.map((c) => {
                       const count = categoryCounts.get(c) ?? 0;
                       if (count === 0) return null;
                       return (
@@ -917,14 +959,7 @@ export function ProductsBrowser({
             </h2>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { title: "AI Tools", desc: "AI productivity resources.", icon: "fa-solid fa-brain" },
-              { title: "Prompt Packs", desc: "Ready-to-use AI prompts.", icon: "fa-solid fa-bolt" },
-              { title: "Canva Templates", desc: "Editable design templates.", icon: "fa-solid fa-palette" },
-              { title: "eBooks", desc: "Practical digital guides.", icon: "fa-solid fa-book" },
-              { title: "Freelancing", desc: "Freelancing resources.", icon: "fa-solid fa-briefcase" },
-              { title: "Design Resources", desc: "Premium creative assets.", icon: "fa-solid fa-wand-magic-sparkles" },
-            ].map((c) => (
+            {categoryGrid.map((c) => (
               <CategoryCard
                 key={c.title}
                 title={c.title}
@@ -1061,7 +1096,7 @@ export function ProductsBrowser({
             </h2>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {FAQS.map((f) => (
+            {(faqItems && faqItems.length > 0 ? faqItems : FAQS).map((f) => (
               <FaqItem key={f.q} q={f.q} a={f.a} />
             ))}
           </div>
@@ -1117,7 +1152,7 @@ export function ProductsBrowser({
               </button>
             </div>
             <div className="space-y-2">
-              {SIDEBAR_CATEGORIES.map((c) => {
+              {sidebarCats.map((c) => {
                 const count = categoryCounts.get(c) ?? 0;
                 if (count === 0) return null;
                 return (
@@ -1202,7 +1237,7 @@ export function ProductsBrowser({
             <div className="p-6 sm:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600">
-                  {categoryOf(quickView)} · {quickView.product_type ?? "Digital"}
+                  {catOf(quickView)} · {quickView.product_type ?? "Digital"}
                 </span>
                 <Stars value={quickView.rating_avg ?? 0} count={quickView.review_count ?? 0} />
               </div>

@@ -173,6 +173,12 @@ export default async function AdminDashboardPage() {
             <Link href="/admin/products" className="wp-btn w-full">
               <i className="fa-solid fa-cube" /> Digital Products
             </Link>
+            <Link href="/admin/faqs" className="wp-btn w-full">
+              <i className="fa-solid fa-circle-question" /> FAQs
+            </Link>
+            <Link href="/admin/testimonials" className="wp-btn w-full">
+              <i className="fa-solid fa-quote-right" /> Testimonials
+            </Link>
             <Link href="/admin/contact" className="wp-btn w-full">
               <i className="fa-solid fa-envelope" /> Contact Messages
             </Link>

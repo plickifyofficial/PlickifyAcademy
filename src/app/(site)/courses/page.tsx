@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CoursesBrowser } from "@/components/courses/courses-browser";
+import { getCategories, getPublishedFaqs } from "@/lib/content-modules";
 
 export const metadata = {
   title: "Courses | Plickify Academy",
@@ -17,7 +18,7 @@ export default async function CoursesPage({
 
   const supabase = createAdminClient();
 
-  const [{ data: courses }, { data: reviews }, { data: lessons }, { data: enrollments }, { data: liveClasses }, { data: products }, { data: profiles }] =
+  const [{ data: courses }, { data: reviews }, { data: lessons }, { data: enrollments }, { data: liveClasses }, { data: products }, { data: profiles }, categories, faqItems] =
     await Promise.all([
       supabase
         .from("courses")
@@ -30,6 +31,8 @@ export default async function CoursesPage({
       supabase.from("live_classes").select("course_id"),
       supabase.from("products").select("id", { count: "exact", head: true }),
       supabase.from("profiles").select("id", { count: "exact", head: true }),
+      getCategories("course"),
+      getPublishedFaqs("courses"),
     ]);
 
   const lessonCounts: Record<string, number> = {};
@@ -116,6 +119,13 @@ export default async function CoursesPage({
       initialCourses={items}
       initialQuery={initialQuery}
       stats={stats}
+      categories={categories.map((c) => ({
+        name: c.name,
+        slug: c.slug,
+        icon: c.icon ?? "fa-solid fa-tag",
+        desc: c.description ?? "",
+      }))}
+      faqItems={faqItems.map((f) => ({ q: f.question, a: f.answer }))}
     />
   );
 }

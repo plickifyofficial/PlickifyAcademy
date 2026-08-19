@@ -1054,6 +1054,157 @@ create policy "Only admins can delete contact messages"
   on public.contact_messages for delete
   using (public.is_admin());
 
+-- ============================================================
+-- CONTENT MODULES: CATEGORIES / FAQS / TESTIMONIALS
+-- ============================================================
+create table if not exists public.categories (
+  id uuid primary key default gen_random_uuid(),
+  type text not null check (type in ('course', 'product')),
+  name text not null,
+  slug text not null,
+  icon text not null default 'fa-solid fa-tag',
+  description text,
+  image text,
+  sort_order integer not null default 0,
+  is_published boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (type, slug)
+);
+
+alter table public.categories enable row level security;
+
+create table if not exists public.faqs (
+  id uuid primary key default gen_random_uuid(),
+  question text not null,
+  answer text not null,
+  page text not null default 'homepage'
+    check (page in ('homepage', 'courses', 'products', 'about', 'contact', 'global')),
+  sort_order integer not null default 0,
+  is_published boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.faqs enable row level security;
+
+create table if not exists public.testimonials (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  role text not null default '',
+  course text not null default '',
+  quote text not null,
+  rating integer not null default 5 check (rating between 1 and 5),
+  initials text not null default '',
+  color text not null default 'bg-blue-600',
+  avatar text,
+  is_featured boolean not null default false,
+  is_published boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.testimonials enable row level security;
+
+drop policy if exists "Published categories are viewable by everyone" on public.categories;
+create policy "Published categories are viewable by everyone"
+  on public.categories for select
+  using (is_published = true or public.is_admin());
+
+drop policy if exists "Only admins can insert categories" on public.categories;
+create policy "Only admins can insert categories"
+  on public.categories for insert
+  with check (public.is_admin());
+
+drop policy if exists "Only admins can update categories" on public.categories;
+create policy "Only admins can update categories"
+  on public.categories for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete categories" on public.categories;
+create policy "Only admins can delete categories"
+  on public.categories for delete
+  using (public.is_admin());
+
+drop policy if exists "Published faqs are viewable by everyone" on public.faqs;
+create policy "Published faqs are viewable by everyone"
+  on public.faqs for select
+  using (is_published = true or public.is_admin());
+
+drop policy if exists "Only admins can insert faqs" on public.faqs;
+create policy "Only admins can insert faqs"
+  on public.faqs for insert
+  with check (public.is_admin());
+
+drop policy if exists "Only admins can update faqs" on public.faqs;
+create policy "Only admins can update faqs"
+  on public.faqs for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete faqs" on public.faqs;
+create policy "Only admins can delete faqs"
+  on public.faqs for delete
+  using (public.is_admin());
+
+drop policy if exists "Published testimonials are viewable by everyone" on public.testimonials;
+create policy "Published testimonials are viewable by everyone"
+  on public.testimonials for select
+  using (is_published = true or public.is_admin());
+
+drop policy if exists "Only admins can insert testimonials" on public.testimonials;
+create policy "Only admins can insert testimonials"
+  on public.testimonials for insert
+  with check (public.is_admin());
+
+drop policy if exists "Only admins can update testimonials" on public.testimonials;
+create policy "Only admins can update testimonials"
+  on public.testimonials for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete testimonials" on public.testimonials;
+create policy "Only admins can delete testimonials"
+  on public.testimonials for delete
+  using (public.is_admin());
+
+insert into public.categories (type, name, slug, icon, description, sort_order)
+select * from (values
+  ('course', 'AI & Automation', 'ai-automation', 'fa-solid fa-robot', 'AI tools, automation এবং smart workflow।', 0),
+  ('course', 'Freelancing', 'freelancing', 'fa-solid fa-briefcase', 'Marketplace, client communication এবং earning।', 1),
+  ('course', 'Graphic Design', 'graphic-design', 'fa-solid fa-palette', 'AI-powered graphic design এবং creative skills।', 2),
+  ('course', 'Digital Marketing', 'digital-marketing', 'fa-solid fa-bullhorn', 'Marketing, advertising এবং audience growth।', 3),
+  ('course', 'Content Creation', 'content-creation', 'fa-solid fa-wand-magic-sparkles', 'Content strategy, AI content এবং creator workflow।', 4),
+  ('course', 'Digital Business', 'digital-business', 'fa-solid fa-globe', 'Online business এবং digital income strategy।', 5),
+  ('product', 'AI Tools', 'ai-tools', 'fa-solid fa-brain', 'AI productivity resources.', 0),
+  ('product', 'Prompt Packs', 'prompt-packs', 'fa-solid fa-bolt', 'Ready-to-use AI prompts.', 1),
+  ('product', 'Canva Templates', 'canva-templates', 'fa-solid fa-palette', 'Editable design templates.', 2),
+  ('product', 'eBooks', 'ebooks', 'fa-solid fa-book', 'Practical digital guides.', 3),
+  ('product', 'Freelancing', 'freelancing-products', 'fa-solid fa-briefcase', 'Freelancing resources.', 4),
+  ('product', 'Design Resources', 'design-resources', 'fa-solid fa-wand-magic-sparkles', 'Premium creative assets.', 5)
+) as v(type, name, slug, icon, description, sort_order)
+where not exists (select 1 from public.categories);
+
+insert into public.faqs (question, answer, page, sort_order)
+select * from (values
+  ('Plickify Academy কী?', 'Plickify Academy হলো AI, Freelancing, Digital Skills এবং Online Income শেখার জন্য একটি practical learning platform।', 'about', 0),
+  ('এখানে কী ধরনের course পাওয়া যায়?', 'AI, Graphic Design, Freelancing, Digital Marketing, Content Creation এবং Digital Business sector-এর practical skill-based courses এবং live batch পাওয়া যায়।', 'about', 1),
+  ('Course শেষ করলে certificate পাওয়া যাবে?', 'হ্যাঁ, course সফলভাবে শেষ করলে verifiable certificate দেওয়া হয়।', 'about', 2),
+  ('Payment করার পর product কিভাবে পাবো?', 'Payment সফল হওয়ার সঙ্গে সঙ্গে আপনার account-এ product unlock হয়ে যাবে এবং dashboard থেকে download করতে পারবেন।', 'products', 0),
+  ('Product কি instant download করা যাবে?', 'হ্যাঁ। Payment complete হওয়ার পরপরই instant download করার সুবিধা আছে।', 'products', 1),
+  ('Course-এ কিভাবে ভর্তি হবো?', 'পছন্দের course-এ ভর্তি বাটনে ক্লিক করে checkout page থেকে payment complete করলেই ভর্তি হয়ে যাবেন।', 'courses', 0),
+  ('Live class এবং recorded class দুটোই কি আছে?', 'হ্যাঁ। প্রতিটি course-এ recorded lessons থাকে এবং নির্দিষ্ট সময়ে live class হয়।', 'courses', 1),
+  ('যোগাযোগের সেরা উপায় কী?', 'Contact page-এর form ব্যবহার করুন অথবা hello@plickifyacademy.com-এ email করুন।', 'contact', 0)
+) as v(question, answer, page, sort_order)
+where not exists (select 1 from public.faqs);
+
+insert into public.testimonials (name, role, course, quote, rating, initials, color, sort_order)
+select * from (values
+  ('Rafiq Hasan', 'Freelancer', 'AI Income Mastery', 'কোর্স থেকে শেখা skill দিয়ে ফ্রিল্যান্সিং শুরু করেছি। প্রথম মাসেই ক্লায়েন্টের কাজ পেয়েছি।', 5, 'RH', 'bg-blue-600', 0),
+  ('Nusrat Jahan', 'Social Media Designer', 'Design & AI', 'AI tools শিখে আমার ডিজাইন quality অনেক উন্নত হয়েছে। এখন নিজের portfolio দিয়ে কাজ করছি।', 5, 'NJ', 'bg-violet-600', 1),
+  ('Tanvir Ahmed', 'YouTube Creator', 'AI Content Creation', 'AI workflow শিখে content তৈরি অনেক দ্রুত করছি। আগের চেয়ে অনেক বেশি consistent হতে পেরেছি।', 5, 'TA', 'bg-emerald-600', 2)
+) as v(name, role, course, quote, rating, initials, color, sort_order)
+where not exists (select 1 from public.testimonials);
+
 -- notifications
 drop policy if exists "Users can view own notifications" on public.notifications;
 create policy "Users can view own notifications"

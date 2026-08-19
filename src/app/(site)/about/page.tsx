@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Faq } from "@/components/home/faq";
 import { getSiteContent } from "@/lib/site-content";
+import { getPublishedFaqs } from "@/lib/content-modules";
 import { aboutDefaults, type AboutContent } from "@/lib/content-schema";
 
 export const metadata = {
@@ -38,10 +39,10 @@ function Avatar({
 }
 
 export default async function AboutPage() {
-  const content = (await getSiteContent(
-    "about",
-    aboutDefaults,
-  )) as AboutContent;
+  const [content, dbFaqs] = await Promise.all([
+    getSiteContent("about", aboutDefaults) as Promise<AboutContent>,
+    getPublishedFaqs("about"),
+  ]);
 
   return (
     <main className="bg-white">
@@ -658,6 +659,7 @@ export default async function AboutPage() {
           title: content.faqTitle,
           items: (content.faqItems ?? []).map((f) => ({ q: f.q, a: f.a })),
         }}
+        items={dbFaqs.map((f) => ({ q: f.question, a: f.answer }))}
       />
 
       {/* Final CTA */}

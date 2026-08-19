@@ -3,8 +3,27 @@
 import { useEffect, useState } from "react";
 import type { TestimonialsContent } from "@/lib/content-schema";
 
-export function Testimonials({ content }: { content: TestimonialsContent }) {
-  const items = content.items ?? [];
+export type TestimonialItem = {
+  name: string;
+  role?: string | null;
+  quote: string;
+  initials?: string | null;
+  color?: string | null;
+  rating?: number;
+  course?: string | null;
+};
+
+export function Testimonials({
+  content,
+  items: dbItems,
+}: {
+  content: TestimonialsContent;
+  items?: TestimonialItem[];
+}) {
+  const items: TestimonialItem[] =
+    dbItems && dbItems.length > 0
+      ? dbItems
+      : (content.items ?? []);
   const [perView, setPerView] = useState(3);
   const [index, setIndex] = useState(0);
 
@@ -71,7 +90,12 @@ export function Testimonials({ content }: { content: TestimonialsContent }) {
               <div className="flex h-full flex-col rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
                 <div className="flex gap-1 text-amber-400">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <i key={i} className="fa-solid fa-star text-sm" />
+                    <i
+                      key={i}
+                      className={`fa-star text-sm ${
+                        i < (t.rating ?? 5) ? "fa-solid" : "fa-regular text-zinc-300"
+                      }`}
+                    />
                   ))}
                 </div>
                 <p className="mt-4 flex-1 text-sm leading-relaxed text-zinc-600">
@@ -79,9 +103,9 @@ export function Testimonials({ content }: { content: TestimonialsContent }) {
                 </p>
                 <div className="mt-6 flex items-center gap-3 border-t border-zinc-100 pt-4">
                   <span
-                    className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white ${t.color}`}
+                    className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white ${t.color ?? "bg-blue-600"}`}
                   >
-                    {t.initials}
+                    {t.initials ?? t.name.slice(0, 2).toUpperCase()}
                   </span>
                   <div>
                     <p className="text-sm font-bold text-zinc-900">{t.name}</p>

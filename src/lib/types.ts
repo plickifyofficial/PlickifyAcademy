@@ -187,6 +187,48 @@ export type Enrollment = {
   created_at: string;
 };
 
+export type Category = {
+  id: string;
+  type: "course" | "product";
+  name: string;
+  slug: string;
+  icon: string | null;
+  description: string | null;
+  image: string | null;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Faq = {
+  id: string;
+  question: string;
+  answer: string;
+  page: "homepage" | "courses" | "products" | "about" | "contact" | "global";
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Testimonial = {
+  id: string;
+  name: string;
+  role: string | null;
+  course: string | null;
+  quote: string;
+  rating: number;
+  initials: string | null;
+  color: string | null;
+  avatar: string | null;
+  is_featured: boolean;
+  is_published: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type LessonProgress = {
   id: string;
   user_id: string;
