@@ -310,6 +310,20 @@ export function FieldRenderer({
           />
         </FieldWrapper>
       );
+    case "boolean":
+      return (
+        <FieldWrapper label={field.label} hint={field.hint}>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={value === true}
+              onChange={(e) => onChange([], e.target.checked)}
+              className="h-4 w-4 accent-[#2271b1]"
+            />
+            <span className="text-sm text-[#3c434a]">Enabled</span>
+          </label>
+        </FieldWrapper>
+      );
     case "icon":
       return (
         <FieldWrapper label={field.label} hint={field.hint}>

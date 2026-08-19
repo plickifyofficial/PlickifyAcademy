@@ -84,6 +84,33 @@ export type ProductPurchase = {
   products?: Product | null;
 };
 
+export type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  body: string | null;
+  cover_image: string | null;
+  author_name: string | null;
+  author_role: string | null;
+  tags: string[] | null;
+  reading_time: string | null;
+  is_featured: boolean;
+  is_published: boolean;
+  published_at: string | null;
+  view_count: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type NewsletterSubscriber = {
+  id: string;
+  email: string;
+  status: "active" | "unsubscribed";
+  source: string | null;
+  created_at: string;
+};
+
 export type Lesson = {
   id: string;
   course_id: string;

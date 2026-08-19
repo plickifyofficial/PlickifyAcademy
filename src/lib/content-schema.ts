@@ -5,7 +5,8 @@ export type ScalarField =
   | { kind: "image"; key: string; label: string; hint?: string }
   | { kind: "number"; key: string; label: string; hint?: string }
   | { kind: "datetime"; key: string; label: string; hint?: string }
-  | { kind: "icon"; key: string; label: string; hint?: string };
+  | { kind: "icon"; key: string; label: string; hint?: string }
+  | { kind: "boolean"; key: string; label: string; hint?: string };
 
 export type FieldDef =
   | ScalarField
@@ -260,11 +261,21 @@ export const navDefaults = {
     { label: "Courses", href: "/courses" },
     { label: "Live Courses", href: "/live-course" },
     { label: "Digital Products", href: "/digital-products" },
+    { label: "Blog", href: "/blog" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
 };
 export type NavContent = typeof navDefaults;
+
+export const announcementDefaults = {
+  is_enabled: false,
+  text: "🎉 New batch admission is open — enroll today!",
+  linkText: "Learn more",
+  link: "/courses",
+  bg: "bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600",
+};
+export type AnnouncementContent = typeof announcementDefaults;
 
 export const footerDefaults = {
   about:
@@ -1348,6 +1359,24 @@ export const homeSections: SectionDef[] = [
 ];
 
 export const globalSections: SectionDef[] = [
+  {
+    key: "global.announcement",
+    title: "Announcement Bar",
+    description: "A thin bar shown above the header. Turn it on and write a short message.",
+    defaults: announcementDefaults,
+    fields: [
+      { kind: "boolean", key: "is_enabled", label: "Show Announcement Bar" },
+      { kind: "text", key: "text", label: "Message" },
+      { kind: "text", key: "linkText", label: "Link Text (optional)" },
+      { kind: "url", key: "link", label: "Link (optional)" },
+      {
+        kind: "text",
+        key: "bg",
+        label: "Background (Tailwind class)",
+        hint: "e.g. bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600",
+      },
+    ],
+  },
   {
     key: "global.nav",
     title: "Navigation Menu",

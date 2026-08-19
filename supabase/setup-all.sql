@@ -1598,3 +1598,94 @@ drop policy if exists "Admins can delete product-files" on storage.objects;
 create policy "Admins can delete product-files"
   on storage.objects for delete
   using (bucket_id = 'product-files' and public.is_admin());
+
+-- ============================================================
+-- MARKETING (Phase 4): blog posts + newsletter subscribers
+-- ============================================================
+
+create table if not exists public.blog_posts (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  slug text not null unique,
+  excerpt text not null default '',
+  body text not null default '',
+  cover_image text,
+  author_name text not null default '',
+  author_role text not null default '',
+  tags text[] not null default '{}',
+  reading_time text not null default '',
+  is_featured boolean not null default false,
+  is_published boolean not null default true,
+  published_at timestamptz,
+  view_count integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.blog_posts enable row level security;
+
+drop policy if exists "Published posts are viewable by everyone" on public.blog_posts;
+create policy "Published posts are viewable by everyone"
+  on public.blog_posts for select
+  using (is_published = true or public.is_admin());
+
+drop policy if exists "Only admins can insert posts" on public.blog_posts;
+create policy "Only admins can insert posts"
+  on public.blog_posts for insert
+  with check (public.is_admin());
+
+drop policy if exists "Only admins can update posts" on public.blog_posts;
+create policy "Only admins can update posts"
+  on public.blog_posts for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete posts" on public.blog_posts;
+create policy "Only admins can delete posts"
+  on public.blog_posts for delete
+  using (public.is_admin());
+
+create table if not exists public.newsletter_subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  status text not null default 'active' check (status in ('active', 'unsubscribed')),
+  source text not null default 'footer',
+  created_at timestamptz not null default now()
+);
+
+alter table public.newsletter_subscribers enable row level security;
+
+drop policy if exists "Only admins can view subscribers" on public.newsletter_subscribers;
+create policy "Only admins can view subscribers"
+  on public.newsletter_subscribers for select
+  using (public.is_admin());
+
+drop policy if exists "Anyone can subscribe" on public.newsletter_subscribers;
+create policy "Anyone can subscribe"
+  on public.newsletter_subscribers for insert
+  with check (true);
+
+drop policy if exists "Only admins can update subscribers" on public.newsletter_subscribers;
+create policy "Only admins can update subscribers"
+  on public.newsletter_subscribers for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete subscribers" on public.newsletter_subscribers;
+create policy "Only admins can delete subscribers"
+  on public.newsletter_subscribers for delete
+  using (public.is_admin());
+
+insert into public.blog_posts (title, slug, excerpt, body, cover_image, author_name, author_role, tags, reading_time, is_featured, is_published, published_at, view_count)
+select * from (values
+  ('AI ফ্রিল্যান্সিং শেখা শুরু করবেন যেভাবে', 'ai-freelancing-start-guide', 'AI tools শিখে ফ্রিল্যান্সিং শুরু করার step-by-step গাইড — প্রথম কাজ পাওয়া পর্যন্ত।', E'## শুরু করার আগে\n\nAI era-তে ফ্রিল্যান্সিং এখন আগের চেয়ে অনেক সহজ। তবে শুরু করার আগে কয়েকটা জিনিস জেনে নেওয়া জরুরি।\n\n- সঠিক skill select করুন\n- Portfolio তৈরি করুন\n- Marketplace-এ profile খুলুন\n\n**ধৈর্য ধরুন** — প্রথম ক্লায়েন্ট আসতে কিছুটা সময় লাগবে।\n\n## প্রথম কাজ পাওয়ার কৌশল\n\nRegular bid করুন, ভালো proposal লিখুন এবং রিভিউ নিয়ে কাজ করুন।', null, 'মোঃ মিনহাজুল ইসলাম', 'Founder & Lead Instructor', array['AI','Freelancing','Career'], '5 min', true, true, '2026-08-10T09:00:00Z'::timestamptz, 42),
+  ('বাংলাদেশে AI Skill-এর চাহিদা ২০২৬', 'ai-skills-demand-2026', '২০২৬ সালে কোন AI skills সবচেয়ে বেশি চাহিদাসম্পন্ন এবং কীভাবে সেগুলো শিখবেন।', E'## বর্তমান বাজার\n\nAI-driven কাজের চাহিদা প্রতিনিয়ত বাড়ছে। ২০২৬-এ সবচেয়ে বেশি চাহিদা রয়েছে এই skills-গুলোতে:\n\n- AI content creation\n- Automation\n- AI-powered design\n\nআরও বিস্তারিত জানতে আমাদের live batch-এ যোগ দিন।', null, 'মোঃ সজীব শেখ', 'Trainer & Mentor', array['AI','Digital Skills','Market'], '4 min', false, true, '2026-08-15T09:00:00Z'::timestamptz, 27)
+) as v(title, slug, excerpt, body, cover_image, author_name, author_role, tags, reading_time, is_featured, is_published, published_at, view_count)
+where not exists (select 1 from public.blog_posts);
+
+-- view counter for blog posts
+create or replace function public.increment_blog_view(post_id uuid)
+returns void
+language sql security definer
+set search_path = public
+as $$
+  update public.blog_posts set view_count = coalesce(view_count, 0) + 1 where id = post_id;
+$$;

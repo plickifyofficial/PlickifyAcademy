@@ -1,6 +1,13 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Batch, Category, Faq, Instructor, Testimonial } from "@/lib/types";
+import type {
+  Batch,
+  BlogPost,
+  Category,
+  Faq,
+  Instructor,
+  Testimonial,
+} from "@/lib/types";
 
 export const contentModuleTag = "content-modules";
 
@@ -116,5 +123,52 @@ export const getPublishedBatches = unstable_cache(
 export const getPublishedInstructors = unstable_cache(
   readPublishedInstructors,
   ["content-modules-instructors"],
+  { revalidate: 60, tags: [contentModuleTag] },
+);
+
+export async function readPublishedPosts(): Promise<BlogPost[]> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) return [];
+    return (data ?? []) as BlogPost[];
+  } catch {
+    return [];
+  }
+}
+
+export async function readPostBySlug(
+  slug: string,
+): Promise<BlogPost | null> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data as BlogPost;
+  } catch {
+    return null;
+  }
+}
+
+export const getPublishedPosts = unstable_cache(
+  readPublishedPosts,
+  ["content-modules-posts"],
+  { revalidate: 60, tags: [contentModuleTag] },
+);
+
+export const getPostBySlug = unstable_cache(
+  async (slug: string) => readPostBySlug(slug),
+  ["content-modules-post"],
   { revalidate: 60, tags: [contentModuleTag] },
 );

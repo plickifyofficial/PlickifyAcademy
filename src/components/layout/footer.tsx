@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { FooterContent } from "@/lib/content-schema";
+import { NewsletterForm } from "@/components/layout/newsletter-form";
 
 type Settings = {
   site_name: string;
@@ -112,25 +113,13 @@ export function Footer({
               </li>
             </ul>
 
-            <form className="mt-6" action="/" aria-label="Newsletter">
-              <p className="text-sm font-semibold text-white">
-                {content.newsletterTitle}
-              </p>
-              <div className="mt-3 flex overflow-hidden rounded-full border border-white/15 bg-white/5">
-                <input
-                  type="email"
-                  required
-                  placeholder={content.newsletterPlaceholder}
-                  className="w-full bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-zinc-400 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="shrink-0 bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-500"
-                >
-                  {content.newsletterButton}
-                </button>
-              </div>
-            </form>
+            <div className="mt-6">
+              <NewsletterForm
+                title={content.newsletterTitle}
+                placeholder={content.newsletterPlaceholder}
+                buttonText={content.newsletterButton}
+              />
+            </div>
           </div>
         </div>
 

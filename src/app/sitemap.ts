@@ -52,6 +52,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      url: `${baseUrl}/blog`,
+      lastModified: today,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/terms`,
       lastModified: today,
       changeFrequency: "yearly",
@@ -83,6 +89,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select("slug, updated_at")
     .eq("is_published", true);
 
+  const { data: posts } = await supabase
+    .from("blog_posts")
+    .select("slug, updated_at")
+    .eq("is_published", true);
+
   const courseRoutes: MetadataRoute.Sitemap = (courses ?? []).map((c) => ({
     url: `${baseUrl}/courses/${c.slug}`,
     lastModified: c.updated_at ? new Date(c.updated_at) : today,
@@ -97,5 +108,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...courseRoutes, ...productRoutes];
+  const postRoutes: MetadataRoute.Sitemap = (posts ?? []).map((p) => ({
+    url: `${baseUrl}/blog/${p.slug}`,
+    lastModified: p.updated_at ? new Date(p.updated_at) : today,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  return [...staticRoutes, ...courseRoutes, ...productRoutes, ...postRoutes];
 }

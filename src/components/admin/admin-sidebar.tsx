@@ -23,6 +23,8 @@ const menu = [
       { href: "/admin/categories", label: "Categories", icon: "fa-solid fa-folder" },
       { href: "/admin/faqs", label: "FAQs", icon: "fa-solid fa-circle-question" },
       { href: "/admin/testimonials", label: "Testimonials", icon: "fa-solid fa-quote-right" },
+      { href: "/admin/blog", label: "Blog", icon: "fa-solid fa-blog" },
+      { href: "/admin/newsletter", label: "Newsletter", icon: "fa-solid fa-envelope-open-text" },
     ],
   },
   {

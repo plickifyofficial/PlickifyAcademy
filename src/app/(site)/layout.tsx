@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { AosProvider } from "@/components/ui/aos-provider";
 import { getSiteContent } from "@/lib/site-content";
 import { footerDefaults, navDefaults } from "@/lib/content-schema";
@@ -33,6 +34,7 @@ export default async function SiteLayout({
 
   return (
     <>
+      <AnnouncementBar />
       <Header settings={settings} nav={nav.links} />
       <AosProvider>
         <div className="flex flex-1 flex-col">{children}</div>
