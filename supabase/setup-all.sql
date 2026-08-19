@@ -398,6 +398,19 @@ create table if not exists public.products (
   updated_at timestamptz not null default now()
 );
 
+-- Upgrade existing products table (older schema) with new marketplace columns
+alter table public.products add column if not exists category text;
+alter table public.products add column if not exists product_type text;
+alter table public.products add column if not exists tags text[] not null default '{}';
+alter table public.products add column if not exists file_format text;
+alter table public.products add column if not exists file_size text;
+alter table public.products add column if not exists file_count integer not null default 0;
+alter table public.products add column if not exists rating_avg numeric(3, 2) not null default 0;
+alter table public.products add column if not exists review_count integer not null default 0;
+alter table public.products add column if not exists download_count integer not null default 0;
+alter table public.products add column if not exists is_featured boolean not null default false;
+alter table public.products add column if not exists is_bestseller boolean not null default false;
+
 alter table public.products enable row level security;
 
 -- Seed the default digital products so they appear in admin + on the site
