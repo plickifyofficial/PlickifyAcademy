@@ -378,10 +378,21 @@ create table if not exists public.products (
   price numeric(10, 2) not null default 0,
   old_price numeric(10, 2) not null default 0,
   tag text,
+  category text,
+  product_type text,
+  tags text[] not null default '{}',
   icon text not null default 'fa-solid fa-file',
   gradient text not null default 'from-blue-600 to-indigo-600',
   cover_image text,
   file_url text,
+  file_format text,
+  file_size text,
+  file_count integer not null default 0,
+  rating_avg numeric(3, 2) not null default 0,
+  review_count integer not null default 0,
+  download_count integer not null default 0,
+  is_featured boolean not null default false,
+  is_bestseller boolean not null default false,
   is_published boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -389,14 +400,35 @@ create table if not exists public.products (
 
 alter table public.products enable row level security;
 
--- Seed the default home-page products so they appear in admin + on the site
-insert into public.products (name, slug, description, price, old_price, tag, icon, gradient, is_published)
+-- Seed the default digital products so they appear in admin + on the site
+insert into public.products (name, slug, description, price, old_price, tag, category, product_type, tags, icon, gradient, file_format, file_size, file_count, rating_avg, review_count, download_count, is_featured, is_bestseller, is_published)
 values
-  ('AI Prompt Pack', 'ai-prompt-pack', 'Ready-to-use AI prompts for content, design and business.', 490, 0, 'PROMPTS', 'fa-solid fa-bolt', 'from-blue-600 to-indigo-600', true),
-  ('Canva Templates', 'canva-templates', 'Modern Canva templates for social media, reels and thumbnails.', 690, 990, 'DESIGN', 'fa-solid fa-palette', 'from-violet-600 to-fuchsia-600', true),
-  ('AI Toolkit', 'ai-toolkit', 'Curated AI tools and resources to boost your workflow.', 990, 0, 'TOOLS', 'fa-solid fa-toolbox', 'from-cyan-600 to-blue-700', true),
-  ('Freelance Guide eBook', 'freelance-guide-ebook', 'Step-by-step guide to start and grow your freelancing career.', 390, 590, 'EBOOK', 'fa-solid fa-book', 'from-emerald-600 to-teal-600', true)
-on conflict (slug) do nothing;
+  ('AI Prompt Pack', 'ai-prompt-pack', 'Content creation, graphic design, marketing এবং productivity-এর জন্য ready-to-use AI prompts-এর premium collection।', 490, 990, 'BEST SELLER', 'Prompt Packs', 'Prompt Pack', array['ai','prompts','chatgpt','marketing','design'], 'fa-solid fa-bolt', 'from-blue-600 to-indigo-600', 'PDF + TXT', '2 MB', 50, 4.9, 85, 1200, true, true, true),
+  ('Canva Templates', 'canva-templates', 'Social media, business, presentation এবং marketing-এর জন্য premium Canva templates।', 690, 990, 'POPULAR', 'Canva Templates', 'Template', array['canva','design','social media','marketing'], 'fa-solid fa-palette', 'from-violet-600 to-fuchsia-600', 'Canva Link', '500 MB', 120, 4.8, 64, 980, false, true, true),
+  ('AI Toolkit', 'ai-toolkit', 'AI productivity এবং content creation-এর জন্য essential tools।', 990, 1490, 'NEW', 'AI Tools', 'Toolkit', array['ai','tools','productivity'], 'fa-solid fa-toolbox', 'from-cyan-600 to-blue-700', 'PDF + LINKS', '10 MB', 200, 4.7, 40, 760, false, false, true),
+  ('Freelance Guide eBook', 'freelance-guide-ebook', 'Freelancing শুরু করার complete beginner guide।', 390, 590, 'EBOOK', 'eBooks', 'eBook', array['freelancing','ebook','guide'], 'fa-solid fa-book', 'from-emerald-600 to-teal-600', 'PDF', '3 MB', 1, 4.9, 150, 2100, false, false, true),
+  ('Social Media Design Pack', 'social-media-design-pack', 'Social media post templates, banners এবং editable assets।', 790, 1190, 'DESIGN', 'Design Resources', 'Design Asset', array['design','social media','templates','assets'], 'fa-solid fa-pen-ruler', 'from-rose-500 to-pink-600', 'Canva + PSD', '400 MB', 85, 4.6, 38, 540, false, false, true),
+  ('Digital Marketing Toolkit', 'digital-marketing-toolkit', 'Marketing templates, checklists, prompts এবং resources।', 890, 1290, 'MARKETING', 'Marketing', 'Toolkit', array['marketing','templates','checklists','prompts'], 'fa-solid fa-bullhorn', 'from-amber-500 to-orange-600', 'PDF + XLSX', '8 MB', 45, 4.7, 52, 690, false, false, true),
+  ('Content Creator Pack', 'content-creator-pack', 'Content prompts, planning templates এবং creator resources।', 590, 890, 'CONTENT', 'Content Creation', 'Course Resource', array['content','prompts','templates','creator'], 'fa-solid fa-wand-magic-sparkles', 'from-fuchsia-600 to-purple-700', 'PDF + Notion', '5 MB', 30, 4.8, 27, 410, false, false, true),
+  ('Freelancing Proposal Pack', 'freelancing-proposal-pack', 'Proposal templates, client messages এবং outreach resources।', 490, 790, 'FREELANCING', 'Freelancing', 'Template', array['freelancing','proposal','client','outreach'], 'fa-solid fa-file-signature', 'from-slate-600 to-slate-800', 'DOCX + PDF', '4 MB', 25, 4.9, 71, 1330, false, true, true)
+on conflict (slug) do update
+set name = excluded.name,
+    description = excluded.description,
+    price = excluded.price,
+    old_price = excluded.old_price,
+    tag = excluded.tag,
+    category = excluded.category,
+    product_type = excluded.product_type,
+    tags = excluded.tags,
+    file_format = excluded.file_format,
+    file_size = excluded.file_size,
+    file_count = excluded.file_count,
+    rating_avg = excluded.rating_avg,
+    review_count = excluded.review_count,
+    download_count = excluded.download_count,
+    is_featured = excluded.is_featured,
+    is_bestseller = excluded.is_bestseller,
+    updated_at = now();
 
 -- ============================================================
 -- COUPONS

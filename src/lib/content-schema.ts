@@ -171,7 +171,7 @@ export const productsDefaults = {
   eyebrow: "Learning Products",
   title: "Premium Digital Resources",
   viewAllText: "View All Resources",
-  viewAllLink: "/products",
+  viewAllLink: "/digital-products",
   items: [
     { name: "AI Prompt Pack", price: "৳490", oldPrice: "", tag: "PROMPTS", icon: "fa-solid fa-bolt", gradient: "from-blue-600 to-indigo-600" },
     { name: "Canva Templates", price: "৳690", oldPrice: "৳990", tag: "DESIGN", icon: "fa-solid fa-palette", gradient: "from-violet-600 to-fuchsia-600" },
@@ -259,7 +259,7 @@ export const navDefaults = {
     { label: "Home", href: "/" },
     { label: "Courses", href: "/courses" },
     { label: "Live Courses", href: "/live-course" },
-    { label: "Digital Products", href: "/products" },
+    { label: "Digital Products", href: "/digital-products" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
@@ -276,7 +276,7 @@ export const footerDefaults = {
   quickLinks: [
     { label: "Courses", href: "/courses" },
     { label: "Live Batch", href: "/live-batch" },
-    { label: "Digital Products", href: "/products" },
+    { label: "Digital Products", href: "/digital-products" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],

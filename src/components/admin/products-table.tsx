@@ -43,6 +43,30 @@ const gradientOptions = [
   { value: "from-lime-500 to-green-600", label: "Lime" },
 ];
 
+const categoryOptions = [
+  { value: "", label: "None" },
+  { value: "AI Tools", label: "AI Tools" },
+  { value: "Prompt Packs", label: "Prompt Packs" },
+  { value: "Canva Templates", label: "Canva Templates" },
+  { value: "eBooks", label: "eBooks" },
+  { value: "Freelancing", label: "Freelancing" },
+  { value: "Graphic Design", label: "Graphic Design" },
+  { value: "Marketing", label: "Marketing" },
+  { value: "Productivity", label: "Productivity" },
+  { value: "Content Creation", label: "Content Creation" },
+  { value: "Design Resources", label: "Design Resources" },
+];
+
+const typeOptions = [
+  { value: "", label: "None" },
+  { value: "Template", label: "Template" },
+  { value: "eBook", label: "eBook" },
+  { value: "Prompt Pack", label: "Prompt Pack" },
+  { value: "Toolkit", label: "Toolkit" },
+  { value: "Course Resource", label: "Course Resource" },
+  { value: "Design Asset", label: "Design Asset" },
+];
+
 const emptyForm = {
   name: "",
   slug: "",
@@ -50,10 +74,21 @@ const emptyForm = {
   price: "0",
   old_price: "0",
   tag: "",
+  category: "",
+  product_type: "",
+  tags: "",
   icon: "fa-solid fa-file-lines",
   gradient: "from-blue-600 to-indigo-600",
   cover_image: "",
   file_url: "",
+  file_format: "",
+  file_size: "",
+  file_count: "0",
+  rating_avg: "0",
+  review_count: "0",
+  download_count: "0",
+  is_featured: false,
+  is_bestseller: false,
   is_published: true,
 };
 
@@ -107,10 +142,21 @@ export function ProductsTable({ products }: { products: Product[] }) {
       price: String(p.price),
       old_price: String(p.old_price),
       tag: p.tag ?? "",
+      category: p.category ?? "",
+      product_type: p.product_type ?? "",
+      tags: (p.tags ?? []).join(", "),
       icon: p.icon ?? "fa-solid fa-file-lines",
       gradient: p.gradient ?? "from-blue-600 to-indigo-600",
       cover_image: p.cover_image ?? "",
       file_url: p.file_url ?? "",
+      file_format: p.file_format ?? "",
+      file_size: p.file_size ?? "",
+      file_count: String(p.file_count ?? 0),
+      rating_avg: String(p.rating_avg ?? 0),
+      review_count: String(p.review_count ?? 0),
+      download_count: String(p.download_count ?? 0),
+      is_featured: p.is_featured,
+      is_bestseller: p.is_bestseller,
       is_published: p.is_published,
     });
     setEditing(p);
@@ -127,10 +173,21 @@ export function ProductsTable({ products }: { products: Product[] }) {
     fd.set("price", form.price);
     fd.set("old_price", form.old_price);
     fd.set("tag", form.tag);
+    fd.set("category", form.category);
+    fd.set("product_type", form.product_type);
+    fd.set("tags", form.tags);
     fd.set("icon", form.icon);
     fd.set("gradient", form.gradient);
     fd.set("cover_image", form.cover_image);
     fd.set("file_url", form.file_url);
+    fd.set("file_format", form.file_format);
+    fd.set("file_size", form.file_size);
+    fd.set("file_count", form.file_count);
+    fd.set("rating_avg", form.rating_avg);
+    fd.set("review_count", form.review_count);
+    fd.set("download_count", form.download_count);
+    fd.set("is_featured", form.is_featured ? "on" : "");
+    fd.set("is_bestseller", form.is_bestseller ? "on" : "");
     fd.set("is_published", form.is_published ? "on" : "");
     const result = editing
       ? await updateProduct(editing.id, fd)
@@ -345,6 +402,47 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   placeholder="e.g. PROMPTS"
                 />
               </div>
+              <div>
+                <label className="wp-label">Category</label>
+                <select
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
+                  className="wp-input"
+                >
+                  {categoryOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="wp-label">Product Type</label>
+                <select
+                  value={form.product_type}
+                  onChange={(e) =>
+                    setForm({ ...form, product_type: e.target.value })
+                  }
+                  className="wp-input"
+                >
+                  {typeOptions.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="wp-label">Tags (comma separated)</label>
+                <input
+                  value={form.tags}
+                  onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                  className="wp-input"
+                  placeholder="ai, prompts, chatgpt"
+                />
+              </div>
               <div className="sm:col-span-2">
                 <label className="wp-label">Description</label>
                 <textarea
@@ -429,17 +527,113 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   placeholder="https://... (uploaded file link)"
                 />
               </div>
-              <label className="flex items-center gap-2 text-sm text-[#3c434a]">
+              <div>
+                <label className="wp-label">File Format</label>
                 <input
-                  type="checkbox"
-                  checked={form.is_published}
+                  value={form.file_format}
                   onChange={(e) =>
-                    setForm({ ...form, is_published: e.target.checked })
+                    setForm({ ...form, file_format: e.target.value })
                   }
-                  className="h-4 w-4"
+                  className="wp-input"
+                  placeholder="PDF + TXT"
                 />
-                Published
-              </label>
+              </div>
+              <div>
+                <label className="wp-label">File Size</label>
+                <input
+                  value={form.file_size}
+                  onChange={(e) =>
+                    setForm({ ...form, file_size: e.target.value })
+                  }
+                  className="wp-input"
+                  placeholder="2 MB"
+                />
+              </div>
+              <div>
+                <label className="wp-label">File Count</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={form.file_count}
+                  onChange={(e) =>
+                    setForm({ ...form, file_count: e.target.value })
+                  }
+                  className="wp-input"
+                />
+              </div>
+              <div>
+                <label className="wp-label">Rating</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  value={form.rating_avg}
+                  onChange={(e) =>
+                    setForm({ ...form, rating_avg: e.target.value })
+                  }
+                  className="wp-input"
+                />
+              </div>
+              <div>
+                <label className="wp-label">Review Count</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={form.review_count}
+                  onChange={(e) =>
+                    setForm({ ...form, review_count: e.target.value })
+                  }
+                  className="wp-input"
+                />
+              </div>
+              <div>
+                <label className="wp-label">Download Count</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={form.download_count}
+                  onChange={(e) =>
+                    setForm({ ...form, download_count: e.target.value })
+                  }
+                  className="wp-input"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
+                <label className="flex items-center gap-2 text-sm text-[#3c434a]">
+                  <input
+                    type="checkbox"
+                    checked={form.is_featured}
+                    onChange={(e) =>
+                      setForm({ ...form, is_featured: e.target.checked })
+                    }
+                    className="h-4 w-4"
+                  />
+                  Featured
+                </label>
+                <label className="flex items-center gap-2 text-sm text-[#3c434a]">
+                  <input
+                    type="checkbox"
+                    checked={form.is_bestseller}
+                    onChange={(e) =>
+                      setForm({ ...form, is_bestseller: e.target.checked })
+                    }
+                    className="h-4 w-4"
+                  />
+                  Bestseller
+                </label>
+                <label className="flex items-center gap-2 text-sm text-[#3c434a]">
+                  <input
+                    type="checkbox"
+                    checked={form.is_published}
+                    onChange={(e) =>
+                      setForm({ ...form, is_published: e.target.checked })
+                    }
+                    className="h-4 w-4"
+                  />
+                  Published
+                </label>
+              </div>
               <div className="flex items-end justify-end gap-2">
                 <button
                   type="button"

@@ -41,7 +41,7 @@ export const navLinks = [
   { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
   { href: "/#live-batch", label: "Live Batch" },
-  { href: "/#products", label: "Digital Products" },
+  { href: "/digital-products", label: "Digital Products" },
   { href: "/#why", label: "About" },
   { href: "/#contact", label: "Contact" },
 ];

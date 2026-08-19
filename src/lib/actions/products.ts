@@ -25,7 +25,19 @@ function readNumber(formData: FormData, key: string) {
 function revalidateProducts() {
   revalidatePath("/");
   revalidatePath("/products");
+  revalidatePath("/digital-products");
   revalidatePath("/admin/products");
+}
+
+function readTags(formData: FormData) {
+  return readString(formData, "tags")
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function readBool(formData: FormData, key: string) {
+  return formData.get(key) === "on";
 }
 
 const MAX_IMAGE = 5 * 1024 * 1024;
@@ -100,11 +112,22 @@ export async function createProduct(formData: FormData) {
     price,
     old_price: oldPrice > price ? oldPrice : 0,
     tag: readString(formData, "tag"),
+    category: readString(formData, "category"),
+    product_type: readString(formData, "product_type"),
+    tags: readTags(formData),
     icon,
     gradient,
     cover_image: readString(formData, "cover_image"),
     file_url: readString(formData, "file_url"),
-    is_published: formData.get("is_published") === "on",
+    file_format: readString(formData, "file_format"),
+    file_size: readString(formData, "file_size"),
+    file_count: Math.floor(readNumber(formData, "file_count")),
+    rating_avg: readNumber(formData, "rating_avg"),
+    review_count: Math.floor(readNumber(formData, "review_count")),
+    download_count: Math.floor(readNumber(formData, "download_count")),
+    is_featured: readBool(formData, "is_featured"),
+    is_bestseller: readBool(formData, "is_bestseller"),
+    is_published: readBool(formData, "is_published"),
   });
 
   if (error) return { error: error.message };
@@ -136,11 +159,22 @@ export async function updateProduct(productId: string, formData: FormData) {
       price,
       old_price: oldPrice > price ? oldPrice : 0,
       tag: readString(formData, "tag"),
+      category: readString(formData, "category"),
+      product_type: readString(formData, "product_type"),
+      tags: readTags(formData),
       icon,
       gradient,
       cover_image: readString(formData, "cover_image"),
       file_url: readString(formData, "file_url"),
-      is_published: formData.get("is_published") === "on",
+      file_format: readString(formData, "file_format"),
+      file_size: readString(formData, "file_size"),
+      file_count: Math.floor(readNumber(formData, "file_count")),
+      rating_avg: readNumber(formData, "rating_avg"),
+      review_count: Math.floor(readNumber(formData, "review_count")),
+      download_count: Math.floor(readNumber(formData, "download_count")),
+      is_featured: readBool(formData, "is_featured"),
+      is_bestseller: readBool(formData, "is_bestseller"),
+      is_published: readBool(formData, "is_published"),
       updated_at: new Date().toISOString(),
     })
     .eq("id", productId);
