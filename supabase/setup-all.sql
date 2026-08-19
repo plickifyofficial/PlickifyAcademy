@@ -939,9 +939,6 @@ drop policy if exists "Only admins can insert coupons" on public.coupons;
 create policy "Only admins can insert coupons"
   on public.coupons for insert
   with check (public.is_admin());
-create policy "Only admins can insert coupons"
-  on public.coupons for insert
-  with check (public.is_admin());
 
 drop policy if exists "Only admins can update coupons" on public.coupons;
 create policy "Only admins can update coupons"

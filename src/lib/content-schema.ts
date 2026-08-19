@@ -258,7 +258,7 @@ export const navDefaults = {
   links: [
     { label: "Home", href: "/" },
     { label: "Courses", href: "/courses" },
-    { label: "Live Batch", href: "/live-batch" },
+    { label: "Live Courses", href: "/live-course" },
     { label: "Digital Products", href: "/products" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
