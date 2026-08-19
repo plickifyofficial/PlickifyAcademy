@@ -8,15 +8,14 @@ import { formatPrice } from "@/lib/format";
 import { previewCoupon } from "@/lib/actions/coupons";
 import { submitManualPayment } from "@/lib/actions/payments";
 
-const BKASH_NUMBER = process.env.NEXT_PUBLIC_BKASH_NUMBER ?? "";
-const NAGAD_NUMBER = process.env.NEXT_PUBLIC_NAGAD_NUMBER ?? "";
-
 type Props = {
   courseId: string;
   price: number;
+  bkashNumber: string;
+  nagadNumber: string;
 };
 
-export function CheckoutPanel({ courseId, price }: Props) {
+export function CheckoutPanel({ courseId, price, bkashNumber, nagadNumber }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const [pending, setPending] = useState(false);
@@ -31,7 +30,7 @@ export function CheckoutPanel({ courseId, price }: Props) {
 
   const finalPrice = discounted ?? price;
   const isFree = finalPrice <= 0;
-  const merchantNumber = method === "bkash" ? BKASH_NUMBER : NAGAD_NUMBER;
+  const merchantNumber = method === "bkash" ? bkashNumber : nagadNumber;
 
   async function handleApply() {
     if (!code.trim()) return;

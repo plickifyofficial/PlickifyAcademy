@@ -52,7 +52,10 @@ const menu = [
   },
   {
     group: "Settings",
-    items: [{ href: "/admin/settings", label: "Site Settings", icon: "fa-solid fa-sliders" }],
+    items: [
+      { href: "/admin/settings", label: "Site Settings", icon: "fa-solid fa-sliders" },
+      { href: "/admin/system", label: "System Status", icon: "fa-solid fa-gauge-high" },
+    ],
   },
 ];
 

@@ -1,25 +1,13 @@
-import { unstable_cache } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { AosProvider } from "@/components/ui/aos-provider";
 import { getSiteContent } from "@/lib/site-content";
+import { getSiteSettings } from "@/lib/settings";
 import { footerDefaults, navDefaults } from "@/lib/content-schema";
 
-const getSiteSettings = unstable_cache(
-  async () => {
-    const supabase = createAdminClient();
-    const { data } = await supabase
-      .from("site_settings")
-      .select("site_name, tagline, logo_url, favicon_url")
-      .eq("id", 1)
-      .single();
-    return data;
-  },
-  ["site-settings"],
-  { revalidate: 300 },
-);
+export const dynamic = "force-dynamic";
 
 export default async function SiteLayout({
   children,
@@ -31,6 +19,38 @@ export default async function SiteLayout({
     getSiteContent("global.nav", navDefaults),
     getSiteContent("global.footer", footerDefaults),
   ]);
+
+  if (settings?.maintenance_mode) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    let isAdmin = false;
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      isAdmin = profile?.role === "admin";
+    }
+    if (!isAdmin) {
+      return (
+        <div className="flex min-h-screen flex-1 flex-col items-center justify-center bg-brand-950 px-4 text-center text-white">
+          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-3xl">
+            <i className="fa-solid fa-screwdriver-wrench text-brand-300" />
+          </span>
+          <h1 className="mt-6 text-2xl font-extrabold sm:text-3xl">
+            We are doing some maintenance
+          </h1>
+          <p className="mt-3 max-w-md text-zinc-300">
+            {settings.maintenance_message ||
+              "We will be back soon! Please check again in a little while."}
+          </p>
+        </div>
+      );
+    }
+  }
 
   return (
     <>

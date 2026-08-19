@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/actions/admin";
+import { settingsTag } from "@/lib/settings";
 
 const MAX_SIZE = 2 * 1024 * 1024;
 
@@ -41,15 +42,30 @@ function validImage(file: File) {
   );
 }
 
+function text(formData: FormData, key: string) {
+  return String(formData.get(key) ?? "").trim() || null;
+}
+
 export async function saveSiteSettings(formData: FormData) {
   await requireAdmin();
 
-  const siteName = String(formData.get("site_name")).trim() || "Plickify Academy";
-  const tagline = String(formData.get("tagline")).trim();
+  const siteName = text(formData, "site_name") || "Plickify Academy";
+  const tagline = text(formData, "tagline");
 
-  const updates: Record<string, string> = {
+  const updates: Record<string, unknown> = {
     site_name: siteName,
     tagline,
+    bkash_number: text(formData, "bkash_number"),
+    nagad_number: text(formData, "nagad_number"),
+    seo_title: text(formData, "seo_title"),
+    seo_description: text(formData, "seo_description"),
+    social_facebook: text(formData, "social_facebook"),
+    social_youtube: text(formData, "social_youtube"),
+    social_linkedin: text(formData, "social_linkedin"),
+    social_instagram: text(formData, "social_instagram"),
+    social_telegram: text(formData, "social_telegram"),
+    maintenance_mode: formData.get("maintenance_mode") === "on",
+    maintenance_message: text(formData, "maintenance_message"),
     updated_at: new Date().toISOString(),
   };
 
@@ -65,6 +81,15 @@ export async function saveSiteSettings(formData: FormData) {
     updates.favicon_url = await uploadImage("site-assets", "favicon", favicon);
   }
 
+  const ogImage = formData.get("og_image_file");
+  if (ogImage instanceof File && ogImage.size > 0) {
+    if (!validImage(ogImage)) throw new Error("OG image: provide a PNG/JPG/WebP/SVG within 2MB");
+    updates.og_image = await uploadImage("site-assets", "og", ogImage);
+  } else {
+    const ogUrl = text(formData, "og_image");
+    if (ogUrl) updates.og_image = ogUrl;
+  }
+
   const admin = createAdminClient();
   const { error } = await admin
     .from("site_settings")
@@ -73,5 +98,7 @@ export async function saveSiteSettings(formData: FormData) {
 
   if (error) throw new Error(error.message);
 
+  updateTag(settingsTag);
   revalidatePath("/admin/settings");
+  revalidatePath("/", "layout");
 }

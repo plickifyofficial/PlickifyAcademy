@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteSettings } from "@/lib/settings";
 import { formatPrice } from "@/lib/format";
 import { CheckoutPanel } from "@/components/checkout/checkout-panel";
 
@@ -13,6 +14,7 @@ export default async function CheckoutPage({
 }) {
   const { courseId } = await params;
   const supabase = await createClient();
+  const settings = await getSiteSettings();
 
   const {
     data: { user },
@@ -128,7 +130,12 @@ export default async function CheckoutPage({
                 : "This course is free — enroll with one click."}
             </p>
             <div className="mt-4">
-              <CheckoutPanel courseId={course.id} price={course.price} />
+              <CheckoutPanel
+                courseId={course.id}
+                price={course.price}
+                bkashNumber={settings?.bkash_number ?? ""}
+                nagadNumber={settings?.nagad_number ?? ""}
+              />
             </div>
             <p className="mt-4 flex items-center gap-2 border-t border-zinc-100 pt-3 text-xs font-medium text-zinc-500">
               <i className="fa-solid fa-shield-halved text-green-600" />

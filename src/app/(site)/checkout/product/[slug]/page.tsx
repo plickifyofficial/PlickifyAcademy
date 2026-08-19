@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getSiteSettings } from "@/lib/settings";
 import { formatPrice } from "@/lib/format";
 import { ProductCheckoutPanel } from "@/components/checkout/product-checkout-panel";
 
@@ -14,6 +15,7 @@ export default async function ProductCheckoutPage({
 }) {
   const { slug } = await params;
   const supabase = await createClient();
+  const settings = await getSiteSettings();
 
   const {
     data: { user },
@@ -132,6 +134,8 @@ export default async function ProductCheckoutPage({
               <ProductCheckoutPanel
                 productId={product.id}
                 price={Number(product.price)}
+                bkashNumber={settings?.bkash_number ?? ""}
+                nagadNumber={settings?.nagad_number ?? ""}
               />
             </div>
             <p className="mt-4 flex items-center gap-2 border-t border-zinc-100 pt-3 text-xs font-medium text-zinc-500">

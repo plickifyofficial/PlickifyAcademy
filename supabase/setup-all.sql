@@ -1689,3 +1689,25 @@ set search_path = public
 as $$
   update public.blog_posts set view_count = coalesce(view_count, 0) + 1 where id = post_id;
 $$;
+
+-- ============================================================
+-- PHASE 5: site settings extension (payment, SEO, maintenance)
+-- ============================================================
+alter table public.site_settings
+  add column if not exists bkash_number text,
+  add column if not exists nagad_number text,
+  add column if not exists seo_title text,
+  add column if not exists seo_description text,
+  add column if not exists og_image text,
+  add column if not exists social_facebook text,
+  add column if not exists social_youtube text,
+  add column if not exists social_linkedin text,
+  add column if not exists social_instagram text,
+  add column if not exists social_telegram text,
+  add column if not exists maintenance_mode boolean not null default false,
+  add column if not exists maintenance_message text default 'We will be back soon!';
+
+update public.site_settings
+set seo_title = coalesce(seo_title, 'Plickify Academy | Learn, Grow'),
+    seo_description = coalesce(seo_description, 'An online academy — build your skills with courses, lessons, and quizzes.')
+where id = 1;

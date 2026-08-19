@@ -7,15 +7,19 @@ import { useToast } from "@/components/ui/toaster";
 import { formatPrice } from "@/lib/format";
 import { submitProductPayment } from "@/lib/actions/payments";
 
-const BKASH_NUMBER = process.env.NEXT_PUBLIC_BKASH_NUMBER ?? "";
-const NAGAD_NUMBER = process.env.NEXT_PUBLIC_NAGAD_NUMBER ?? "";
-
 type Props = {
   productId: string;
   price: number;
+  bkashNumber: string;
+  nagadNumber: string;
 };
 
-export function ProductCheckoutPanel({ productId, price }: Props) {
+export function ProductCheckoutPanel({
+  productId,
+  price,
+  bkashNumber,
+  nagadNumber,
+}: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const [pending, setPending] = useState(false);
@@ -26,7 +30,7 @@ export function ProductCheckoutPanel({ productId, price }: Props) {
   const [trxId, setTrxId] = useState("");
 
   const isFree = price <= 0;
-  const merchantNumber = method === "bkash" ? BKASH_NUMBER : NAGAD_NUMBER;
+  const merchantNumber = method === "bkash" ? bkashNumber : nagadNumber;
 
   async function handleSubmit() {
     setPending(true);

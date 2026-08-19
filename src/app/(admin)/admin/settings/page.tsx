@@ -20,7 +20,7 @@ export default async function AdminSettingsPage() {
 
   const { data: settings } = await supabase
     .from("site_settings")
-    .select("site_name, tagline, logo_url, favicon_url")
+    .select("*")
     .eq("id", 1)
     .single();
 
@@ -29,17 +29,29 @@ export default async function AdminSettingsPage() {
     tagline: "Learn, grow up",
     logo_url: null as string | null,
     favicon_url: null as string | null,
+    bkash_number: null as string | null,
+    nagad_number: null as string | null,
+    seo_title: null as string | null,
+    seo_description: null as string | null,
+    og_image: null as string | null,
+    social_facebook: null as string | null,
+    social_youtube: null as string | null,
+    social_linkedin: null as string | null,
+    social_instagram: null as string | null,
+    social_telegram: null as string | null,
+    maintenance_mode: false as boolean,
+    maintenance_message: null as string | null,
   };
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <h1 className="wp-page-title">Site Settings</h1>
       <p className="wp-subtitle">
-        Change the logo, favicon, and site name — updates instantly
-        everywhere.
+        Site identity, payment numbers, SEO defaults and maintenance mode —
+        updates apply instantly.
       </p>
 
-      <SiteSettingsForm settings={settings ?? defaults} />
+      <SiteSettingsForm settings={{ ...defaults, ...settings }} />
     </div>
   );
 }
