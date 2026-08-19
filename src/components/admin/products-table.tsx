@@ -8,6 +8,7 @@ import {
   updateProduct,
   deleteProduct,
   toggleProductPublish,
+  uploadProductImage,
 } from "@/lib/actions/products";
 import { formatPrice } from "@/lib/format";
 import { useToast } from "@/components/ui/toaster";
@@ -90,6 +91,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [pending, setPending] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   function startCreate() {
     setForm(emptyForm);
@@ -162,6 +164,22 @@ export function ProductsTable({ products }: { products: Product[] }) {
       return;
     }
     router.refresh();
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.set("file", file);
+    const result = await uploadProductImage(fd);
+    setUploading(false);
+    if (result?.error) {
+      showToast(result.error, "error");
+      return;
+    }
+    if (result?.url) setForm({ ...form, cover_image: result.url });
+    showToast("Image uploaded");
   }
 
   const modalOpen = creating || editing;
@@ -366,15 +384,41 @@ export function ProductsTable({ products }: { products: Product[] }) {
               {fieldset("icon", "Icon", form, setForm, iconOptions)}
               {fieldset("gradient", "Color", form, setForm, gradientOptions)}
               <div className="sm:col-span-2">
-                <label className="wp-label">Cover Image URL</label>
-                <input
-                  value={form.cover_image}
-                  onChange={(e) =>
-                    setForm({ ...form, cover_image: e.target.value })
-                  }
-                  className="wp-input"
-                  placeholder="https://... or Media Library URL"
-                />
+                <label className="wp-label">Cover Image</label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="wp-input flex cursor-pointer items-center gap-2 !w-auto !py-2">
+                    <i className="fa-solid fa-upload text-[#2271b1]" />
+                    <span className="text-sm font-medium text-[#2271b1]">
+                      {uploading ? "Uploading..." : "Upload Image"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      className="hidden"
+                      disabled={uploading}
+                      onChange={handleImageUpload}
+                    />
+                  </label>
+                  {form.cover_image && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={form.cover_image}
+                      alt="Product preview"
+                      className="h-14 w-24 rounded object-cover"
+                    />
+                  )}
+                </div>
+                <div className="mt-2">
+                  <label className="wp-label">Or Image URL</label>
+                  <input
+                    value={form.cover_image}
+                    onChange={(e) =>
+                      setForm({ ...form, cover_image: e.target.value })
+                    }
+                    className="wp-input"
+                    placeholder="https://... (uploaded file link)"
+                  />
+                </div>
               </div>
               <div className="sm:col-span-2">
                 <label className="wp-label">Download File URL</label>

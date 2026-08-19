@@ -28,6 +28,42 @@ function revalidateProducts() {
   revalidatePath("/admin/products");
 }
 
+const MAX_IMAGE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/svg+xml",
+];
+
+export async function uploadProductImage(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0)
+    return { error: "Please select a file" };
+  if (file.size > MAX_IMAGE) return { error: "Image must be within 5MB" };
+  if (!ALLOWED_IMAGE.includes(file.type))
+    return { error: "Please provide a PNG/JPG/WebP/SVG image" };
+
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  const path = `product-${Date.now()}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from("course-images")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (error) return { error: error.message };
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("course-images").getPublicUrl(path);
+  return { success: true, url: publicUrl };
+}
+
 export async function createProduct(formData: FormData) {
   const supabase = await createClient();
   const {

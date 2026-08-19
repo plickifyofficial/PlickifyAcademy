@@ -389,6 +389,15 @@ create table if not exists public.products (
 
 alter table public.products enable row level security;
 
+-- Seed the default home-page products so they appear in admin + on the site
+insert into public.products (name, slug, description, price, old_price, tag, icon, gradient, is_published)
+values
+  ('AI Prompt Pack', 'ai-prompt-pack', 'Ready-to-use AI prompts for content, design and business.', 490, 0, 'PROMPTS', 'fa-solid fa-bolt', 'from-blue-600 to-indigo-600', true),
+  ('Canva Templates', 'canva-templates', 'Modern Canva templates for social media, reels and thumbnails.', 690, 990, 'DESIGN', 'fa-solid fa-palette', 'from-violet-600 to-fuchsia-600', true),
+  ('AI Toolkit', 'ai-toolkit', 'Curated AI tools and resources to boost your workflow.', 990, 0, 'TOOLS', 'fa-solid fa-toolbox', 'from-cyan-600 to-blue-700', true),
+  ('Freelance Guide eBook', 'freelance-guide-ebook', 'Step-by-step guide to start and grow your freelancing career.', 390, 590, 'EBOOK', 'fa-solid fa-book', 'from-emerald-600 to-teal-600', true)
+on conflict (slug) do nothing;
+
 -- ============================================================
 -- COUPONS
 -- ============================================================
