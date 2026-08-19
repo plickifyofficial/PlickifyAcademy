@@ -34,6 +34,12 @@ const menu = [
     ],
   },
   {
+    group: "Support",
+    items: [
+      { href: "/admin/contact", label: "Contact Messages", icon: "fa-solid fa-envelope" },
+    ],
+  },
+  {
     group: "Media",
     items: [{ href: "/admin/media", label: "Media Library", icon: "fa-solid fa-images" }],
   },

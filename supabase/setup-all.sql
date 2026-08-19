@@ -1016,6 +1016,44 @@ create policy "Only admins can delete products"
   on public.products for delete
   using (public.is_admin());
 
+-- ============================================================
+-- CONTACT MESSAGES
+-- ============================================================
+create table if not exists public.contact_messages (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  phone text not null default '',
+  subject text not null default 'General Question',
+  message text not null,
+  status text not null default 'New' check (status in ('New', 'In Progress', 'Replied', 'Closed')),
+  is_read boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.contact_messages enable row level security;
+
+drop policy if exists "Anyone can submit contact messages" on public.contact_messages;
+create policy "Anyone can submit contact messages"
+  on public.contact_messages for insert
+  with check (true);
+
+drop policy if exists "Only admins can view contact messages" on public.contact_messages;
+create policy "Only admins can view contact messages"
+  on public.contact_messages for select
+  using (public.is_admin());
+
+drop policy if exists "Only admins can update contact messages" on public.contact_messages;
+create policy "Only admins can update contact messages"
+  on public.contact_messages for update
+  using (public.is_admin());
+
+drop policy if exists "Only admins can delete contact messages" on public.contact_messages;
+create policy "Only admins can delete contact messages"
+  on public.contact_messages for delete
+  using (public.is_admin());
+
 -- notifications
 drop policy if exists "Users can view own notifications" on public.notifications;
 create policy "Users can view own notifications"
