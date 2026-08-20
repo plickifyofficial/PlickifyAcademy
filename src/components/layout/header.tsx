@@ -1,7 +1,11 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SiteNav } from "@/components/layout/site-nav";
 import { AuthSection } from "@/components/layout/auth-section";
 import { SearchModal } from "@/components/layout/search-modal";
+import { cn } from "@/lib/utils";
 
 type Settings = {
   site_name: string;
@@ -16,28 +20,48 @@ export function Header({
   nav: { label: string; href: string }[];
 }) {
   const siteName = settings?.site_name || "Plickify Academy";
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-100 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+    <header
+      className={cn(
+        "sticky top-0 z-40 border-b bg-white/90 backdrop-blur transition-all duration-200",
+        scrolled
+          ? "border-zinc-200 shadow-sm"
+          : "border-zinc-100 shadow-none",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 transition-all duration-200 sm:px-6",
+          scrolled ? "h-14 lg:h-16" : "h-16 lg:h-[72px]",
+        )}
+      >
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           {settings?.logo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={settings.logo_url}
               alt={siteName}
-              className="h-9 w-auto max-w-[180px] object-contain"
+              className="h-8 w-auto max-w-[150px] object-contain sm:h-9 sm:max-w-[180px]"
             />
           ) : (
             <>
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 shadow-md shadow-brand-500/30">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 shadow-md shadow-brand-500/30 sm:h-9 sm:w-9">
                 <i className="fa-solid fa-graduation-cap text-white" />
               </span>
               <span className="flex flex-col leading-tight">
-                <span className="text-lg font-extrabold tracking-tight text-zinc-900">
+                <span className="text-base font-extrabold tracking-tight text-zinc-900 sm:text-lg">
                   Plickify
                 </span>
-                <span className="-mt-0.5 text-[11px] font-semibold uppercase tracking-widest text-brand-600">
+                <span className="-mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-brand-600 sm:text-[11px]">
                   Academy
                 </span>
               </span>
@@ -47,9 +71,8 @@ export function Header({
 
         <SiteNav links={nav} />
 
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <SearchModal />
-
           <AuthSection />
         </div>
       </div>

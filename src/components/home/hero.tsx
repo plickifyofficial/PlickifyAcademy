@@ -15,26 +15,26 @@ export function Hero({ content }: { content: HeroContent }) {
             {content.badge}
           </span>
 
-          <h1 className="mt-6 text-[42px] font-extrabold leading-[1.15] tracking-tight text-zinc-900 sm:text-[50px] lg:text-[54px]">
+          <h1 className="hero-heading mt-6 font-extrabold tracking-tight text-zinc-900">
             {content.titleA}{" "}
             <span className="text-brand-600">{content.titleHighlight}</span>{" "}
             {content.titleB}
           </h1>
 
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-600">
+          <p className="readable mt-6 max-w-xl text-zinc-600">
             {content.subtitle}
           </p>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
               href={content.primaryBtnLink || "/signup"}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 px-8 py-3.5 text-base font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-700"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-600 px-8 py-3.5 text-base font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-700 sm:w-auto"
             >
               {content.primaryBtn}
             </Link>
             <Link
               href={content.secondaryBtnLink || "/courses"}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-300 bg-white px-8 py-3.5 text-base font-semibold text-brand-700 transition-colors hover:bg-brand-50"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-brand-300 bg-white px-8 py-3.5 text-base font-semibold text-brand-700 transition-colors hover:bg-brand-50 sm:w-auto"
             >
               <i className="fa-solid fa-play text-sm" />
               {content.secondaryBtn}

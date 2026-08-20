@@ -32,7 +32,7 @@ export function FeaturedCourse({ content }: { content: FeaturedContent }) {
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
               {content.tagline}
             </span>
-            <h2 className="mt-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
+            <h2 className="mt-3 section-heading font-extrabold text-zinc-900">
               {content.title}
             </h2>
             <p className="mt-3 text-base text-zinc-600">

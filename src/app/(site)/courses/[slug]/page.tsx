@@ -296,7 +296,7 @@ export default async function CourseDetailPage({
   );
 
   return (
-    <main className="flex-1">
+    <main className="flex-1 pb-24 lg:pb-0">
       {/* 1. HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-purple-800 pb-16 pt-10 text-white sm:pt-14">
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand-500/30 blur-3xl" />
@@ -781,6 +781,46 @@ No topics added yet
             </div>
           </div>
         </section>
+      </div>
+
+      {/* Sticky mobile purchase bar */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-200 bg-white/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur lg:hidden">
+        <div className="safe-bottom mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-2">
+              <span className="text-lg font-extrabold text-zinc-900">
+                {formatPrice(course.price)}
+              </span>
+              {course.price > 0 && originalPrice > course.price && (
+                <span className="text-sm text-zinc-400 line-through">
+                  {formatPrice(originalPrice)}
+                </span>
+              )}
+            </div>
+            <p className="truncate text-xs text-zinc-500">{course.title}</p>
+          </div>
+          {canAccess ? (
+            <Link
+              href={
+                resumeTopic
+                  ? `/courses/${course.slug}/lessons/${resumeTopic.id}`
+                  : `/courses/${course.slug}`
+              }
+              className="flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-colors hover:bg-brand-700"
+            >
+              <i className="fa-solid fa-play" />
+              {isEnrolled && lastLessonId ? "Continue" : "Start Learning"}
+            </Link>
+          ) : (
+            <Link
+              href={`/checkout/${course.id}`}
+              className="flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-colors hover:bg-brand-700"
+            >
+              Enroll Now
+              <i className="fa-solid fa-arrow-right text-xs" />
+            </Link>
+          )}
+        </div>
       </div>
     </main>
   );

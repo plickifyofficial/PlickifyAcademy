@@ -15,7 +15,7 @@ export function CourseCard({
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-shadow hover:shadow-lg">
       <Link href={`/courses/${course.slug}`} className="flex flex-1 flex-col">
-        <div className="relative h-44 w-full bg-gradient-to-br from-brand-500 to-purple-600">
+        <div className="relative aspect-[16/10] w-full bg-gradient-to-br from-brand-500 to-purple-600">
           {course.cover_image ? (
             <Image
               src={course.cover_image}
@@ -68,7 +68,7 @@ export function CourseCard({
       <div className="px-5 pb-5">
         <Link
           href={`/checkout/${course.id}`}
-          className="flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+          className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
         >
           {course.price === 0 ? "Enroll Free" : "Enroll Now"}
           <i className="fa-solid fa-arrow-right text-xs" />

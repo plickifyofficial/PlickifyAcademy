@@ -114,14 +114,14 @@ export function StudentShell({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setDrawerState({ open: true, atPath: pathname })}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100 md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100 md:hidden"
             aria-label="Open menu"
           >
             <i className="fa-solid fa-bars" />
           </button>
           <button
             onClick={toggleCollapse}
-            className="hidden h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 text-sm font-bold text-zinc-500 hover:bg-zinc-100 md:flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-lg border border-zinc-300 text-sm font-bold text-zinc-500 hover:bg-zinc-100 md:flex"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
@@ -169,7 +169,7 @@ export function StudentShell({
           >
             <button
               type="submit"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
+              className="flex h-11 w-11 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
               aria-label="Search"
             >
               <i className="fa-solid fa-magnifying-glass" />
@@ -186,7 +186,7 @@ export function StudentShell({
                     : { open: true, atPath: pathname },
                 )
               }
-              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-zinc-300 bg-brand-100 text-sm font-bold text-brand-700 hover:ring-2 hover:ring-brand-100"
+              className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-zinc-300 bg-brand-100 text-sm font-bold text-brand-700 hover:ring-2 hover:ring-brand-100"
               aria-label="Account menu"
             >
               {avatarUrl ? (
@@ -337,8 +337,40 @@ export function StudentShell({
           />
         )}
 
-        <main className="min-w-0 flex-1 p-4 sm:p-6 md:p-8">{children}</main>
+        <main className="min-w-0 flex-1 p-4 pb-24 sm:p-6 sm:pb-24 md:p-8 md:pb-8">{children}</main>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <nav
+        aria-label="Primary"
+        className="safe-bottom fixed inset-x-0 bottom-0 z-40 flex border-t border-zinc-200 bg-white/95 backdrop-blur md:hidden"
+      >
+        {(
+          [
+            { href: "/dashboard", label: "Home", icon: "fa-solid fa-house" },
+            { href: "/dashboard/courses", label: "Courses", icon: "fa-solid fa-graduation-cap" },
+            { href: "/dashboard/live-classes", label: "Live", icon: "fa-solid fa-video" },
+            { href: "/dashboard/notifications", label: "Bell", icon: "fa-solid fa-bell" },
+            { href: "/dashboard/profile", label: "Me", icon: "fa-solid fa-user" },
+          ] as const
+        ).map((item) => {
+          const active =
+            pathname === item.href || pathname.startsWith(item.href + "/");
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors",
+                active ? "text-brand-600" : "text-zinc-500",
+              )}
+            >
+              <i className={`${item.icon} text-lg`} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

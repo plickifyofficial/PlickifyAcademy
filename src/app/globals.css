@@ -32,12 +32,103 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-hind-siliguri), Arial, Helvetica, sans-serif;
+}
+
+/* ============================================================
+   Responsive foundation
+   ============================================================ */
+@layer base {
+  img,
+  video,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  iframe {
+    max-width: 100%;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    letter-spacing: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500, #0757d9);
+    outline-offset: 2px;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Utility: hide scrollbars on horizontal chip/scroll rows */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Utility: safe-area bottom padding for fixed bars (notch phones) */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Utility: safe-area top inset for fixed headers */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Horizontal scrolling is never allowed on the whole page */
+body {
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   Responsive typography
+   ============================================================ */
+.hero-heading {
+  font-size: clamp(2rem, 0.9rem + 4.8vw, 4.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.section-heading {
+  font-size: clamp(1.6rem, 1.35rem + 1.3vw, 2.5rem);
+  line-height: 1.2;
+}
+
+.page-title {
+  font-size: clamp(1.75rem, 1.4rem + 1.8vw, 2.75rem);
+  line-height: 1.15;
+}
+
+/* Body copy: comfortable reading size that scales */
+.readable {
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.75;
 }
 
 /* ============================================================
@@ -103,7 +194,8 @@ body {
   border: 1px solid var(--wp-border);
   border-radius: 3px;
   background: var(--wp-surface);
-  padding: 5px 12px;
+  padding: 8px 14px;
+  min-height: 40px;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
@@ -155,9 +247,10 @@ body {
   border: 1px solid var(--wp-hover-border);
   border-radius: 4px;
   background: var(--wp-surface);
-  padding: 5px 10px;
-  font-size: 13px;
-  line-height: 1.6;
+  padding: 9px 12px;
+  min-height: 44px;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--wp-text);
 }
 
@@ -179,6 +272,13 @@ body {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+}
+
+/* On narrow screens large admin tables scroll within their panel only;
+   the page itself never scrolls horizontally. */
+.wp-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .wp-table th {

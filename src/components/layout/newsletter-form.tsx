@@ -47,12 +47,12 @@ export function NewsletterForm({
           name="email"
           required
           placeholder={placeholder}
-          className="w-full bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-zinc-400 focus:outline-none"
+          className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder:text-zinc-400 focus:outline-none"
         />
         <button
           type="submit"
           disabled={pending}
-          className="shrink-0 bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-60"
+          className="shrink-0 bg-brand-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-60 sm:px-6"
         >
           {pending ? "..." : buttonText}
         </button>

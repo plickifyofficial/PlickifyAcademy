@@ -17,7 +17,7 @@ export function PageHero({
           <i className="fa-solid fa-wand-magic-sparkles" />
           {eyebrow}
         </span>
-        <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-zinc-900 sm:text-5xl">
+        <h1 className="page-title mt-5 font-extrabold tracking-tight text-zinc-900">
           {title}
         </h1>
         {subtitle && (

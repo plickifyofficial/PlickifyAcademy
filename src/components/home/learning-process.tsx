@@ -7,7 +7,7 @@ export function LearningProcess({ content }: { content: ProcessContent }) {
         <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
           {content.eyebrow}
         </span>
-        <h2 className="mt-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
+        <h2 className="mt-3 section-heading font-extrabold text-zinc-900">
           {content.title}
         </h2>
       </div>

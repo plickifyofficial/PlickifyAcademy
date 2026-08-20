@@ -133,20 +133,20 @@ export function ProductCheckoutPanel({
               value={senderNumber}
               onChange={(e) => setSenderNumber(e.target.value)}
               placeholder={`Your ${method === "bkash" ? "bKash" : "Nagad"} number`}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded-lg border border-zinc-300 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
             />
             <input
               value={trxId}
               onChange={(e) => setTrxId(e.target.value)}
               placeholder="Transaction ID (TrxID)"
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded-lg border border-zinc-300 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
 
           <button
             onClick={handleSubmit}
             disabled={pending || !trxId.trim() || !senderNumber.trim()}
-            className="mt-4 w-full rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+            className="mt-4 flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
           >
             {pending ? "Submitting..." : "Submit Payment"}
           </button>

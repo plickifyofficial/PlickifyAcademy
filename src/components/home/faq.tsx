@@ -56,7 +56,7 @@ export function Faq({
     <section id="faq" className="bg-zinc-50/70 px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-5xl">
         <div className="text-center" data-aos="fade-up">
-          <h2 className="text-3xl font-extrabold text-zinc-900 sm:text-4xl">
+          <h2 className="section-heading font-extrabold text-zinc-900">
             {content.title}
           </h2>
         </div>

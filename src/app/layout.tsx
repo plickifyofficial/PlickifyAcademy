@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toaster";
@@ -11,6 +11,12 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.plickifyacademy.com";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();

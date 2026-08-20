@@ -25,7 +25,7 @@ export function LiveBatch({ content }: { content: LiveBatchContent }) {
             <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-brand-200">
               {content.eyebrow}
             </p>
-            <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">
+            <h2 className="mt-2 section-heading font-extrabold text-white">
               {content.title}
             </h2>
             <ul className="mt-6 space-y-2.5">

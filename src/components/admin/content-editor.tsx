@@ -443,7 +443,7 @@ export function FieldRenderer({
                         next[i] = t;
                         onChange([], next);
                       }}
-                      className="flex h-7 w-7 items-center justify-center rounded border border-[#c3c4c7] text-[#2271b1] disabled:opacity-40"
+                      className="flex h-11 w-11 items-center justify-center rounded border border-[#c3c4c7] text-[#2271b1] disabled:opacity-40"
                       aria-label="Move up"
                     >
                       <i className="fa-solid fa-arrow-up text-xs" />
@@ -458,7 +458,7 @@ export function FieldRenderer({
                         next[i] = t;
                         onChange([], next);
                       }}
-                      className="flex h-7 w-7 items-center justify-center rounded border border-[#c3c4c7] text-[#2271b1] disabled:opacity-40"
+                      className="flex h-11 w-11 items-center justify-center rounded border border-[#c3c4c7] text-[#2271b1] disabled:opacity-40"
                       aria-label="Move down"
                     >
                       <i className="fa-solid fa-arrow-down text-xs" />
@@ -470,8 +470,8 @@ export function FieldRenderer({
                         next.splice(i, 1);
                         onChange([], next);
                       }}
-                      className="flex h-7 w-7 items-center justify-center rounded border border-[#c3c4c7] text-[#d63638] hover:bg-red-50"
-aria-label="Delete"
+                      className="flex h-11 w-11 items-center justify-center rounded border border-[#c3c4c7] text-[#d63638] hover:bg-red-50"
+                      aria-label="Delete"
                     >
                       <i className="fa-solid fa-trash-can text-xs" />
                     </button>

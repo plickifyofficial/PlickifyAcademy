@@ -98,7 +98,7 @@ export default async function MyCoursesPage({
               {t.label}
               <span
                 className={cn(
-                  "rounded-full px-1.5 py-px text-[10px] font-bold",
+                  "rounded-full px-2 py-px text-xs font-bold",
                   isActive ? "bg-brand-50 text-brand-700" : "bg-zinc-200 text-zinc-500",
                 )}
               >
@@ -158,7 +158,7 @@ export default async function MyCoursesPage({
                   )}
                   <span
                     className={cn(
-                      "absolute right-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold text-white",
+                      "absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-bold text-white",
                       state === "completed"
                         ? "bg-green-500"
                         : state === "in-progress"

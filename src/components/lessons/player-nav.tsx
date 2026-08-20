@@ -91,11 +91,11 @@ export function PlayerNav({
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 pt-5">
+    <div className="flex flex-col gap-3 border-t border-zinc-200 pt-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       {prevLesson ? (
         <Link
           href={`/dashboard/learn/${courseId}/${prevLesson.id}`}
-          className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+          className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 sm:inline-flex sm:w-auto"
         >
           <i className="fa-solid fa-arrow-left" /> Previous Lesson
         </Link>
@@ -108,8 +108,8 @@ export function PlayerNav({
         disabled={completed || pending}
         className={
           completed
-            ? "inline-flex items-center gap-2 rounded-xl bg-green-50 px-5 py-2.5 text-sm font-semibold text-green-700"
-            : "inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-60"
+            ? "flex min-h-12 items-center justify-center gap-2 rounded-xl bg-green-50 px-5 py-3 text-sm font-semibold text-green-700 sm:inline-flex sm:w-auto"
+            : "flex min-h-12 items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-60 sm:inline-flex sm:w-auto"
         }
       >
         <i
@@ -123,7 +123,7 @@ export function PlayerNav({
       {nextLesson ? (
         <Link
           href={`/dashboard/learn/${courseId}/${nextLesson.id}`}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+          className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 sm:inline-flex sm:w-auto"
         >
           Next Lesson <i className="fa-solid fa-arrow-right" />
         </Link>

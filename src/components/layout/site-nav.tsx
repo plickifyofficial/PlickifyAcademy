@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,21 @@ export function SiteNav({ links }: { links: { label: string; href: string }[] })
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href.split("#")[0]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
     <>
@@ -32,39 +47,83 @@ export function SiteNav({ links }: { links: { label: string; href: string }[] })
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Menu"
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-700 transition-colors hover:bg-zinc-100 lg:hidden"
+        aria-expanded={open}
+        aria-controls="mobile-nav-drawer"
+        className="flex h-11 w-11 items-center justify-center rounded-lg text-zinc-700 transition-colors hover:bg-zinc-100 lg:hidden"
       >
-        <i className={`fa-solid ${open ? "fa-xmark" : "fa-bars"} text-lg`} />
+        <i className={`fa-solid ${open ? "fa-xmark" : "fa-bars"} text-xl`} />
       </button>
 
-      {open && (
-        <div className="absolute inset-x-0 top-[72px] border-b border-zinc-100 bg-white shadow-lg lg:hidden">
-          <nav className="flex flex-col gap-1 px-4 py-4">
-            {links.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
-                  isActive(link.href)
-                    ? "bg-brand-50 text-brand-600"
-                    : "text-zinc-700 hover:bg-zinc-50",
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link
-              href="/courses"
-              onClick={() => setOpen(false)}
-              className="mt-2 rounded-full bg-brand-600 px-4 py-2.5 text-center text-sm font-semibold text-white lg:hidden"
-            >
-              Browse Courses
-            </Link>
-          </nav>
+      <div
+        id="mobile-nav-drawer"
+        aria-hidden={!open}
+        className={cn(
+          "fixed inset-y-0 right-0 z-50 flex w-80 max-w-[85vw] flex-col bg-white shadow-2xl transition-transform duration-200 ease-out lg:hidden",
+          open ? "translate-x-0" : "translate-x-full",
+        )}
+      >
+        <div className="safe-top flex h-16 shrink-0 items-center justify-between border-b border-zinc-100 px-5">
+          <span className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800">
+              <i className="fa-solid fa-graduation-cap text-white" />
+            </span>
+            <span className="text-sm font-extrabold text-zinc-900">
+              Plickify Academy
+            </span>
+          </span>
+          <button
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100"
+          >
+            <i className="fa-solid fa-xmark text-xl" />
+          </button>
         </div>
-      )}
+
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          {links.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              onClick={() => setOpen(false)}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-4 py-3.5 text-[15px] font-medium transition-colors",
+                isActive(link.href)
+                  ? "bg-brand-50 font-semibold text-brand-600"
+                  : "text-zinc-700 hover:bg-zinc-50",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="safe-bottom shrink-0 border-t border-zinc-100 px-4 py-4">
+          <Link
+            href="/login"
+            onClick={() => setOpen(false)}
+            className="flex min-h-12 items-center justify-center rounded-full border border-zinc-300 px-4 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600"
+          >
+            Login
+          </Link>
+          <Link
+            href="/signup"
+            onClick={() => setOpen(false)}
+            className="mt-2 flex min-h-12 items-center justify-center rounded-full bg-brand-600 px-4 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-colors hover:bg-brand-700"
+          >
+            Join Now
+          </Link>
+        </div>
+      </div>
+
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 lg:hidden",
+          open ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
     </>
   );
 }

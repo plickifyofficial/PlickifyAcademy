@@ -21,7 +21,7 @@ export function FinalCta({ content }: { content: CtaContent }) {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-300">
                 {content.eyebrow}
               </p>
-              <h2 className="mt-3 text-3xl font-extrabold text-white sm:text-4xl">
+              <h2 className="mt-3 section-heading font-extrabold text-white">
                 {content.title}
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm text-zinc-300 lg:mx-0">

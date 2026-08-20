@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { FooterContent } from "@/lib/content-schema";
 import { NewsletterForm } from "@/components/layout/newsletter-form";
+import { FooterColumn } from "@/components/layout/footer-column";
 
 type Settings = {
   site_name: string;
@@ -19,8 +19,8 @@ export function Footer({
   return (
     <footer id="contact" className="bg-brand-900 text-zinc-300">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
-          <div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
+          <div className="pb-2 md:pb-0">
             <div className="flex items-center gap-2.5">
               {settings?.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -54,7 +54,7 @@ export function Footer({
                   key={s.icon}
                   href={s.href}
                   aria-label="Social link"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-zinc-300 transition-colors hover:bg-brand-600 hover:text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-zinc-300 transition-colors hover:bg-brand-600 hover:text-white"
                 >
                   <i className={`${s.icon} text-sm`} />
                 </a>
@@ -62,35 +62,8 @@ export function Footer({
             </div>
           </div>
 
-          <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
-              {content.quickLinksTitle}
-            </h4>
-            <ul className="mt-5 space-y-3 text-sm">
-              {content.quickLinks.map((l) => (
-                <li key={l.label}>
-                  <Link href={l.href} className="text-zinc-400 transition-colors hover:text-white">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
-              {content.supportTitle}
-            </h4>
-            <ul className="mt-5 space-y-3 text-sm">
-              {content.supportLinks.map((l) => (
-                <li key={l.label}>
-                  <Link href={l.href} className="text-zinc-400 transition-colors hover:text-white">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterColumn title={content.quickLinksTitle} links={content.quickLinks} />
+          <FooterColumn title={content.supportTitle} links={content.supportLinks} />
 
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wider text-white">

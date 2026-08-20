@@ -23,7 +23,7 @@ export function AuthSection() {
 
   if (loading) {
     return (
-      <div className="h-9 w-20 animate-pulse rounded-full bg-zinc-200" />
+      <div className="h-10 w-16 animate-pulse rounded-full bg-zinc-200 sm:w-20" />
     );
   }
 
@@ -33,13 +33,13 @@ export function AuthSection() {
     <>
       <Link
         href="/login"
-        className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600"
+        className="flex min-h-10 items-center rounded-full border border-zinc-300 bg-white px-3.5 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600 sm:min-h-11 sm:px-4"
       >
         Login
       </Link>
       <Link
         href="/signup"
-        className="rounded-full bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-colors hover:bg-brand-700"
+        className="hidden min-h-11 items-center rounded-full bg-brand-600 px-5 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-colors hover:bg-brand-700 md:flex"
       >
         Join Now
       </Link>

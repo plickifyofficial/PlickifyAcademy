@@ -231,7 +231,7 @@ function CourseCardView({ item }: { item: CourseItem }) {
         </div>
       </Link>
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-brand-600">
+        <p className="text-xs font-bold uppercase tracking-widest text-brand-600">
           {categorize(item.category)}
         </p>
         <Link href={`/courses/${item.slug}`}>
@@ -282,7 +282,7 @@ function CourseCardView({ item }: { item: CourseItem }) {
             </span>
           )}
           {discount > 0 && (
-            <span className="rounded bg-red-600/10 px-1.5 py-0.5 text-[11px] font-bold text-red-600">
+            <span className="rounded bg-red-600/10 px-2 py-0.5 text-xs font-bold text-red-600">
               {discount}% OFF
             </span>
           )}
@@ -291,13 +291,13 @@ function CourseCardView({ item }: { item: CourseItem }) {
         <div className="mt-4 flex gap-2">
           <Link
             href={`/checkout/${item.id}`}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+            className="flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-3 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
           >
             এখনই ভর্তি করুন
           </Link>
           <Link
             href={`/courses/${item.slug}`}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-zinc-300 px-3 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600"
+            className="flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-lg border border-zinc-300 px-3 py-3 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600"
           >
             বিস্তারিত দেখুন
           </Link>
@@ -701,7 +701,7 @@ export function CoursesBrowser({
                 )}
               </Link>
               <div className="flex flex-col justify-center p-8 sm:p-10">
-                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-amber-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
                   Featured Course
                 </span>
                 <h2 className="mt-4 text-3xl font-extrabold text-white">
@@ -806,7 +806,7 @@ export function CoursesBrowser({
               </div>
 
               {shown.length > 0 ? (
-                <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                   {shown.map((c) => (
                     <CourseCardView key={c.id} item={c} />
                   ))}

@@ -266,39 +266,50 @@ export default async function LearnLessonPage({
     <div>
       <ResumeTracker courseId={course.id} lessonId={lesson.id} />
 
-      <header className="sticky top-16 z-20 -mx-4 mb-5 flex items-center gap-3 border-b border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
-        <Link
-          href={`/dashboard/courses/${courseId}`}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
-          title="Back to Course"
-        >
-          <i className="fa-solid fa-arrow-left" />
-        </Link>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-zinc-900">
-            {course.title}
-          </p>
-          <p className="truncate text-xs text-zinc-500">
-            {sectionTitles[lesson.section_id ?? ""] ?? "Course"} ·{" "}
-            {lesson.title}
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <div className="hidden items-center gap-2 sm:flex">
-            <div className="h-2 w-24 overflow-hidden rounded-full bg-zinc-200">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-700"
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-            <span className="text-xs font-bold text-zinc-700">{percent}%</span>
-          </div>
+      <header className="sticky top-16 z-20 -mx-4 mb-5 border-b border-zinc-200 bg-white/95 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:px-6 md:-mx-8 md:px-8">
+        <div className="flex items-center gap-3">
           <Link
             href={`/dashboard/courses/${courseId}`}
-            className="rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-600 hover:bg-zinc-100"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
+            title="Back to Course"
           >
-            Exit Course
+            <i className="fa-solid fa-arrow-left" />
           </Link>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-zinc-900">
+              {course.title}
+            </p>
+            <p className="truncate text-xs text-zinc-500">
+              {sectionTitles[lesson.section_id ?? ""] ?? "Course"} ·{" "}
+              {lesson.title}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            <div className="hidden items-center gap-2 sm:flex">
+              <div className="h-2 w-24 overflow-hidden rounded-full bg-zinc-200">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-700"
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <span className="text-xs font-bold text-zinc-700">{percent}%</span>
+            </div>
+            <Link
+              href={`/dashboard/courses/${courseId}`}
+              className="flex min-h-11 items-center rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-600 hover:bg-zinc-100"
+            >
+              Exit Course
+            </Link>
+          </div>
+        </div>
+        <div className="mt-2 flex items-center gap-2 sm:hidden">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-200">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-700"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+          <span className="text-[11px] font-bold text-zinc-600">{percent}%</span>
         </div>
       </header>
 

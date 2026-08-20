@@ -56,7 +56,7 @@ export function NotificationBell() {
     <div className="relative">
       <button
         onClick={handleOpen}
-        className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
+        className="relative flex h-11 w-11 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 hover:bg-zinc-100"
         aria-label="Notifications"
       >
         <i className="fa-solid fa-bell" />
@@ -70,19 +70,28 @@ export function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
+          <div className="safe-bottom fixed inset-x-0 bottom-0 z-50 max-h-[80vh] overflow-hidden rounded-t-2xl border border-zinc-200 bg-white shadow-xl md:absolute md:inset-auto md:right-0 md:top-full md:mt-2 md:max-h-96 md:w-80 md:rounded-xl md:rounded-t-xl md:max-w-[calc(100vw-2rem)] md:pb-0">
+            <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3.5">
               <p className="text-sm font-semibold text-zinc-900">
                 Notifications
               </p>
-              {unread > 0 && (
+              <div className="flex items-center gap-3">
+                {unread > 0 && (
+                  <button
+                    onClick={handleMarkAll}
+                    className="text-xs font-medium text-brand-600 hover:underline"
+                  >
+                    Mark all as read
+                  </button>
+                )}
                 <button
-                  onClick={handleMarkAll}
-                  className="text-xs font-medium text-brand-600 hover:underline"
+                  onClick={() => setOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 md:hidden"
+                  aria-label="Close notifications"
                 >
-                  Mark all as read
+                  <i className="fa-solid fa-xmark" />
                 </button>
-              )}
+              </div>
             </div>
 
             <div className="max-h-96 overflow-y-auto">

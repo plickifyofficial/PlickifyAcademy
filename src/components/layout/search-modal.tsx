@@ -14,7 +14,10 @@ type Result = {
   cover_image: string | null;
   price: number;
   level: string | null;
+  type: "course" | "product";
 };
+
+const POPULAR_SEARCHES = ["AI", "Freelancing", "Design", "Digital Marketing", "Video Editing"];
 
 export function SearchModal() {
   const [open, setOpen] = useState(false);
@@ -33,15 +36,36 @@ export function SearchModal() {
     timerRef.current = setTimeout(async () => {
       setLoading(true);
       const supabase = createClient();
-      const { data } = await supabase
-        .from("courses")
-        .select("id, slug, title, description, cover_image, price, level")
-        .eq("is_published", true)
-        .eq("visibility", "public")
-        .ilike("title", `%${term}%`)
-        .order("created_at", { ascending: false })
-        .limit(6);
-      setResults((data as Result[]) ?? []);
+      const [courseRes, productRes] = await Promise.all([
+        supabase
+          .from("courses")
+          .select("id, slug, title, description, cover_image, price, level")
+          .eq("is_published", true)
+          .eq("visibility", "public")
+          .ilike("title", `%${term}%`)
+          .order("created_at", { ascending: false })
+          .limit(5),
+        supabase
+          .from("products")
+          .select("id, slug, name, description, cover_image, price")
+          .eq("is_published", true)
+          .ilike("name", `%${term}%`)
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ]);
+      const merged: Result[] = [
+        ...((courseRes.data ?? []) as Result[]).map((c) => ({
+          ...c,
+          title: c.title,
+          type: "course" as const,
+        })),
+        ...((productRes.data ?? []) as unknown as Result[]).map((p) => ({
+          ...p,
+          title: (p as unknown as { name: string }).name,
+          type: "product" as const,
+        })),
+      ].slice(0, 6);
+      setResults(merged);
       setLoading(false);
     }, 200);
     return () => {
@@ -50,12 +74,27 @@ export function SearchModal() {
   }, [q, open]);
 
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
-    }
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [open]);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  function openSearch() {
+    setQ("");
+    setResults([]);
+    setOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
 
   function goToAll() {
     const term = q.trim();
@@ -65,110 +104,124 @@ export function SearchModal() {
     router.refresh();
   }
 
-  if (!open) {
-    return (
+  return (
+    <>
       <button
-        onClick={() => {
-          setQ("");
-          setResults([]);
-          setOpen(true);
-          setTimeout(() => inputRef.current?.focus(), 50);
-        }}
+        onClick={openSearch}
         aria-label="Search"
-        className="hidden h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-brand-600 md:flex"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-brand-600"
       >
         <i className="fa-solid fa-magnifying-glass" />
       </button>
-    );
-  }
 
-  return (
-    <>
-      <div
-        className="fixed inset-0 z-40 bg-black/50"
-        onClick={() => setOpen(false)}
-      />
-      <div className="fixed inset-x-0 top-0 z-50 bg-white p-4 shadow-lg sm:top-20 sm:mx-auto sm:max-w-xl sm:rounded-2xl sm:border sm:border-zinc-200">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            goToAll();
-          }}
-          className="flex items-center gap-3"
-        >
-          <i className="fa-solid fa-magnifying-glass text-zinc-400" />
-          <input
-            ref={inputRef}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search courses…"
-            className="w-full bg-transparent py-2 text-base text-zinc-900 outline-none placeholder:text-zinc-400"
-          />
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label="Close"
-            className="rounded-full p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
-          >
-            <i className="fa-solid fa-xmark" />
-          </button>
-        </form>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setOpen(false)} />
+          <div className="fixed inset-x-0 top-0 z-50 flex h-full flex-col bg-white shadow-lg sm:top-20 sm:mx-auto sm:h-auto sm:max-h-[70vh] sm:max-w-xl sm:rounded-2xl sm:border sm:border-zinc-200">
+            <div className="safe-top flex items-center gap-3 border-b border-zinc-100 p-4">
+              <i className="fa-solid fa-magnifying-glass text-zinc-400" />
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  goToAll();
+                }}
+                className="flex-1"
+              >
+                <input
+                  ref={inputRef}
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Search courses, products…"
+                  className="w-full bg-transparent py-3 text-base text-zinc-900 outline-none placeholder:text-zinc-400"
+                />
+              </form>
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Close search"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
+              >
+                <i className="fa-solid fa-xmark text-lg" />
+              </button>
+            </div>
 
-        {q.trim().length >= 2 && (
-          <div className="mt-2 max-h-80 overflow-y-auto border-t border-zinc-100 pt-2">
-            {loading ? (
-              <p className="px-3 py-4 text-sm text-zinc-500">Searching…</p>
-            ) : results.length === 0 ? (
-              <p className="px-3 py-4 text-sm text-zinc-500">
-                No courses found for “{q.trim()}”.
-              </p>
-            ) : (
-              results.map((r) => (
-                <Link
-                  key={r.id}
-                  href={`/courses/${r.slug}`}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-zinc-50"
+            <div className="flex-1 overflow-y-auto p-4">
+              {q.trim().length < 2 ? (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    Popular searches
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {POPULAR_SEARCHES.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => {
+                          setQ(s);
+                          inputRef.current?.focus();
+                        }}
+                        className="rounded-full border border-zinc-200 px-4 py-2 text-sm text-zinc-600 transition-colors hover:border-brand-300 hover:text-brand-600"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : loading ? (
+                <p className="px-3 py-4 text-sm text-zinc-500">Searching…</p>
+              ) : results.length === 0 ? (
+                <p className="px-3 py-4 text-sm text-zinc-500">
+                  No courses found for “{q.trim()}”.
+                </p>
+              ) : (
+                <div className="space-y-1.5">
+                  {results.map((r) => (
+                    <Link
+                      key={r.id}
+                      href={r.type === "course" ? `/courses/${r.slug}` : `/digital-products/${r.slug}`}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-zinc-50"
+                    >
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-brand-100 text-sm font-bold text-brand-700">
+                        {r.cover_image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={r.cover_image}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          r.title.charAt(0)
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-zinc-900">
+                          {r.title}
+                        </p>
+                        <p className="truncate text-xs text-zinc-500">
+                          {r.description || (r.type === "product" ? "Digital Product" : r.level)}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-sm font-semibold text-brand-600">
+                        {formatPrice(r.price)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {q.trim().length >= 2 && !loading && results.length > 0 && (
+              <div className="safe-bottom shrink-0 border-t border-zinc-100 p-4">
+                <button
+                  onClick={goToAll}
+                  className="flex min-h-12 w-full items-center justify-center rounded-full bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-brand-100 text-sm font-bold text-brand-700">
-                    {r.cover_image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={r.cover_image}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      r.title.charAt(0)
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-zinc-900">
-                      {r.title}
-                    </p>
-                    <p className="truncate text-xs text-zinc-500">
-                      {r.description || r.level}
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-sm font-semibold text-brand-600">
-                    {formatPrice(r.price)}
-                  </span>
-                </Link>
-              ))
+                  View all results
+                </button>
+              </div>
             )}
           </div>
-        )}
-
-        {q.trim().length >= 2 && !loading && results.length > 0 && (
-          <button
-            type="button"
-            onClick={goToAll}
-            className="mt-2 w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-          >
-            View all results
-          </button>
-        )}
-      </div>
+        </>
+      )}
     </>
   );
 }

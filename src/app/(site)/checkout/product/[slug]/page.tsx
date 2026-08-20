@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getSiteSettings } from "@/lib/settings";
 import { formatPrice } from "@/lib/format";
 import { ProductCheckoutPanel } from "@/components/checkout/product-checkout-panel";
+import { OrderSummary } from "@/components/checkout/order-summary";
 
 export const metadata = { title: "Checkout" };
 
@@ -62,9 +63,8 @@ export default async function ProductCheckoutPage({
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
         <div>
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-zinc-900">Order Summary</h2>
-            <div className="mt-4 flex items-start gap-4">
+          <OrderSummary title="Order Summary">
+            <div className="flex items-start gap-4">
               <div
                 className={`relative flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${
                   product.gradient || "from-blue-600 to-indigo-600"
@@ -117,7 +117,7 @@ export default async function ProductCheckoutPage({
                 )}
               </div>
             </div>
-          </div>
+          </OrderSummary>
         </div>
 
         <div className="lg:sticky lg:top-24">
