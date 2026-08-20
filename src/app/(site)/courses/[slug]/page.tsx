@@ -21,8 +21,8 @@ import {
   type LearnModule,
 } from "@/components/courses/what-you-learn";
 import { Faq } from "@/components/home/faq";
-import { Markdown } from "@/components/ui/markdown";
-import { markdownToText } from "@/lib/markdown";
+import { ProseContent } from "@/components/editor/prose-content";
+import { renderContent, toPlainTextMd } from "@/lib/rte";
 import type { Lesson, Announcement, LiveClass } from "@/lib/types";
 
 export const metadata = { title: "Course" };
@@ -279,7 +279,7 @@ export default async function CourseDetailPage({
         : 0;
 
   const courseHeroExcerpt = course.description
-    ? markdownToText(course.description).slice(0, 200)
+    ? toPlainTextMd(course.description).slice(0, 200)
     : "";
   const courseDescription =
     course.description?.trim() || content.description || "";
@@ -475,7 +475,7 @@ No topics added yet
           <section className="mt-14" data-aos="fade-up">
             <div className="mx-auto max-w-3xl">
               <div className="text-center">{sectionTitle("fa-solid fa-circle-info", content.descriptionHeading)}</div>
-              <Markdown source={courseDescription} className="mt-6" />
+              <ProseContent html={renderContent(courseDescription)} className="mt-6" />
             </div>
           </section>
         )}

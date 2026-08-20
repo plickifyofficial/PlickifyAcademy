@@ -6,7 +6,7 @@ import {
   formatBlogDate,
   formatViews,
 } from "@/lib/blog-utils";
-import { markdownToText } from "@/lib/markdown";
+import { toPlainTextMd } from "@/lib/rte";
 
 export function BlogCard({
   post,
@@ -68,7 +68,7 @@ export function BlogCard({
           {post.title}
         </h3>
         <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-zinc-500">
-          {post.excerpt || markdownToText(post.body ?? "")}
+          {post.excerpt || toPlainTextMd(post.body ?? "")}
         </p>
         <div className="mt-4 flex items-center gap-2 border-t border-zinc-100 pt-4 text-xs text-zinc-500">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-800 text-[10px] font-bold text-white">
@@ -129,7 +129,7 @@ export function BlogFeaturedCard({
           {post.title}
         </h2>
         <p className="mt-3 line-clamp-3 text-zinc-600">
-          {post.excerpt || markdownToText(post.body ?? "")}
+          {post.excerpt || toPlainTextMd(post.body ?? "")}
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-500">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-800 text-xs font-bold text-white">

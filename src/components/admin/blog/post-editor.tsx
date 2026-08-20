@@ -11,6 +11,7 @@ import type {
 import { createPost, updatePost } from "@/lib/actions/blog";
 import { uploadContentImage } from "@/lib/actions/content";
 import { useToast } from "@/components/ui/toaster";
+import { RichTextEditor } from "@/components/editor/rich-text-editor";
 
 type CourseOption = { id: string; title: string; slug: string };
 type ProductOption = { id: string; name: string; slug: string };
@@ -76,13 +77,16 @@ export function PostEditor({
     post?.related_product_ids ?? [],
   );
 
-  function buildFormData(saveStatus: "draft" | "published" | "scheduled") {
+  function buildFormData(
+    saveStatus: "draft" | "published" | "scheduled",
+    overrides: { body?: string; excerpt?: string } = {},
+  ) {
     const fd = new FormData();
     if (post) fd.set("id", post.id);
     fd.set("title", title);
     fd.set("slug", slug);
-    fd.set("excerpt", excerpt);
-    fd.set("body", body);
+    fd.set("excerpt", overrides.excerpt ?? excerpt);
+    fd.set("body", overrides.body ?? body);
     fd.set("cover_image", cover);
     fd.set("og_image", ogImage);
     fd.set("category_id", categoryId);
@@ -120,6 +124,14 @@ export function PostEditor({
     showToast("Post saved.");
     router.push("/admin/blog/posts");
     router.refresh();
+  }
+
+  async function autosaveDraft(html: string) {
+    if (!post) return;
+    setBody(html);
+    const fd = buildFormData("draft", { body: html });
+    const res = await updatePost(fd);
+    if (res?.error) throw new Error(res.error);
   }
 
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -183,22 +195,30 @@ export function PostEditor({
             </div>
             <div>
               <label className={label}>Excerpt</label>
-              <textarea
+              <RichTextEditor
                 value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                rows={3}
-                className={`${field} min-h-[70px]`}
+                onChange={setExcerpt}
+                preset="medium"
+                placeholder="Short summary shown on cards & in search engines..."
+                minHeight={90}
               />
             </div>
             <div>
-              <label className={label}>Body (Markdown supported)</label>
-              <textarea
+              <label className={label}>Body</label>
+              <RichTextEditor
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
-                rows={22}
-                className={`${field} min-h-[360px] font-mono text-xs leading-relaxed`}
-                placeholder={'# Heading\n\nParagraph with **bold**, *italic* and [links](https://...).\n\n> Quote block\n\n- bullet list\n1. numbered list\n\n```js\ncode block\n```\n\n![alt text](https://image-url)  \n---'}
+                onChange={setBody}
+                preset="full"
+                placeholder={"Start writing your post... Use the toolbar to format text, add images, tables, quotes, code, videos, courses and products."}
+                minHeight={380}
+                autosave={autosaveDraft}
+                courseOptions={courses}
+                productOptions={products.map((p) => ({ ...p, title: p.name }))}
               />
+              <p className="mt-1 text-xs text-[#646970]">
+                <i className="fa-solid fa-circle-info mr-1" />
+                Auto-saves a draft while you type. Old markdown posts still render fine.
+              </p>
             </div>
           </div>
         </div>

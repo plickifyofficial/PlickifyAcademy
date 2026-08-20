@@ -6,6 +6,8 @@ import { getSiteContent } from "@/lib/site-content";
 import { getPublishedBatches } from "@/lib/content-modules";
 import { ctaDefaults, liveBatchDefaults } from "@/lib/content-schema";
 import type { Batch } from "@/lib/types";
+import { ProseContent } from "@/components/editor/prose-content";
+import { renderContent } from "@/lib/rte";
 
 export const metadata = {
   title: "Live Batch | Plickify Academy",
@@ -132,9 +134,9 @@ function BatchCard({ batch: b }: { batch: Batch }) {
         )}
       </div>
       <h3 className="mt-4 text-lg font-bold text-zinc-900">{b.title}</h3>
-      {b.description && (
-        <p className="mt-1.5 line-clamp-2 text-sm text-zinc-500">{b.description}</p>
-      )}
+      {b.description ? (
+        <ProseContent html={renderContent(b.description)} className="mt-1.5 line-clamp-2 text-sm text-zinc-500" />
+      ) : null}
 
       <div className="mt-4 space-y-2 text-sm text-zinc-600">
         {b.start_date && (

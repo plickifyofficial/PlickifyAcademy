@@ -30,6 +30,7 @@ import {
   courseContentFields,
 } from "@/lib/content-schema";
 import { uploadContentImage } from "@/lib/actions/content";
+import { RichTextEditor } from "@/components/editor/rich-text-editor";
 
 function Field({
   name,
@@ -63,27 +64,6 @@ function Field({
         step={type === "number" ? "0.01" : undefined}
         className="wp-input"
       />
-    </div>
-  );
-}
-
-function TextArea({
-  name,
-  label,
-  defaultValue,
-  rows = 3,
-  className = "",
-}: {
-  name: string;
-  label: string;
-  defaultValue?: string;
-  rows?: number;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <label className="wp-label">{label}</label>
-      <textarea name={name} rows={rows} defaultValue={defaultValue} className="wp-input" />
     </div>
   );
 }
@@ -171,8 +151,11 @@ function CourseContentFields({ course }: { course?: Course }) {
 }
 
 function CourseFormFields({ course }: { course?: Course }) {
+  const [description, setDescription] = useState(course?.description ?? "");
+
   return (
     <div className="space-y-3">
+      <input type="hidden" name="description" value={description} />
       <Group title="Basic Info" icon="fa-solid fa-circle-info">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field name="title" label="Title" required defaultValue={course?.title} />
@@ -180,11 +163,20 @@ function CourseFormFields({ course }: { course?: Course }) {
           <Field name="subtitle" label="Subtitle / Tagline" defaultValue={course?.subtitle ?? ""} placeholder="e.g., AI & Digital Income Mastery" />
           <Field name="category" label="Category" defaultValue={course?.category ?? "General"} placeholder="e.g., AI, Freelancing" />
         </div>
-        <TextArea name="description" label="Detailed Description" defaultValue={course?.description ?? ""} rows={6} className="mt-3" />
-        <p className="mt-1 text-xs text-[#646970]">
-          <i className="fa-solid fa-circle-info mr-1" />
-          Markdown supported — headings (# / ##), bullets (*), bold (**text**), emoji. It will display nicely on the course page.
-        </p>
+        <div className="mt-3">
+          <label className="wp-label">Detailed Description</label>
+          <RichTextEditor
+            value={description}
+            onChange={setDescription}
+            preset="full"
+            minHeight={180}
+            placeholder="Write a rich description with headings, lists, tables, videos, images..."
+          />
+          <p className="mt-1 text-xs text-[#646970]">
+            <i className="fa-solid fa-circle-info mr-1" />
+            Rich text editor — old markdown descriptions still render fine on the course page.
+          </p>
+        </div>
       </Group>
 
       <Group title="Price & Discount" icon="fa-solid fa-tags">

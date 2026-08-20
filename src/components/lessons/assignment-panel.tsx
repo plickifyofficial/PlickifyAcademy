@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { submitAssignment } from "@/lib/actions/learning";
+import { ProseContent } from "@/components/editor/prose-content";
+import { renderContent } from "@/lib/rte";
 
 export function AssignmentPanel({
   lessonId,
@@ -82,8 +84,8 @@ export function AssignmentPanel({
       </div>
 
       {instructions && (
-        <div className="prose-sm mt-4 whitespace-pre-wrap text-sm text-zinc-700">
-          {instructions}
+        <div className="mt-4 rounded-xl bg-zinc-50 p-4 text-sm text-zinc-700">
+          <ProseContent html={renderContent(instructions)} />
         </div>
       )}
 

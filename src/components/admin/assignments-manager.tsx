@@ -7,6 +7,7 @@ import {
   updateAssignmentGrade,
   deleteAssignmentGrade,
 } from "@/lib/actions/admin";
+import { RichTextEditor } from "@/components/editor/rich-text-editor";
 
 export type AdminAssignment = {
   lessonId: string;
@@ -129,12 +130,7 @@ export function AssignmentsManager({
               </label>
               <label className="block text-xs font-semibold text-zinc-600 sm:col-span-2">
                 Instructions
-                <textarea
-                  name="instructions"
-                  rows={4}
-                  defaultValue={a.instructions ?? ""}
-                  className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-                />
+                <InstructionsField initial={a.instructions ?? ""} />
               </label>
               <div className="sm:col-span-2">
                 <button
@@ -235,6 +231,23 @@ export function AssignmentsManager({
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function InstructionsField({ initial }: { initial: string }) {
+  const [value, setValue] = useState(initial);
+
+  return (
+    <div className="mt-1">
+      <input type="hidden" name="instructions" value={value} />
+      <RichTextEditor
+        value={value}
+        onChange={setValue}
+        preset="medium"
+        minHeight={120}
+        placeholder="Assignment instructions — how to submit, grading criteria..."
+      />
     </div>
   );
 }

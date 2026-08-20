@@ -13,7 +13,7 @@ import {
 } from "@/lib/content-modules";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { markdownHeadings, markdownToHtml } from "@/lib/markdown";
+import { ensureHeadingIds, renderContent, renderHeadings } from "@/lib/rte";
 import { RecordView } from "@/components/blog/record-view";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { Toc } from "@/components/blog/toc";
@@ -140,8 +140,8 @@ export default async function BlogPostPage({ params }: Props) {
   const products = (productData.data ?? []) as ProductLike[];
 
   const category = categoryOf(post, categories);
-  const bodyHtml = markdownToHtml(post.body ?? "");
-  const headings = markdownHeadings(post.body ?? "");
+  const bodyHtml = ensureHeadingIds(renderContent(post.body ?? ""));
+  const headings = renderHeadings(post.body ?? "");
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -294,7 +294,7 @@ export default async function BlogPostPage({ params }: Props) {
             </div>
 
             <div
-              className="prose prose-zinc prose-headings:mt-9 prose-headings:font-bold prose-headings:scroll-mt-28 prose-h2:text-2xl prose-h3:text-xl prose-p:text-[17px] prose-p:leading-relaxed prose-p:text-zinc-700 prose-a:text-brand-600 prose-a:font-medium prose-img:rounded-2xl prose-blockquote:border-l-brand-600 prose-blockquote:bg-brand-50/60 prose-blockquote:py-1 prose-blockquote:not-italic prose-ul:list-disc prose-ol:list-decimal prose-li:marker:text-brand-600 prose-code:rounded prose-code:bg-zinc-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-brand-800 prose-code:before:content-none prose-code:after:content-none prose-pre:rounded-2xl prose-pre:bg-zinc-900 prose-pre:shadow-lg max-w-none"
+              className="prose-content max-w-none text-[17px]"
               dangerouslySetInnerHTML={{ __html: bodyHtml }}
             />
 

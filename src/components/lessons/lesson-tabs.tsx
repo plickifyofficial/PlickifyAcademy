@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { addLessonComment, saveLessonNote } from "@/lib/actions/learning";
+import { ProseContent } from "@/components/editor/prose-content";
+import { renderContent } from "@/lib/rte";
 
 type Resource = {
   id: string;
@@ -100,8 +102,8 @@ export function LessonTabs({
           <div className="space-y-4">
             {description && <p className="text-zinc-700">{description}</p>}
             {content && (
-              <div className="whitespace-pre-wrap rounded-xl border border-zinc-200 bg-white p-5 text-sm leading-relaxed text-zinc-700">
-                {content}
+              <div className="rounded-xl border border-zinc-200 bg-white p-5 text-sm leading-relaxed text-zinc-700">
+                <ProseContent html={renderContent(content)} />
               </div>
             )}
             {!description && !content && (

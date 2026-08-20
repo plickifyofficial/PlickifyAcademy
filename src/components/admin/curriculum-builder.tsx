@@ -28,6 +28,7 @@ import { useToast } from "@/components/ui/toaster";
 import { QuestionsEditor } from "@/components/admin/questions-editor";
 import { VideoSourceFields } from "@/components/admin/video-source-fields";
 import { LessonResourcesPanel } from "@/components/admin/lesson-resources-panel";
+import { RichTextEditor } from "@/components/editor/rich-text-editor";
 
 const TOPIC_TYPES: { value: Lesson["type"]; label: string; icon: string }[] = [
   { value: "lesson", label: "Lesson", icon: "fa-solid fa-book-open" },
@@ -486,6 +487,7 @@ function TopicForm({
   onDone: () => void;
 }) {
   const [pending, setPending] = useState(false);
+  const [content, setContent] = useState(topic?.content ?? "");
   const { showToast } = useToast();
   const isEdit = !!topic;
   const isQuiz = (topic?.type ?? "lesson") === "quiz";
@@ -564,7 +566,14 @@ function TopicForm({
       </div>
       <div className="mt-2">
         <label className="wp-label">Content (for lessons/assignments)</label>
-        <textarea name="content" rows={2} defaultValue={topic?.content ?? ""} className="wp-input" />
+        <input type="hidden" name="content" value={content} />
+        <RichTextEditor
+          value={content}
+          onChange={setContent}
+          preset="full"
+          minHeight={140}
+          placeholder="Lesson content — text, images, videos, tables, quizzes guide..."
+        />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-xs font-medium text-[#3c434a]">

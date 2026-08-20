@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/format";
 import { BuyButton } from "@/components/products/buy-button";
+import { ProseContent } from "@/components/editor/prose-content";
+import { renderContent } from "@/lib/rte";
 import type { Metadata } from "next";
 
 export const revalidate = 60;
@@ -140,7 +142,9 @@ export default async function ProductDetailPage({
                   ({product.review_count || 0} Reviews)
                 </span>
               </div>
-              <p className="mt-4 text-zinc-500">{product.description}</p>
+              <p className="mt-4 text-zinc-500">
+              <ProseContent html={renderContent(product.description)} />
+            </p>
 
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {stats.map((m) => (

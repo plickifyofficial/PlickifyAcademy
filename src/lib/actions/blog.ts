@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/actions/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { contentModuleTag } from "@/lib/content-modules";
+import { sanitizeHtml, toPlainText } from "@/lib/rte";
 
 type DbClient = Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>;
 
@@ -132,8 +133,8 @@ export async function createPost(
     .insert({
       title,
       slug,
-      excerpt: clean(String(formData.get("excerpt") ?? "")).slice(0, 500),
-      body: String(formData.get("body") ?? ""),
+      excerpt: toPlainText(String(formData.get("excerpt") ?? "")).slice(0, 500),
+      body: sanitizeHtml(String(formData.get("body") ?? "")),
       cover_image: clean(String(formData.get("cover_image") ?? "")) || null,
       author_name: clean(String(formData.get("author_name") ?? "")).slice(0, 100),
       author_role: clean(String(formData.get("author_role") ?? "")).slice(0, 100),
@@ -207,8 +208,8 @@ export async function updatePost(
     .from("blog_posts")
     .update({
       title,
-      excerpt: clean(String(formData.get("excerpt") ?? "")).slice(0, 500),
-      body: String(formData.get("body") ?? ""),
+      excerpt: toPlainText(String(formData.get("excerpt") ?? "")).slice(0, 500),
+      body: sanitizeHtml(String(formData.get("body") ?? "")),
       cover_image: clean(String(formData.get("cover_image") ?? "")) || null,
       author_name: clean(String(formData.get("author_name") ?? "")).slice(0, 100),
       author_role: clean(String(formData.get("author_role") ?? "")).slice(0, 100),

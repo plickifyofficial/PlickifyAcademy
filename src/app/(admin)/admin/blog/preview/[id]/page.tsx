@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { markdownToHtml } from "@/lib/markdown";
+import { renderContent } from "@/lib/rte";
 import { formatBlogDateLong, estimateReadingTime } from "@/lib/blog-utils";
 import { getBlogAuthorById } from "@/lib/content-modules";
 
@@ -35,7 +35,7 @@ export default async function AdminBlogPreviewPage({
     .maybeSingle();
   if (!post) notFound();
 
-  const bodyHtml = markdownToHtml(post.body ?? "");
+  const bodyHtml = renderContent(post.body ?? "");
   const author = post.author_id
     ? await getBlogAuthorById(post.author_id)
     : null;
@@ -101,7 +101,7 @@ export default async function AdminBlogPreviewPage({
 
         <article>
           <div
-            className="prose prose-zinc prose-headings:mt-9 prose-headings:font-bold prose-headings:text-[#1d2327] prose-h2:text-2xl prose-h3:text-xl prose-p:text-[17px] prose-p:leading-relaxed prose-p:text-[#3c434a] prose-a:text-[#2271b1] prose-img:rounded-2xl prose-blockquote:border-l-[#2271b1] prose-blockquote:bg-[#f0f6fc] prose-blockquote:py-1 prose-blockquote:not-italic prose-ul:list-disc prose-ol:list-decimal prose-code:rounded prose-code:bg-zinc-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-pre:rounded-2xl prose-pre:bg-zinc-900 max-w-none"
+            className="prose-content max-w-none text-[17px]"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
         </article>

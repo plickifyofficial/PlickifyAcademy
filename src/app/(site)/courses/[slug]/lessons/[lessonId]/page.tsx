@@ -6,6 +6,8 @@ import { QuizPlayer } from "@/components/lessons/quiz-player";
 import { ResumeTracker } from "@/components/lessons/resume-tracker";
 import { VideoPlayer } from "@/components/lessons/video-player";
 import { buildProtectedRender } from "@/lib/video-access";
+import { ProseContent } from "@/components/editor/prose-content";
+import { renderContent } from "@/lib/rte";
 import type { QuizQuestion } from "@/lib/types";
 
 export const metadata = { title: "Lesson" };
@@ -184,9 +186,9 @@ export default async function LessonPage({
           ) : null}
 
           {lesson.content && (
-            <div className="prose prose-zinc mt-8 max-w-none">
-              <div className="whitespace-pre-wrap rounded-xl border border-zinc-200 bg-white p-6 text-zinc-700">
-                {lesson.content}
+            <div className="mt-8">
+              <div className="rounded-xl border border-zinc-200 bg-white p-6">
+                <ProseContent html={renderContent(lesson.content)} />
               </div>
             </div>
           )}
