@@ -3,6 +3,8 @@ import { Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toaster";
 import { getSiteSettings } from "@/lib/settings";
+import { getContactSettings } from "@/lib/contact-settings";
+import { GlobalFloaters } from "@/components/floating/global-floaters";
 
 const hindSiliguri = Hind_Siliguri({
   variable: "--font-hind-siliguri",
@@ -61,15 +63,17 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const contactSettings = await getContactSettings();
   return (
     <html lang="en" className={`${hindSiliguri.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <ToastProvider>{children}</ToastProvider>
+        <GlobalFloaters settings={contactSettings} />
       </body>
     </html>
   );

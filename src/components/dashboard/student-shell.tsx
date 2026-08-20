@@ -344,6 +344,7 @@ export function StudentShell({
       <nav
         aria-label="Primary"
         className="safe-bottom fixed inset-x-0 bottom-0 z-40 flex border-t border-zinc-200 bg-white/95 backdrop-blur md:hidden"
+        data-floating-obstacle
       >
         {(
           [

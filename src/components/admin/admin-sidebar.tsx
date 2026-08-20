@@ -65,6 +65,12 @@ const menu = [
     items: [{ href: "/admin/media", label: "Media Library", icon: "fa-solid fa-images" }],
   },
   {
+    group: "Contact",
+    items: [
+      { href: "/admin/contact-system", label: "Contact System", icon: "fa-solid fa-comment-dots" },
+    ],
+  },
+  {
     group: "Settings",
     items: [
       { href: "/admin/settings", label: "Site Settings", icon: "fa-solid fa-sliders" },

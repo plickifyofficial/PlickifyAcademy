@@ -1,8 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/actions/admin";
+import { contactSettingsTag } from "@/lib/contact-settings";
 
 const SUBJECTS = [
   "Course Inquiry",
@@ -126,6 +129,75 @@ export async function deleteContactMessage(id: string) {
     .from("contact_messages")
     .delete()
     .eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/contact");
+  return { success: true };
+}
+
+// ============================================================
+// Floating Contact System (Phase 8)
+// ============================================================
+
+export async function saveContactSettings(
+  value: string,
+): Promise<{ error?: string; success?: boolean }> {
+  await requireAdmin();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return { error: "Invalid settings JSON." };
+  }
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("site_content")
+    .upsert(
+      { key: "contact.settings", value: parsed, updated_at: new Date().toISOString() },
+      { onConflict: "key" },
+    );
+  if (error) return { error: error.message };
+  updateTag(contactSettingsTag);
+  revalidatePath("/admin/contact-system");
+  return { success: true };
+}
+
+export async function logContactEvent(
+  eventType: string,
+  label?: string,
+  path?: string,
+) {
+  const admin = createAdminClient();
+  try {
+    await admin.from("contact_events").insert({
+      event_type: eventType,
+      label: label ?? null,
+      path: path ?? null,
+    });
+  } catch {
+    // analytics are best-effort — never block the UI
+  }
+}
+
+export async function submitOfflineMessage(input: {
+  name: string;
+  email: string;
+  message: string;
+}): Promise<{ error?: string; success?: boolean }> {
+  if (!input.name.trim() || !input.email.trim() || !input.message.trim()) {
+    return { error: "Please fill in your name, email and message." };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())) {
+    return { error: "Please enter a valid email address." };
+  }
+  const admin = createAdminClient();
+  const { error } = await admin.from("contact_messages").insert({
+    name: input.name.trim(),
+    email: input.email.trim(),
+    subject: "Live Chat Offline",
+    message: input.message.trim(),
+    status: "New",
+    is_read: false,
+  });
   if (error) return { error: error.message };
   revalidatePath("/admin/contact");
   return { success: true };

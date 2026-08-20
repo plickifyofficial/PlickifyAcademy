@@ -286,6 +286,90 @@ export const blogSettingsDefaults = {
 };
 export type BlogSettingsContent = typeof blogSettingsDefaults;
 
+const businessHourDefaults = [
+  { day: 0, label: "Sunday", enabled: true, open: "10:00", close: "22:00" },
+  { day: 1, label: "Monday", enabled: true, open: "10:00", close: "22:00" },
+  { day: 2, label: "Tuesday", enabled: true, open: "10:00", close: "22:00" },
+  { day: 3, label: "Wednesday", enabled: true, open: "10:00", close: "22:00" },
+  { day: 4, label: "Thursday", enabled: true, open: "10:00", close: "22:00" },
+  { day: 5, label: "Friday", enabled: true, open: "10:00", close: "22:00" },
+  { day: 6, label: "Saturday", enabled: true, open: "10:00", close: "22:00" },
+];
+
+export const contactSettingsDefaults = {
+  enabled: true,
+  backToTopEnabled: true,
+  whatsappEnabled: true,
+  whatsappNumber: "",
+  whatsappMessage:
+    "Assalamu Alaikum, I need help regarding Plickify Academy.",
+  whatsappLabel: "WhatsApp Us",
+  messengerEnabled: true,
+  messengerUrl: "",
+  messengerLabel: "Messenger",
+  liveChatEnabled: true,
+  botName: "Plickify Support",
+  botAvatarUrl: "",
+  welcomeMessage: "Assalamu Alaikum! 👋 How can we help you?",
+  quickReplies: [
+    {
+      label: "Courses",
+      reply:
+        "We offer practical courses on AI, Freelancing, Graphic Design, Digital Marketing, Content Creation and Digital Business. Which course are you interested in?",
+    },
+    {
+      label: "Enrollment",
+      reply:
+        "To enroll, open any course page, press the enroll button, complete payment via bKash or Nagad and submit your TrxID. You'll be enrolled instantly.",
+    },
+    {
+      label: "Payment",
+      reply:
+        "We accept bKash and Nagad. Send the course fee to our merchant number shown at checkout, then submit your Transaction ID (TrxID). You'll be enrolled instantly.",
+    },
+    {
+      label: "Student Support",
+      reply:
+        "For account or course access help, please share your issue details and our support team will resolve it as soon as possible.",
+    },
+    {
+      label: "Technical Support",
+      reply:
+        "If you're facing a technical problem, please describe it here or talk to our support team for immediate help.",
+    },
+    {
+      label: "Digital Products",
+      reply:
+        "After payment, digital products are unlocked instantly in your dashboard under My Products. For any issue, contact our support team.",
+    },
+  ],
+  supportMessage:
+    "I'm not completely sure about that. Would you like to talk to our support team?",
+  offlineMessage:
+    "We're currently offline. Leave a message and we'll get back to you.",
+  handoffEnabled: true,
+  handoffTarget: "whatsapp",
+  availability: "always",
+  businessHours: businessHourDefaults,
+  placement: {
+    all: true,
+    home: true,
+    courses: true,
+    products: true,
+    blog: true,
+    dashboard: true,
+    checkout: true,
+    pages: true,
+  },
+};
+export type ContactSettingsContent = typeof contactSettingsDefaults;
+export type BusinessHour = (typeof businessHourDefaults)[number];
+export type QuickReply = {
+  label: string;
+  reply: string;
+};
+export type ContactPlacement = ContactSettingsContent["placement"];
+
 export const announcementDefaults = {
   is_enabled: false,
   text: "🎉 New batch admission is open — enroll today!",

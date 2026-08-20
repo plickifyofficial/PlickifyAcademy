@@ -444,3 +444,14 @@ body {
 .md-content em {
   font-style: italic;
 }
+
+/* ============ Floating Contact / Back-to-Top ============ */
+:root {
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@layer utilities {
+  .z-floating { z-index: 45; }
+  .z-contact-menu { z-index: 46; }
+  .z-chat-widget { z-index: 48; }
+}
