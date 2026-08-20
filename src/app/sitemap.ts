@@ -115,5 +115,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...courseRoutes, ...productRoutes, ...postRoutes];
+  const { data: blogCategories } = await supabase
+    .from("blog_categories")
+    .select("slug")
+    .eq("is_active", true);
+  const { data: blogTags } = await supabase.from("blog_tags").select("slug");
+  const { data: blogAuthors } = await supabase.from("blog_authors").select("slug");
+
+  const categoryRoutes: MetadataRoute.Sitemap = (blogCategories ?? []).map((c) => ({
+    url: `${baseUrl}/blog/category/${c.slug}`,
+    lastModified: today,
+    changeFrequency: "weekly",
+    priority: 0.5,
+  }));
+
+  const tagRoutes: MetadataRoute.Sitemap = (blogTags ?? []).map((t) => ({
+    url: `${baseUrl}/blog/tag/${t.slug}`,
+    lastModified: today,
+    changeFrequency: "weekly",
+    priority: 0.4,
+  }));
+
+  const authorRoutes: MetadataRoute.Sitemap = (blogAuthors ?? []).map((a) => ({
+    url: `${baseUrl}/blog/author/${a.slug}`,
+    lastModified: today,
+    changeFrequency: "weekly",
+    priority: 0.4,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...courseRoutes,
+    ...productRoutes,
+    ...postRoutes,
+    ...categoryRoutes,
+    ...tagRoutes,
+    ...authorRoutes,
+  ];
 }

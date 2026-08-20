@@ -24,8 +24,20 @@ const menu = [
       { href: "/admin/categories", label: "Categories", icon: "fa-solid fa-folder" },
       { href: "/admin/faqs", label: "FAQs", icon: "fa-solid fa-circle-question" },
       { href: "/admin/testimonials", label: "Testimonials", icon: "fa-solid fa-quote-right" },
-      { href: "/admin/blog", label: "Blog", icon: "fa-solid fa-blog" },
       { href: "/admin/newsletter", label: "Newsletter", icon: "fa-solid fa-envelope-open-text" },
+    ],
+  },
+  {
+    group: "Blog",
+    items: [
+      { href: "/admin/blog", label: "Dashboard", icon: "fa-solid fa-gauge" },
+      { href: "/admin/blog/posts", label: "Posts", icon: "fa-solid fa-file-lines" },
+      { href: "/admin/blog/posts/new", label: "New Post", icon: "fa-solid fa-file-circle-plus" },
+      { href: "/admin/blog/categories", label: "Categories", icon: "fa-solid fa-folder" },
+      { href: "/admin/blog/tags", label: "Tags", icon: "fa-solid fa-tags" },
+      { href: "/admin/blog/authors", label: "Authors", icon: "fa-solid fa-user-pen" },
+      { href: "/admin/blog/comments", label: "Comments", icon: "fa-solid fa-comment-dots" },
+      { href: "/admin/blog/settings", label: "Settings", icon: "fa-solid fa-sliders" },
     ],
   },
   {

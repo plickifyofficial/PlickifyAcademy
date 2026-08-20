@@ -93,14 +93,104 @@ export type BlogPost = {
   cover_image: string | null;
   author_name: string | null;
   author_role: string | null;
+  author_id: string | null;
+  category_id: string | null;
   tags: string[] | null;
   reading_time: string | null;
   is_featured: boolean;
+  is_popular: boolean;
+  is_trending: boolean;
+  is_editors_pick: boolean;
   is_published: boolean;
+  status: "draft" | "published" | "scheduled";
+  scheduled_at: string | null;
   published_at: string | null;
   view_count: number | null;
+  seo_title: string | null;
+  meta_description: string | null;
+  og_image: string | null;
+  canonical_url: string | null;
+  noindex: boolean;
+  related_course_id: string | null;
+  related_product_ids: string[];
   created_at: string;
   updated_at: string;
+};
+
+export type BlogCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  image: string | null;
+  icon: string | null;
+  seo_title: string | null;
+  meta_description: string | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+};
+
+export type BlogTag = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  created_at: string;
+};
+
+export type BlogAuthor = {
+  id: string;
+  name: string;
+  slug: string;
+  photo: string | null;
+  bio: string | null;
+  role: string | null;
+  expertise: string[] | null;
+  socials: Record<string, string> | null;
+  created_at: string;
+};
+
+export type BlogComment = {
+  id: string;
+  post_id: string;
+  user_id: string | null;
+  parent_id: string | null;
+  name: string | null;
+  email: string | null;
+  body: string;
+  status: "pending" | "approved" | "rejected" | "spam";
+  is_reported: boolean;
+  report_count: number;
+  likes: number;
+  created_at: string;
+};
+
+export type BlogRevision = {
+  id: string;
+  post_id: string;
+  title: string | null;
+  excerpt: string | null;
+  body: string | null;
+  created_by: string | null;
+  created_at: string;
+};
+
+export type BlogSettings = {
+  postsPerPage: number;
+  defaultCategoryId: string | null;
+  defaultAuthorId: string | null;
+  commentsEnabled: boolean;
+  commentsModeration: "auto" | "manual";
+  shareButtons: boolean;
+  relatedPosts: boolean;
+  showReadingTime: boolean;
+  showViewCounter: boolean;
+  showNewsletter: boolean;
+  showSidebar: boolean;
+  showFeatured: boolean;
+  pagination: "paged" | "load-more";
+  seoTitleTemplate: string;
 };
 
 export type NewsletterSubscriber = {

@@ -268,6 +268,24 @@ export const navDefaults = {
 };
 export type NavContent = typeof navDefaults;
 
+export const blogSettingsDefaults = {
+  postsPerPage: 9,
+  defaultCategoryId: null,
+  defaultAuthorId: null,
+  commentsEnabled: true,
+  commentsModeration: "manual",
+  shareButtons: true,
+  relatedPosts: true,
+  showReadingTime: true,
+  showViewCounter: true,
+  showNewsletter: true,
+  showSidebar: true,
+  showFeatured: true,
+  pagination: "load-more",
+  seoTitleTemplate: "{title} | Plickify Academy Blog",
+};
+export type BlogSettingsContent = typeof blogSettingsDefaults;
+
 export const announcementDefaults = {
   is_enabled: false,
   text: "🎉 New batch admission is open — enroll today!",
