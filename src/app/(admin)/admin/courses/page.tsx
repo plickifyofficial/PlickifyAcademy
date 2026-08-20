@@ -37,7 +37,8 @@ export default async function AdminCoursesPage({
       | "lessons"
       | "quiz_questions"
       | "course_announcements"
-      | "live_classes",
+      | "live_classes"
+      | "lesson_resources",
   ) => {
     const q = supabase.from(table).select("*");
     return courseIds.length > 0 ? q.in("course_id", courseIds) : q;
@@ -49,12 +50,14 @@ export default async function AdminCoursesPage({
     { data: questions },
     { data: announcements },
     { data: liveClasses },
+    { data: resources },
   ] = await Promise.all([
     scoped("course_sections").order("position", { ascending: true }),
     scoped("lessons"),
     scoped("quiz_questions").order("position", { ascending: true }),
     scoped("course_announcements").order("created_at", { ascending: false }),
     scoped("live_classes").order("scheduled_at", { ascending: true }),
+    scoped("lesson_resources").order("created_at", { ascending: true }),
   ]);
 
   const sectionsByCourse: Record<string, NonNullable<typeof sections>[0][]> = {};
@@ -104,6 +107,15 @@ export default async function AdminCoursesPage({
     }
   }
 
+  const resourcesByLesson: Record<string, NonNullable<typeof resources>[0][]> = {};
+  for (const r of resources ?? []) {
+    if (resourcesByLesson[r.lesson_id]) {
+      resourcesByLesson[r.lesson_id].push(r);
+    } else {
+      resourcesByLesson[r.lesson_id] = [r];
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -125,6 +137,7 @@ export default async function AdminCoursesPage({
         questionsByLesson={questionsByLesson}
         announcementsByCourse={announcementsByCourse}
         liveClassesByCourse={liveClassesByCourse}
+        resourcesByLesson={resourcesByLesson}
         defaultCreating={add === "1"}
       />
     </div>

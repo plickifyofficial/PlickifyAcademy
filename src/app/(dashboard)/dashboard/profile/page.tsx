@@ -15,7 +15,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role, avatar_url")
+    .select("full_name, role, avatar_url, phone, location, bio")
     .eq("id", user.id)
     .single();
 
@@ -63,7 +63,12 @@ export default async function ProfilePage() {
       </div>
 
       <div className="mt-6">
-        <ProfileForm currentName={profile?.full_name ?? ""} />
+        <ProfileForm
+          currentName={profile?.full_name ?? ""}
+          currentPhone={profile?.phone ?? ""}
+          currentLocation={profile?.location ?? ""}
+          currentBio={profile?.bio ?? ""}
+        />
       </div>
     </div>
   );

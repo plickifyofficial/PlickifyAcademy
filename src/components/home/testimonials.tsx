@@ -36,10 +36,7 @@ export function Testimonials({
   }, []);
 
   const totalPages = Math.max(1, Math.ceil(items.length / perView));
-
-  useEffect(() => {
-    if (index >= totalPages) setIndex(0);
-  }, [totalPages, index]);
+  const safeIndex = index >= totalPages ? 0 : index;
 
   function move(dir: number) {
     setIndex((i) => (i + dir + totalPages) % totalPages);
@@ -79,7 +76,7 @@ export function Testimonials({
       <div className="mt-10 overflow-hidden" data-aos="fade-up" data-aos-delay="100">
         <div
           className="flex transition-transform duration-500 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
+          style={{ transform: `translateX(-${safeIndex * 100}%)` }}
         >
           {items.map((t) => (
             <div

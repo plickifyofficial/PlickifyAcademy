@@ -224,6 +224,16 @@ export type LiveClass = {
   created_at: string;
 };
 
+export type LessonResource = {
+  id: string;
+  lesson_id: string;
+  title: string;
+  file_path: string;
+  file_type: string | null;
+  file_size: string | null;
+  created_at: string;
+};
+
 export type CourseSection = {
   id: string;
   course_id: string;

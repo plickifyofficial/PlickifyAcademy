@@ -2,16 +2,26 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getEnrolledCourses } from "@/lib/student";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Search" };
+
+const TABS = [
+  { key: "all", label: "All" },
+  { key: "courses", label: "Courses" },
+  { key: "lessons", label: "Lessons" },
+  { key: "resources", label: "Resources" },
+  { key: "products", label: "Products" },
+];
 
 export default async function DashboardSearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; tab?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, tab } = await searchParams;
   const query = (q ?? "").trim();
+  const activeTab = TABS.some((t) => t.key === tab) ? (tab as string) : "all";
 
   const supabase = await createClient();
   const {
@@ -29,6 +39,13 @@ export default async function DashboardSearchPage({
     course_id: string;
     course_title: string;
   }[] = [];
+  let resources: {
+    id: string;
+    title: string;
+    lesson_id: string;
+    course_id: string;
+    course_title: string;
+  }[] = [];
   let products: {
     id: string;
     name: string;
@@ -38,20 +55,29 @@ export default async function DashboardSearchPage({
 
   if (query && query.length >= 2) {
     const pattern = `%${query}%`;
+    const ql = query.toLowerCase();
 
     matchedCourses = courses.filter(
       (c) =>
-        c.title.toLowerCase().includes(query.toLowerCase()) ||
-        (c.subtitle ?? "").toLowerCase().includes(query.toLowerCase()),
+        c.title.toLowerCase().includes(ql) ||
+        (c.subtitle ?? "").toLowerCase().includes(ql),
     );
 
     if (enrolledIds.length > 0) {
-      const { data: rows } = await supabase
-        .from("lessons")
-        .select("id, title, course_id")
-        .in("course_id", enrolledIds)
-        .ilike("title", pattern)
-        .limit(20);
+      const [{ data: rows }, { data: resRows }] = await Promise.all([
+        supabase
+          .from("lessons")
+          .select("id, title, course_id")
+          .in("course_id", enrolledIds)
+          .ilike("title", pattern)
+          .limit(20),
+        supabase
+          .from("lesson_resources")
+          .select("id, title, lesson_id, lessons(course_id)")
+          .ilike("title", pattern)
+          .limit(20),
+      ]);
+
       const courseTitles = new Map(courses.map((c) => [c.id, c.title]));
       lessons = (rows ?? []).map((l) => ({
         id: l.id,
@@ -59,6 +85,21 @@ export default async function DashboardSearchPage({
         course_id: l.course_id,
         course_title: courseTitles.get(l.course_id) ?? "",
       }));
+
+      resources = ((resRows ?? []) as unknown as Array<{
+        id: string;
+        title: string;
+        lesson_id: string;
+        lessons: { course_id: string } | null;
+      }>)
+        .map((r) => ({
+          id: r.id,
+          title: r.title,
+          lesson_id: r.lesson_id,
+          course_id: r.lessons?.course_id ?? "",
+          course_title: courseTitles.get(r.lessons?.course_id ?? "") ?? "",
+        }))
+        .filter((r) => r.course_id && courseTitles.has(r.course_id));
     }
 
     const { data: purchases } = await supabase
@@ -73,13 +114,22 @@ export default async function DashboardSearchPage({
       .filter((p): p is (typeof products)[number] => Boolean(p));
   }
 
-  const totalResults = matchedCourses.length + lessons.length + products.length;
+  const allCounts = {
+    courses: matchedCourses.length,
+    lessons: lessons.length,
+    resources: resources.length,
+    products: products.length,
+  };
+  const totalResults = allCounts.courses + allCounts.lessons + allCounts.resources + allCounts.products;
+
+  const tabHref = (key: string) =>
+    `/dashboard/search?q=${encodeURIComponent(query)}&tab=${key}`;
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-zinc-900">Search</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        আপনার course, lesson বা resource খুঁজুন
+        আপনার course, lesson, resource বা product খুঁজুন
       </p>
 
       <form action="/dashboard/search" className="mt-5">
@@ -89,7 +139,7 @@ export default async function DashboardSearchPage({
             type="search"
             name="q"
             defaultValue={query}
-            placeholder="কোর্স, lesson বা resource খুঁজুন..."
+            placeholder="কোর্স, lesson, resource বা product খুঁজুন..."
             className="h-12 w-full rounded-xl border border-zinc-200 bg-white pl-11 pr-4 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
           />
         </div>
@@ -114,104 +164,159 @@ export default async function DashboardSearchPage({
           </p>
         </div>
       ) : (
-        <div className="mt-8 space-y-8">
-          {matchedCourses.length > 0 && (
-            <section>
-              <h2 className="text-base font-bold text-zinc-900">
-                Courses <span className="text-zinc-400">({matchedCourses.length})</span>
-              </h2>
-              <div className="mt-3 space-y-3">
-                {matchedCourses.map((course) => (
-                  <Link
-                    key={course.id}
-                    href={`/dashboard/courses/${course.id}`}
-                    className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
-                  >
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-brand-600 to-brand-800 text-lg font-bold text-white">
-                      {course.cover_image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={course.cover_image}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        course.title.charAt(0)
-                      )}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-zinc-900">{course.title}</p>
-                      <p className="text-xs text-zinc-500">
-                        {course.percent}% complete · {course.doneLessons}/{course.totalLessons} lessons
-                      </p>
-                    </div>
-                    <i className="fa-solid fa-chevron-right text-zinc-300" />
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="mt-8">
+          <div className="flex flex-wrap items-center gap-2">
+            {TABS.map((t) => (
+              <Link
+                key={t.key}
+                href={tabHref(t.key)}
+                className={cn(
+                  "rounded-full px-4 py-1.5 text-xs font-semibold transition",
+                  activeTab === t.key
+                    ? "bg-brand-600 text-white"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200",
+                )}
+              >
+                {t.label}
+                {allCounts[t.key as keyof typeof allCounts] > 0 && (
+                  <span className="ml-1 opacity-70">
+                    {allCounts[t.key as keyof typeof allCounts]}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
 
-          {lessons.length > 0 && (
-            <section>
-              <h2 className="text-base font-bold text-zinc-900">
-                Lessons <span className="text-zinc-400">({lessons.length})</span>
-              </h2>
-              <div className="mt-3 space-y-3">
-                {lessons.map((lesson) => (
-                  <Link
-                    key={lesson.id}
-                    href={`/dashboard/learn/${lesson.course_id}/${lesson.id}`}
-                    className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
-                  >
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-50 text-lg text-green-600">
-                      <i className="fa-solid fa-circle-play" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-zinc-900">{lesson.title}</p>
-                      <p className="text-xs text-zinc-500">{lesson.course_title}</p>
-                    </div>
-                    <i className="fa-solid fa-chevron-right text-zinc-300" />
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
+          <p className="mt-4 text-sm text-zinc-500">
+            {totalResults} result{totalResults === 1 ? "" : "s"} for{" "}
+            <span className="font-semibold text-zinc-800">“{query}”</span>
+          </p>
 
-          {products.length > 0 && (
-            <section>
-              <h2 className="text-base font-bold text-zinc-900">
-                Digital Products <span className="text-zinc-400">({products.length})</span>
-              </h2>
-              <div className="mt-3 space-y-3">
-                {products.map((product) => (
-                  <Link
-                    key={product.id}
-                    href="/dashboard/my-products"
-                    className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
-                  >
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-lg text-white">
-                      {product.cover_image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={product.cover_image}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <i className="fa-solid fa-file-lines" />
-                      )}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-zinc-900">{product.name}</p>
-                      <p className="text-xs text-zinc-500">Purchased product</p>
-                    </div>
-                    <i className="fa-solid fa-chevron-right text-zinc-300" />
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
+          <div className="mt-6 space-y-8">
+            {activeTab !== "courses" && matchedCourses.length > 0 && (
+              <section>
+                <h2 className="text-base font-bold text-zinc-900">
+                  Courses <span className="text-zinc-400">({matchedCourses.length})</span>
+                </h2>
+                <div className="mt-3 space-y-3">
+                  {matchedCourses.map((course) => (
+                    <Link
+                      key={course.id}
+                      href={`/dashboard/courses/${course.id}`}
+                      className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
+                    >
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-brand-600 to-brand-800 text-lg font-bold text-white">
+                        {course.cover_image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={course.cover_image}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          course.title.charAt(0)
+                        )}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-zinc-900">{course.title}</p>
+                        <p className="text-xs text-zinc-500">
+                          {course.percent}% complete · {course.doneLessons}/{course.totalLessons} lessons
+                        </p>
+                      </div>
+                      <i className="fa-solid fa-chevron-right text-zinc-300" />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {activeTab !== "lessons" && lessons.length > 0 && (
+              <section>
+                <h2 className="text-base font-bold text-zinc-900">
+                  Lessons <span className="text-zinc-400">({lessons.length})</span>
+                </h2>
+                <div className="mt-3 space-y-3">
+                  {lessons.map((lesson) => (
+                    <Link
+                      key={lesson.id}
+                      href={`/dashboard/learn/${lesson.course_id}/${lesson.id}`}
+                      className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
+                    >
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-50 text-lg text-green-600">
+                        <i className="fa-solid fa-circle-play" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-zinc-900">{lesson.title}</p>
+                        <p className="text-xs text-zinc-500">{lesson.course_title}</p>
+                      </div>
+                      <i className="fa-solid fa-chevron-right text-zinc-300" />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {activeTab !== "resources" && resources.length > 0 && (
+              <section>
+                <h2 className="text-base font-bold text-zinc-900">
+                  Resources <span className="text-zinc-400">({resources.length})</span>
+                </h2>
+                <div className="mt-3 space-y-3">
+                  {resources.map((resource) => (
+                    <Link
+                      key={resource.id}
+                      href={`/dashboard/learn/${resource.course_id}/${resource.lesson_id}`}
+                      className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
+                    >
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-lg text-amber-600">
+                        <i className="fa-solid fa-file-arrow-down" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-zinc-900">{resource.title}</p>
+                        <p className="text-xs text-zinc-500">{resource.course_title}</p>
+                      </div>
+                      <i className="fa-solid fa-chevron-right text-zinc-300" />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {activeTab !== "products" && products.length > 0 && (
+              <section>
+                <h2 className="text-base font-bold text-zinc-900">
+                  Digital Products <span className="text-zinc-400">({products.length})</span>
+                </h2>
+                <div className="mt-3 space-y-3">
+                  {products.map((product) => (
+                    <Link
+                      key={product.id}
+                      href="/dashboard/my-products"
+                      className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:bg-zinc-50"
+                    >
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-lg text-white">
+                        {product.cover_image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={product.cover_image}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <i className="fa-solid fa-file-lines" />
+                        )}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-zinc-900">{product.name}</p>
+                        <p className="text-xs text-zinc-500">Purchased product</p>
+                      </div>
+                      <i className="fa-solid fa-chevron-right text-zinc-300" />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         </div>
       )}
     </div>

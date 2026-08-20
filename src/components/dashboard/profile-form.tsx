@@ -4,16 +4,32 @@ import { useState } from "react";
 import { updateProfile } from "@/lib/actions/profile";
 import { useToast } from "@/components/ui/toaster";
 
-export function ProfileForm({ currentName }: { currentName: string }) {
+export function ProfileForm({
+  currentName,
+  currentPhone,
+  currentLocation,
+  currentBio,
+}: {
+  currentName: string;
+  currentPhone: string;
+  currentLocation: string;
+  currentBio: string;
+}) {
   const { showToast } = useToast();
   const [pending, setPending] = useState(false);
   const [name, setName] = useState(currentName);
+  const [phone, setPhone] = useState(currentPhone);
+  const [location, setLocation] = useState(currentLocation);
+  const [bio, setBio] = useState(currentBio);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     const fd = new FormData();
     fd.set("full_name", name);
+    fd.set("phone", phone);
+    fd.set("location", location);
+    fd.set("bio", bio);
     const result = await updateProfile(fd);
     setPending(false);
     if (result?.error) {
@@ -28,20 +44,69 @@ export function ProfileForm({ currentName }: { currentName: string }) {
       onSubmit={handleSubmit}
       className="rounded-2xl border border-zinc-200 bg-white p-6"
     >
-      <h2 className="font-semibold text-zinc-900">Change Name</h2>
-      <label
-        htmlFor="full_name"
-        className="mt-4 mb-1 block text-sm font-medium text-zinc-700"
-      >
-        Full Name
-      </label>
-      <input
-        id="full_name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-        placeholder="Your name"
-      />
+      <h2 className="font-semibold text-zinc-900">Edit Profile</h2>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label
+            htmlFor="full_name"
+            className="mb-1 block text-sm font-medium text-zinc-700"
+          >
+            Full Name
+          </label>
+          <input
+            id="full_name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            placeholder="Your name"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="phone"
+            className="mb-1 block text-sm font-medium text-zinc-700"
+          >
+            Phone
+          </label>
+          <input
+            id="phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            placeholder="01XXXXXXXXX"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="location"
+            className="mb-1 block text-sm font-medium text-zinc-700"
+          >
+            Location
+          </label>
+          <input
+            id="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            placeholder="Dhaka, Bangladesh"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="bio"
+            className="mb-1 block text-sm font-medium text-zinc-700"
+          >
+            Bio
+          </label>
+          <input
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            placeholder="A short bio about you"
+          />
+        </div>
+      </div>
       <button
         type="submit"
         disabled={pending}

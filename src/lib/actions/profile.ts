@@ -13,10 +13,13 @@ export async function updateProfile(formData: FormData) {
   if (!user) redirect("/login");
 
   const fullName = String(formData.get("full_name")).trim();
+  const phone = String(formData.get("phone")).trim();
+  const location = String(formData.get("location")).trim();
+  const bio = String(formData.get("bio")).trim();
 
   const { error } = await supabase
     .from("profiles")
-    .update({ full_name: fullName })
+    .update({ full_name: fullName, phone, location, bio })
     .eq("id", user.id);
 
   if (error) return { error: error.message };
@@ -86,5 +89,34 @@ export async function removeAvatar() {
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/profile");
+  return { success: true };
+}
+
+export async function updatePreferences(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  const emailNotifications = formData.get("email_notifications") === "on";
+  const pushNotifications = formData.get("push_notifications") === "on";
+  const marketingOptIn = formData.get("marketing_opt_in") === "on";
+
+  const { error } = await supabase.from("user_preferences").upsert(
+    {
+      id: user.id,
+      email_notifications: emailNotifications,
+      push_notifications: pushNotifications,
+      marketing_opt_in: marketingOptIn,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "id" },
+  );
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings");
   return { success: true };
 }

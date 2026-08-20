@@ -13,18 +13,15 @@ function getRemaining(target: number): Remaining {
   return { days, hours, minutes, seconds };
 }
 
-const EMPTY: Remaining = { days: 0, hours: 0, minutes: 0, seconds: 0 };
-
 export function Countdown({ target }: { target: number }) {
-  const [time, setTime] = useState<Remaining | null>(null);
+  const [time, setTime] = useState<Remaining>(() => getRemaining(target));
 
   useEffect(() => {
-    setTime(getRemaining(target));
     const timer = setInterval(() => setTime(getRemaining(target)), 1000);
     return () => clearInterval(timer);
   }, [target]);
 
-  const current = time ?? EMPTY;
+  const current = time;
 
   const boxes = [
     { value: current.days, label: "Days" },

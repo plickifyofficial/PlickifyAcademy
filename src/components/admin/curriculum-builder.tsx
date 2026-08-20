@@ -8,6 +8,7 @@ import type {
   QuizQuestion,
   Announcement,
   LiveClass,
+  LessonResource,
 } from "@/lib/types";
 import {
   createSection,
@@ -26,6 +27,7 @@ import {
 import { useToast } from "@/components/ui/toaster";
 import { QuestionsEditor } from "@/components/admin/questions-editor";
 import { VideoSourceFields } from "@/components/admin/video-source-fields";
+import { LessonResourcesPanel } from "@/components/admin/lesson-resources-panel";
 
 const TOPIC_TYPES: { value: Lesson["type"]; label: string; icon: string }[] = [
   { value: "lesson", label: "Lesson", icon: "fa-solid fa-book-open" },
@@ -48,6 +50,7 @@ export function CurriculumBuilder({
   questionsByLesson,
   announcements,
   liveClasses,
+  resourcesByLesson,
 }: {
   course: Course;
   sections: CourseSection[];
@@ -55,6 +58,7 @@ export function CurriculumBuilder({
   questionsByLesson: Record<string, QuizQuestion[]>;
   announcements: Announcement[];
   liveClasses: LiveClass[];
+  resourcesByLesson: Record<string, LessonResource[]>;
 }) {
   const [pending, setPending] = useState(false);
   const [renamingSection, setRenamingSection] = useState<string | null>(null);
@@ -371,6 +375,24 @@ export function CurriculumBuilder({
             <input name="meeting_url" placeholder="Zoom/Meet link (optional)" className="wp-input" />
             <input name="duration_minutes" type="text" inputMode="numeric" defaultValue={60} placeholder="Duration (minutes)" className="wp-input" />
           </form>
+        </div>
+      </div>
+
+      <div className="wp-panel">
+        <div className="wp-panel-header">
+          <span>
+            <i className="fa-solid fa-file-arrow-down mr-1 text-[#2271b1]" />
+            Lesson Resources
+          </span>
+        </div>
+        <div className="wp-panel-body">
+          <LessonResourcesPanel
+            courseId={course.id}
+            lessons={sections
+              .flatMap((s) => topics[s.id] ?? [])
+              .sort((a, b) => a.order - b.order)}
+            resourcesByLesson={resourcesByLesson}
+          />
         </div>
       </div>
 

@@ -26,24 +26,12 @@ export function SearchModal() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (open) {
-      setQ("");
-      setResults([]);
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
-  }, [open]);
-
-  useEffect(() => {
     if (!open) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     const term = q.trim();
-    if (term.length < 2) {
-      setResults([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+    if (term.length < 2) return;
     timerRef.current = setTimeout(async () => {
+      setLoading(true);
       const supabase = createClient();
       const { data } = await supabase
         .from("courses")
@@ -80,7 +68,12 @@ export function SearchModal() {
   if (!open) {
     return (
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setQ("");
+          setResults([]);
+          setOpen(true);
+          setTimeout(() => inputRef.current?.focus(), 50);
+        }}
         aria-label="Search"
         className="hidden h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-brand-600 md:flex"
       >

@@ -907,3 +907,64 @@ export async function deleteAssignmentGrade(formData: FormData) {
 
   revalidatePath("/admin/assignments");
 }
+
+export async function uploadLessonResource(formData: FormData) {
+  const courseId = String(formData.get("course_id"));
+  const lessonId = String(formData.get("lesson_id"));
+  if (!courseId || !lessonId) throw new Error("Course and lesson are required");
+  await requireCourseEditor(courseId);
+
+  const file = formData.get("file") as File | null;
+  if (!file || file.size === 0) throw new Error("No file selected");
+  if (file.size > 50 * 1024 * 1024)
+    throw new Error("File must be under 50MB");
+
+  const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = `${courseId}/${lessonId}/${Date.now()}-${safe}`;
+
+  const admin = createAdminClient();
+  const { error: upErr } = await admin.storage
+    .from("lesson-resources")
+    .upload(path, file, { upsert: false, contentType: file.type });
+  if (upErr) throw new Error(upErr.message);
+
+  const { error: dbErr } = await admin.from("lesson_resources").insert({
+    lesson_id: lessonId,
+    title: file.name,
+    file_path: path,
+    file_type: file.type || null,
+    file_size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+  });
+  if (dbErr) {
+    await admin.storage.from("lesson-resources").remove([path]).catch(() => {});
+    throw new Error(dbErr.message);
+  }
+
+  revalidatePath("/admin/courses");
+}
+
+export async function deleteLessonResource(formData: FormData) {
+  const id = String(formData.get("id"));
+  const courseId = String(formData.get("course_id"));
+  if (!id) throw new Error("Resource ID missing");
+  await requireCourseEditor(courseId);
+
+  const admin = createAdminClient();
+  const { data: resource } = await admin
+    .from("lesson_resources")
+    .select("file_path")
+    .eq("id", id)
+    .single();
+
+  const { error } = await admin
+    .from("lesson_resources")
+    .delete()
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  if (resource?.file_path) {
+    await admin.storage.from("lesson-resources").remove([resource.file_path]).catch(() => {});
+  }
+
+  revalidatePath("/admin/courses");
+}

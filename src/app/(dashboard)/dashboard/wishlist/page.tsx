@@ -36,7 +36,7 @@ export default async function WishlistPage() {
     <div>
       <h1 className="text-2xl font-bold text-zinc-900">Wishlist</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        Courses you've saved to learn later
+        Courses you&apos;ve saved to learn later
       </p>
 
       {courses.length > 0 ? (

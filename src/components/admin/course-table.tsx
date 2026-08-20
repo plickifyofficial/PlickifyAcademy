@@ -8,6 +8,7 @@ import type {
   QuizQuestion,
   Announcement,
   LiveClass,
+  LessonResource,
 } from "@/lib/types";
 import {
   createCourse,
@@ -147,7 +148,7 @@ function CourseContentFields({ course }: { course?: Course }) {
       />
       <p className="rounded bg-[#f0f6fc] px-3 py-2 text-xs text-[#2271b1]">
         Customize the course page content for this course only. Leave unchanged
-        to use the global "Course Detail Page" defaults.
+        to use the global &quot;Course Detail Page&quot; defaults.
       </p>
       {courseContentFields.map((field) => (
         <FieldRenderer
@@ -289,6 +290,7 @@ export function AdminCourseTable({
   questionsByLesson,
   announcementsByCourse,
   liveClassesByCourse,
+  resourcesByLesson,
   defaultCreating = false,
 }: {
   courses: Course[];
@@ -297,6 +299,7 @@ export function AdminCourseTable({
   questionsByLesson: Record<string, QuizQuestion[]>;
   announcementsByCourse: Record<string, Announcement[]>;
   liveClassesByCourse: Record<string, LiveClass[]>;
+  resourcesByLesson: Record<string, LessonResource[]>;
   defaultCreating?: boolean;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -507,6 +510,7 @@ export function AdminCourseTable({
                           questionsByLesson={questionsByLesson}
                           announcements={announcementsByCourse[course.id] ?? []}
                           liveClasses={liveClassesByCourse[course.id] ?? []}
+                          resourcesByLesson={resourcesByLesson}
                         />
                       </td>
                     </tr>

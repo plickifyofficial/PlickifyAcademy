@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 
@@ -180,12 +180,14 @@ function discountPercent(price: number, original: number) {
   return 0;
 }
 
+const SERVER_NOW = Date.now();
+
 function CardBadge({ item }: { item: CourseItem }) {
   if (item.price === 0)
     return <span className="rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white shadow">FREE</span>;
   if (item.is_featured)
     return <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow">BEST SELLER</span>;
-  const age = Date.now() - new Date(item.created_at).getTime();
+  const age = SERVER_NOW - new Date(item.created_at).getTime();
   if (age < 30 * 24 * 60 * 60 * 1000)
     return <span className="rounded-full bg-brand-600 px-3 py-1 text-xs font-bold text-white shadow">NEW</span>;
   if (item.enrollmentCount >= 10)
@@ -193,7 +195,7 @@ function CardBadge({ item }: { item: CourseItem }) {
   return null;
 }
 
-function Stars({ rating }: { rating: number }) {
+function Stars() {
   return (
     <span className="text-amber-400">
       <i className="fa-solid fa-star" />
@@ -259,7 +261,7 @@ function CourseCardView({ item }: { item: CourseItem }) {
         </div>
 
         <div className="mt-3 flex items-center gap-1.5">
-          <Stars rating={item.ratingAvg} />
+          <Stars />
           <span className="text-sm font-semibold text-zinc-800">
             {item.ratingAvg > 0 ? item.ratingAvg.toFixed(1) : "New"}
           </span>
@@ -354,7 +356,7 @@ export function CoursesBrowser({
   const [visible, setVisible] = useState(9);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const dbCats = categories ?? [];
+  const dbCats = useMemo(() => categories ?? [], [categories]);
   const CAT_LIST: CategoryOption[] =
     dbCats.length > 0
       ? dbCats
@@ -365,14 +367,17 @@ export function CoursesBrowser({
           desc: c.desc,
         }));
 
-  const categoryKey = (c: CourseItem) => {
-    const raw = c.category || "";
-    if (dbCats.length > 0) {
-      const m = CAT_LIST.find((x) => matchesCategory(raw, x.name));
-      return m ? m.name : "Other";
-    }
-    return categorize(raw);
-  };
+  const categoryKey = useCallback(
+    (c: CourseItem) => {
+      const raw = c.category || "";
+      if (dbCats.length > 0) {
+        const m = CAT_LIST.find((x) => matchesCategory(raw, x.name));
+        return m ? m.name : "Other";
+      }
+      return categorize(raw);
+    },
+    [dbCats, CAT_LIST],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -432,7 +437,7 @@ export function CoursesBrowser({
         );
     }
     return list;
-  }, [initialCourses, query, cats, levels, types, price, ratingMin, sort]);
+  }, [initialCourses, query, cats, levels, types, price, ratingMin, sort, categoryKey]);
 
   const featured = useMemo(
     () =>
@@ -1004,7 +1009,7 @@ export function CoursesBrowser({
                 key={t.name}
                 className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"
               >
-                <Stars rating={5} />
+                <Stars />
                 <p className="mt-4 text-sm leading-relaxed text-zinc-700">
                   “{t.quote}”
                 </p>

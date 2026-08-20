@@ -44,7 +44,10 @@ const GROUPS: Group[] = [
   },
   {
     title: "Account",
-    items: [{ href: "/dashboard/profile", label: "Profile", icon: "fa-solid fa-user" }],
+    items: [
+      { href: "/dashboard/profile", label: "Profile", icon: "fa-solid fa-user" },
+      { href: "/dashboard/settings", label: "Settings", icon: "fa-solid fa-gear" },
+    ],
   },
 ];
 

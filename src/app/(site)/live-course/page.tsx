@@ -7,6 +7,8 @@ export const metadata = {
 
 export const revalidate = 60;
 
+const SERVER_NOW = Date.now();
+
 type LiveRow = {
   id: string;
   title: string;
@@ -90,7 +92,7 @@ export default async function LiveCoursePage() {
     .order("scheduled_at", { ascending: true });
 
   const rows = (liveClasses ?? []) as unknown as LiveRow[];
-  const now = Date.now();
+  const now = SERVER_NOW; // hoisted below (Date.now is impure in render)
 
   const creatorIds = [
     ...new Set(rows.map((r) => r.courses?.created_by).filter(Boolean)),

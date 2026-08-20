@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
@@ -278,6 +278,113 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+function Cover({ p, className }: { p: Product; className?: string }) {
+  const gradient = p.gradient || "from-blue-600 to-indigo-600";
+  return (
+    <div
+      className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br ${gradient} ${className ?? ""}`}
+    >
+      {p.cover_image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={p.cover_image} alt={p.name} className="h-full w-full object-cover" />
+      ) : (
+        <i className={`${p.icon || "fa-solid fa-file-lines"} text-5xl text-white/85`} />
+      )}
+    </div>
+  );
+}
+
+function ProductCard({
+  p,
+  onQuickView,
+  categoryOf,
+}: {
+  p: Product;
+  onQuickView: (p: Product) => void;
+  categoryOf: (p: Product) => string;
+}) {
+  const badge = badgeOf(p);
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-100">
+      <button
+        onClick={() => onQuickView(p)}
+        className="relative block text-left"
+      >
+        <Cover p={p} className="aspect-[16/10] w-full" />
+        {badge && (
+          <span className="absolute left-3 top-3 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-extrabold tracking-wider text-white backdrop-blur">
+            {badge}
+          </span>
+        )}
+        <span className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-sm text-brand-600 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+          <i className="fa-solid fa-eye" />
+        </span>
+      </button>
+      <div className="flex flex-1 flex-col p-4">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600">
+          {categoryOf(p)}
+        </span>
+        <button
+          onClick={() => onQuickView(p)}
+          className="mt-1 text-left text-lg font-bold text-zinc-900 transition-colors hover:text-brand-600"
+        >
+          {p.name}
+        </button>
+        {p.description && (
+          <p className="mt-1 line-clamp-2 text-sm text-zinc-500">
+            {p.description}
+          </p>
+        )}
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
+          {(p.file_count ?? 0) > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <i className="fa-solid fa-layer-group text-brand-400" />
+              {p.file_count}+ Resources
+            </span>
+          )}
+          {p.has_file && (
+            <span className="inline-flex items-center gap-1">
+              <i className="fa-solid fa-download text-brand-400" />
+              Instant Download
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1">
+            <i className="fa-solid fa-infinity text-brand-400" />
+            Lifetime Access
+          </span>
+        </div>
+        <div className="mt-3">
+          <Stars value={p.rating_avg ?? 0} count={p.review_count ?? 0} />
+        </div>
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="text-xl font-extrabold text-brand-600">
+            {p.price <= 0 ? "Free" : formatPrice(p.price)}
+          </span>
+          {p.old_price > p.price && (
+            <span className="text-sm text-zinc-400 line-through">
+              {formatPrice(p.old_price)}
+            </span>
+          )}
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button
+            onClick={() => onQuickView(p)}
+            className="rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+          >
+            এখনই কিনুন
+          </button>
+          <button
+            onClick={() => onQuickView(p)}
+            className="rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-300 hover:text-brand-600"
+          >
+            বিস্তারিত
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ProductsBrowser({
   products,
   initialQuery,
@@ -311,11 +418,14 @@ export function ProductsBrowser({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [quickView, setQuickView] = useState<Product | null>(null);
 
-  const dbCats = categories ?? [];
-  const dbCatNames = dbCats.map((c) => c.name);
+  const dbCats = useMemo(() => categories ?? [], [categories]);
+  const dbCatNames = useMemo(() => dbCats.map((c) => c.name), [dbCats]);
   const dbCatKey = dbCatNames.join("|");
-  const catOf = (p: Product) =>
-    dbCatNames.length > 0 ? categoryOfWith(p, dbCatNames) : categoryOf(p);
+  const catOf = useCallback(
+    (p: Product) =>
+      dbCatNames.length > 0 ? categoryOfWith(p, dbCatNames) : categoryOf(p),
+    [dbCatNames],
+  );
   const sidebarCats = dbCatNames.length > 0 ? dbCatNames : SIDEBAR_CATEGORIES;
   const heroCats = dbCatNames.length > 0 ? dbCatNames : HERO_CATEGORIES;
   const categoryGrid =
@@ -379,32 +489,32 @@ export function ProductsBrowser({
     return list.slice(0, 4);
   }, [products]);
 
-  function matches(p: Product) {
-    const q = query.trim().toLowerCase();
-    if (q) {
-      const hay =
-        `${p.name} ${catOf(p)} ${p.product_type ?? ""} ${p.description ?? ""} ${(p.tags ?? []).join(" ")}`.toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    const activeCat = chip !== "All Products" ? chip : category;
-    if (activeCat !== "All Products" && catOf(p) !== activeCat) return false;
-    if (type && (p.product_type ?? "") !== type) return false;
-    if (price) {
-      if (price === "free" && p.price > 0) return false;
-      if (price === "under500" && (p.price <= 0 || p.price >= 500)) return false;
-      if (price === "500-1000" && (p.price < 500 || p.price > 1000)) return false;
-      if (price === "1000+" && p.price <= 1000) return false;
-    }
-    if (rating > 0 && (p.rating_avg ?? 0) < rating) return false;
-    if (availability) {
-      if (availability === "instant" && !p.has_file) return false;
-      if (availability === "free" && p.price > 0) return false;
-      if (availability === "premium" && p.price <= 0) return false;
-    }
-    return true;
-  }
-
   const filtered = useMemo(() => {
+    function matches(p: Product) {
+      const q = query.trim().toLowerCase();
+      if (q) {
+        const hay =
+          `${p.name} ${catOf(p)} ${p.product_type ?? ""} ${p.description ?? ""} ${(p.tags ?? []).join(" ")}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      const activeCat = chip !== "All Products" ? chip : category;
+      if (activeCat !== "All Products" && catOf(p) !== activeCat) return false;
+      if (type && (p.product_type ?? "") !== type) return false;
+      if (price) {
+        if (price === "free" && p.price > 0) return false;
+        if (price === "under500" && (p.price <= 0 || p.price >= 500)) return false;
+        if (price === "500-1000" && (p.price < 500 || p.price > 1000)) return false;
+        if (price === "1000+" && p.price <= 1000) return false;
+      }
+      if (rating > 0 && (p.rating_avg ?? 0) < rating) return false;
+      if (availability) {
+        if (availability === "instant" && !p.has_file) return false;
+        if (availability === "free" && p.price > 0) return false;
+        if (availability === "premium" && p.price <= 0) return false;
+      }
+      return true;
+    }
+
     const list = products.filter(matches);
     switch (sort) {
       case "popular":
@@ -432,7 +542,7 @@ export function ProductsBrowser({
           return rank(b) - rank(a);
         });
     }
-  }, [products, query, chip, category, type, price, rating, availability, sort]);
+  }, [products, query, chip, category, type, price, rating, availability, sort, catOf]);
 
   const shown = filtered.slice(0, visible);
 
@@ -462,105 +572,6 @@ export function ProductsBrowser({
   const hasFilters =
     query || category !== "All Products" || chip !== "All Products" ||
     type || price || rating > 0 || availability;
-
-  function Cover({ p, className }: { p: Product; className?: string }) {
-    const gradient = p.gradient || "from-blue-600 to-indigo-600";
-    return (
-      <div
-        className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br ${gradient} ${className ?? ""}`}
-      >
-        {p.cover_image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={p.cover_image} alt={p.name} className="h-full w-full object-cover" />
-        ) : (
-          <i className={`${p.icon || "fa-solid fa-file-lines"} text-5xl text-white/85`} />
-        )}
-      </div>
-    );
-  }
-
-  function ProductCard({ p }: { p: Product }) {
-    const badge = badgeOf(p);
-    return (
-      <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-100">
-        <button
-          onClick={() => setQuickView(p)}
-          className="relative block text-left"
-        >
-          <Cover p={p} className="aspect-[16/10] w-full" />
-          {badge && (
-            <span className="absolute left-3 top-3 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-extrabold tracking-wider text-white backdrop-blur">
-              {badge}
-            </span>
-          )}
-          <span className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-sm text-brand-600 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-            <i className="fa-solid fa-eye" />
-          </span>
-        </button>
-        <div className="flex flex-1 flex-col p-4">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600">
-            {catOf(p)}
-          </span>
-          <button
-            onClick={() => setQuickView(p)}
-            className="mt-1 text-left text-lg font-bold text-zinc-900 transition-colors hover:text-brand-600"
-          >
-            {p.name}
-          </button>
-          {p.description && (
-            <p className="mt-1 line-clamp-2 text-sm text-zinc-500">
-              {p.description}
-            </p>
-          )}
-          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
-            {(p.file_count ?? 0) > 0 && (
-              <span className="inline-flex items-center gap-1">
-                <i className="fa-solid fa-layer-group text-brand-400" />
-                {p.file_count}+ Resources
-              </span>
-            )}
-            {p.has_file && (
-              <span className="inline-flex items-center gap-1">
-                <i className="fa-solid fa-download text-brand-400" />
-                Instant Download
-              </span>
-            )}
-            <span className="inline-flex items-center gap-1">
-              <i className="fa-solid fa-infinity text-brand-400" />
-              Lifetime Access
-            </span>
-          </div>
-          <div className="mt-3">
-            <Stars value={p.rating_avg ?? 0} count={p.review_count ?? 0} />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-xl font-extrabold text-brand-600">
-              {p.price <= 0 ? "Free" : formatPrice(p.price)}
-            </span>
-            {p.old_price > p.price && (
-              <span className="text-sm text-zinc-400 line-through">
-                {formatPrice(p.old_price)}
-              </span>
-            )}
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setQuickView(p)}
-              className="rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-            >
-              এখনই কিনুন
-            </button>
-            <button
-              onClick={() => setQuickView(p)}
-              className="rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-300 hover:text-brand-600"
-            >
-              বিস্তারিত
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <main className="bg-[#f6f9ff]">
@@ -930,7 +941,7 @@ export function ProductsBrowser({
                 <>
                   <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
                     {shown.map((p) => (
-                      <ProductCard key={p.id} p={p} />
+                      <ProductCard key={p.id} p={p} onQuickView={setQuickView} categoryOf={catOf} />
                     ))}
                   </div>
                   {filtered.length > visible && (
@@ -1041,7 +1052,7 @@ export function ProductsBrowser({
             </div>
             <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {bestSellers.map((p) => (
-                <ProductCard key={p.id} p={p} />
+                <ProductCard key={p.id} p={p} onQuickView={setQuickView} categoryOf={catOf} />
               ))}
             </div>
           </div>
