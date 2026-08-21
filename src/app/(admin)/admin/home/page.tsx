@@ -1,7 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ContentEditor } from "@/components/admin/content-editor";
-import { allSections } from "@/lib/content-schema";
+import { SectionManager } from "@/components/admin/section-manager";
+import {
+  allSections,
+  homeSectionLabels,
+  sectionsMetaDefaults,
+} from "@/lib/content-schema";
 import { readSiteContent } from "@/lib/site-content";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +33,11 @@ export default async function AdminHomeEditorPage() {
     );
   }
 
+  const sectionsMeta = await readSiteContent(
+    "home.sections_meta",
+    sectionsMetaDefaults,
+  );
+
   return (
     <div className="max-w-5xl">
       <h1 className="wp-page-title">Home Page & Site Content</h1>
@@ -44,6 +54,14 @@ export default async function AdminHomeEditorPage() {
         <a href="/admin/media" className="wp-btn">
           <i className="fa-solid fa-images" /> Media Library
         </a>
+      </div>
+
+      <div className="mt-6">
+        <SectionManager
+          initialOrder={sectionsMeta.order}
+          initialHidden={sectionsMeta.hidden}
+          labels={homeSectionLabels}
+        />
       </div>
 
       <div className="mt-6">

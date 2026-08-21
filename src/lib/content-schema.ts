@@ -1887,3 +1887,17 @@ export const pageSections: SectionDef[] = [
 ];
 
 export const allSections = [...homeSections, ...globalSections, ...pageSections];
+
+// ============================================================
+// HOMEPAGE SECTION MANAGER (order + visibility)
+// ============================================================
+export const homeSectionLabels: Record<string, string> = Object.fromEntries(
+  homeSections.map((s) => [s.key, s.title]),
+);
+
+export const sectionsMetaDefaults = {
+  order: homeSections.map((s) => s.key),
+  hidden: [] as string[],
+};
+
+export type SectionsMeta = typeof sectionsMetaDefaults;

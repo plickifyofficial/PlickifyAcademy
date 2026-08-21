@@ -23,6 +23,7 @@ import {
   ourCoursesDefaults,
   processDefaults,
   productsDefaults,
+  sectionsMetaDefaults,
   skillsDefaults,
   statsDefaults,
   testimonialsDefaults,
@@ -35,7 +36,7 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts, dbTestimonials, dbFaqs] =
+  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts, dbTestimonials, dbFaqs, sectionsMeta] =
     await Promise.all([
       getSiteContent("home.hero", heroDefaults),
       getSiteContent("home.stats", statsDefaults),
@@ -53,37 +54,49 @@ export default async function HomePage() {
       getPublishedProducts(),
       getPublishedTestimonials(),
       getPublishedFaqs("homepage"),
+      getSiteContent("home.sections_meta", sectionsMetaDefaults),
     ]);
+
+  const testimonialItems = dbTestimonials.map((t) => ({
+    name: t.name,
+    role: t.role,
+    quote: t.quote,
+    initials: t.initials,
+    color: t.color,
+    rating: t.rating,
+    course: t.course,
+  }));
+  const faqItems = dbFaqs.map((f) => ({ q: f.question, a: f.answer }));
+
+  const hiddenSet = new Set(sectionsMeta.hidden);
+  const knownKeys = new Set(sectionsMetaDefaults.order);
+
+  const orderedKeys = [
+    ...sectionsMeta.order.filter((k) => knownKeys.has(k)),
+    ...sectionsMetaDefaults.order.filter((k) => !sectionsMeta.order.includes(k)),
+  ].filter((k) => !hiddenSet.has(k));
+
+  const sectionMap: Record<string, React.ReactNode> = {
+    "home.hero": <Hero content={hero} />,
+    "home.stats": <Stats content={stats} />,
+    "home.tools": <AiTools content={tools} />,
+    "home.skills": <Skills content={skills} />,
+    "home.featured": <FeaturedCourse content={featured} />,
+    "home.our_courses": <OurCourses content={ourCourses} />,
+    "home.why": <WhyUs content={why} />,
+    "home.process": <LearningProcess content={process} />,
+    "home.live_batch": <LiveBatch content={liveBatch} />,
+    "home.products": <Products content={products} products={dbProducts} />,
+    "home.testimonials": <Testimonials content={testimonials} items={testimonialItems} />,
+    "home.faq": <Faq content={faq} items={faqItems} />,
+    "home.cta": <FinalCta content={cta} />,
+  };
 
   return (
     <>
-      <Hero content={hero} />
-      <Stats content={stats} />
-      <AiTools content={tools} />
-      <Skills content={skills} />
-      <FeaturedCourse content={featured} />
-      <OurCourses content={ourCourses} />
-      <WhyUs content={why} />
-      <LearningProcess content={process} />
-      <LiveBatch content={liveBatch} />
-      <Products content={products} products={dbProducts} />
-      <Testimonials
-        content={testimonials}
-        items={dbTestimonials.map((t) => ({
-          name: t.name,
-          role: t.role,
-          quote: t.quote,
-          initials: t.initials,
-          color: t.color,
-          rating: t.rating,
-          course: t.course,
-        }))}
-      />
-      <Faq
-        content={faq}
-        items={dbFaqs.map((f) => ({ q: f.question, a: f.answer }))}
-      />
-      <FinalCta content={cta} />
+      {orderedKeys.map((key) => (
+        <div key={key}>{sectionMap[key]}</div>
+      ))}
     </>
   );
 }

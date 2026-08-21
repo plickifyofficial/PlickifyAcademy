@@ -32,6 +32,37 @@ export async function saveSectionContent(key: string, value: unknown) {
   return { ok: true };
 }
 
+export async function saveSectionsMeta(order: string[], hidden: string[]) {
+  await requireAdmin();
+
+  const validKeys = [
+    "home.hero",
+    "home.stats",
+    "home.tools",
+    "home.skills",
+    "home.featured",
+    "home.our_courses",
+    "home.why",
+    "home.process",
+    "home.live_batch",
+    "home.products",
+    "home.testimonials",
+    "home.faq",
+    "home.cta",
+  ];
+
+  const cleanOrder = order.filter((k) => validKeys.includes(k));
+  for (const k of validKeys) {
+    if (!cleanOrder.includes(k)) cleanOrder.push(k);
+  }
+  const cleanHidden = hidden.filter((k) => validKeys.includes(k));
+
+  return saveSectionContent("home.sections_meta", {
+    order: cleanOrder,
+    hidden: cleanHidden,
+  });
+}
+
 export async function uploadContentImage(formData: FormData) {
   await requireAdmin();
 
