@@ -1,14 +1,28 @@
 import Link from "next/link";
 import type { LiveBatchContent } from "@/lib/content-schema";
+import type { Batch } from "@/lib/types";
 import { Countdown } from "@/components/home/countdown";
 
-export function LiveBatch({ content }: { content: LiveBatchContent }) {
-  const target = content.deadline
-    ? new Date(content.deadline).getTime()
-    : NaN;
+export function LiveBatch({
+  content,
+  batch,
+}: {
+  content: LiveBatchContent;
+  batch?: Batch | null;
+}) {
+  const deadline =
+    batch?.start_date || (content.deadline ? content.deadline : null);
+  const target = deadline ? new Date(deadline).getTime() : NaN;
+  const seatsFilled = batch?.seats_filled ?? content.seatsFilled ?? 0;
+  const seatsTotal = batch?.seats_total ?? content.seatsTotal ?? 1;
+  const checks =
+    batch?.features && batch.features.length > 0
+      ? batch.features
+      : content.checks;
+  const buttonLink = batch ? "/live-batch" : content.buttonLink;
   const pct = Math.min(
     100,
-    Math.round(((content.seatsFilled || 0) / (content.seatsTotal || 1)) * 100),
+    Math.round(((seatsFilled || 0) / (seatsTotal || 1)) * 100),
   );
 
   return (
@@ -26,10 +40,10 @@ export function LiveBatch({ content }: { content: LiveBatchContent }) {
               {content.eyebrow}
             </p>
             <h2 className="mt-2 section-heading font-extrabold text-white">
-              {content.title}
+              {batch?.title || content.title}
             </h2>
             <ul className="mt-6 space-y-2.5">
-              {content.checks.map((c) => (
+              {checks.map((c) => (
                 <li key={c} className="flex items-center gap-2.5 text-sm font-medium text-white/90">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
                     <i className="fa-solid fa-check text-[10px] text-white" />
@@ -47,7 +61,7 @@ export function LiveBatch({ content }: { content: LiveBatchContent }) {
               <div className="mb-2 flex justify-between text-xs font-medium text-white/90">
                 <span>{content.seatLabel}</span>
                 <span>
-                  {content.seatsFilled} / {content.seatsTotal}
+                  {seatsFilled} / {seatsTotal}
                 </span>
               </div>
               <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/20">
@@ -59,7 +73,7 @@ export function LiveBatch({ content }: { content: LiveBatchContent }) {
             </div>
 
             <Link
-              href={content.buttonLink || "/signup"}
+              href={buttonLink || "/signup"}
               className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-bold text-brand-700 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-50"
             >
               {content.buttonText}

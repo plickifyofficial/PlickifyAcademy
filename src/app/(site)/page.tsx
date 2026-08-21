@@ -15,6 +15,7 @@ import { CustomSectionBlock } from "@/components/home/custom-section-block";
 import { getSiteContent } from "@/lib/site-content";
 import { getPublishedProducts } from "@/lib/products";
 import { getPublishedFaqs, getPublishedTestimonials } from "@/lib/content-modules";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   ctaDefaults,
   faqDefaults,
@@ -38,7 +39,7 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts, dbTestimonials, dbFaqs, sectionsMeta, customSections] =
+  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts, dbTestimonials, dbFaqs, sectionsMeta, customSections, featuredCourse, featuredBatch] =
     await Promise.all([
       getSiteContent("home.hero", heroDefaults),
       getSiteContent("home.stats", statsDefaults),
@@ -58,6 +59,28 @@ export default async function HomePage() {
       getPublishedFaqs("homepage"),
       getSiteContent("home.sections_meta", sectionsMetaDefaults),
       getSiteContent("home.custom_sections", customSectionsDefaults),
+      (async () => {
+        const supabase = createAdminClient();
+        const { data } = await supabase
+          .from("courses")
+          .select("*")
+          .eq("is_featured", true)
+          .eq("is_published", true)
+          .order("updated_at", { ascending: false })
+          .limit(1);
+        return data?.[0] ?? null;
+      })(),
+      (async () => {
+        const supabase = createAdminClient();
+        const { data } = await supabase
+          .from("batches")
+          .select("*")
+          .eq("is_featured", true)
+          .eq("is_published", true)
+          .order("sort_order", { ascending: true })
+          .limit(1);
+        return data?.[0] ?? null;
+      })(),
     ]);
 
   const testimonialItems = dbTestimonials.map((t) => ({
@@ -84,11 +107,11 @@ export default async function HomePage() {
     "home.stats": <Stats content={stats} />,
     "home.tools": <AiTools content={tools} />,
     "home.skills": <Skills content={skills} />,
-    "home.featured": <FeaturedCourse content={featured} />,
+    "home.featured": <FeaturedCourse content={featured} course={featuredCourse} />,
     "home.our_courses": <OurCourses content={ourCourses} />,
     "home.why": <WhyUs content={why} />,
     "home.process": <LearningProcess content={process} />,
-    "home.live_batch": <LiveBatch content={liveBatch} />,
+    "home.live_batch": <LiveBatch content={liveBatch} batch={featuredBatch} />,
     "home.products": <Products content={products} products={dbProducts} />,
     "home.testimonials": <Testimonials content={testimonials} items={testimonialItems} />,
     "home.faq": <Faq content={faq} items={faqItems} />,
