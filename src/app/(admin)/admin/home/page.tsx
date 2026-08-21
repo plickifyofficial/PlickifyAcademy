@@ -88,6 +88,7 @@ export default async function AdminHomeEditorPage() {
         <SectionManager
           initialOrder={sectionsMeta.order}
           initialHidden={sectionsMeta.hidden}
+          initialDevices={sectionsMeta.devices}
           labels={homeSectionLabels}
         />
       </div>

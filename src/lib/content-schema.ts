@@ -1921,6 +1921,10 @@ export const homeSectionLabels: Record<string, string> = Object.fromEntries(
 export const sectionsMetaDefaults = {
   order: homeSections.map((s) => s.key),
   hidden: [] as string[],
+  devices: {} as Record<
+    string,
+    { desktop: boolean; tablet: boolean; mobile: boolean }
+  >,
 };
 
 export type SectionsMeta = typeof sectionsMetaDefaults;

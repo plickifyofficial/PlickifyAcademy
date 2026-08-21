@@ -172,7 +172,11 @@ export async function discardDraft(key: string) {
   return { ok: true };
 }
 
-export async function saveSectionsMeta(order: string[], hidden: string[]) {
+export async function saveSectionsMeta(
+  order: string[],
+  hidden: string[],
+  devices?: Record<string, { desktop: boolean; tablet: boolean; mobile: boolean }>,
+) {
   await requireAdmin();
 
   const validKeys = [
@@ -197,9 +201,25 @@ export async function saveSectionsMeta(order: string[], hidden: string[]) {
   }
   const cleanHidden = hidden.filter((k) => validKeys.includes(k));
 
+  const cleanDevices: Record<
+    string,
+    { desktop: boolean; tablet: boolean; mobile: boolean }
+  > = {};
+  if (devices) {
+    for (const [k, v] of Object.entries(devices)) {
+      if (!validKeys.includes(k) || !v || typeof v !== "object") continue;
+      cleanDevices[k] = {
+        desktop: v.desktop !== false,
+        tablet: v.tablet !== false,
+        mobile: v.mobile !== false,
+      };
+    }
+  }
+
   return saveSectionContent("home.sections_meta", {
     order: cleanOrder,
     hidden: cleanHidden,
+    devices: cleanDevices,
   });
 }
 

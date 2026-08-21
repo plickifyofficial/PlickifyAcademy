@@ -4,15 +4,24 @@ import { useState } from "react";
 import { saveSectionsMeta } from "@/lib/actions/content";
 import { cn } from "@/lib/utils";
 
+type DeviceFlags = { desktop: boolean; tablet: boolean; mobile: boolean };
+
 type Props = {
   initialOrder: string[];
   initialHidden: string[];
+  initialDevices?: Record<string, DeviceFlags>;
   labels: Record<string, string>;
 };
 
-export function SectionManager({ initialOrder, initialHidden, labels }: Props) {
+export function SectionManager({
+  initialOrder,
+  initialHidden,
+  initialDevices = {},
+  labels,
+}: Props) {
   const [order, setOrder] = useState(initialOrder);
   const [hidden, setHidden] = useState<string[]>(initialHidden);
+  const [devices, setDevices] = useState<Record<string, DeviceFlags>>(initialDevices);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -34,11 +43,19 @@ export function SectionManager({ initialOrder, initialHidden, labels }: Props) {
     setMessage(null);
   }
 
+  function toggleDevice(key: string, device: keyof DeviceFlags) {
+    setDevices((prev) => {
+      const current = prev[key] ?? { desktop: true, tablet: true, mobile: true };
+      return { ...prev, [key]: { ...current, [device]: !current[device] } };
+    });
+    setMessage(null);
+  }
+
   async function handleSave() {
     setPending(true);
     setMessage(null);
     try {
-      await saveSectionsMeta(order, hidden);
+      await saveSectionsMeta(order, hidden, devices);
       setMessage("Section layout saved.");
     } catch (err) {
       setMessage(
@@ -119,6 +136,40 @@ export function SectionManager({ initialOrder, initialHidden, labels }: Props) {
               <span className="hidden font-mono text-[11px] text-zinc-400 sm:block">
                 {key}
               </span>
+
+              <div className="flex items-center gap-1" title="Device visibility">
+                {(
+                  [
+                    ["desktop", "fa-solid fa-desktop", "Desktop"],
+                    ["tablet", "fa-solid fa-tablet-screen-button", "Tablet"],
+                    ["mobile", "fa-solid fa-mobile-screen-button", "Mobile"],
+                  ] as const
+                ).map(([device, icon, title]) => {
+                  const flags = devices[key] ?? {
+                    desktop: true,
+                    tablet: true,
+                    mobile: true,
+                  };
+                  const on = flags[device];
+                  return (
+                    <button
+                      key={device}
+                      onClick={() => toggleDevice(key, device)}
+                      aria-label={`${title} visibility for ${labels[key] ?? key}`}
+                      aria-pressed={on}
+                      title={`${title}: ${on ? "shown" : "hidden"}`}
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                        on
+                          ? "border-brand-200 bg-brand-50 text-brand-600 hover:bg-brand-100"
+                          : "border-zinc-200 bg-white text-zinc-300 hover:text-zinc-500",
+                      )}
+                    >
+                      <i className={`${icon} text-sm`} />
+                    </button>
+                  );
+                })}
+              </div>
 
               <button
                 onClick={() => toggleVisibility(key)}

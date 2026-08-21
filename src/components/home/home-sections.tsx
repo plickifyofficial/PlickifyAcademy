@@ -109,6 +109,20 @@ export async function HomeSections({ useDrafts = false }: { useDrafts?: boolean 
     ...sectionsMetaDefaults.order.filter((k) => !sectionsMeta.order.includes(k)),
   ].filter((k) => !hiddenSet.has(k));
 
+  // Tailwind visibility classes per device flags
+  // (mobile <768px, tablet 768–1279px, desktop ≥1280px).
+  function deviceClass(
+    flags?: { desktop: boolean; tablet: boolean; mobile: boolean },
+  ) {
+    if (!flags) return "";
+    const { desktop = true, tablet = true, mobile = true } = flags;
+    if (desktop && tablet && mobile) return "";
+    let cls = mobile ? "" : "hidden";
+    if (tablet !== mobile) cls += ` md:${tablet ? "block" : "hidden"}`;
+    if (desktop !== tablet) cls += ` xl:${desktop ? "block" : "hidden"}`;
+    return cls.trim();
+  }
+
   const sectionMap: Record<string, React.ReactNode> = {
     "home.hero": <Hero content={hero} />,
     "home.stats": <Stats content={stats} />,
@@ -127,9 +141,14 @@ export async function HomeSections({ useDrafts = false }: { useDrafts?: boolean 
 
   return (
     <>
-      {orderedKeys.map((key) => (
-        <div key={key}>{sectionMap[key]}</div>
-      ))}
+      {orderedKeys.map((key) => {
+        const cls = deviceClass(sectionsMeta.devices?.[key]);
+        return (
+          <div key={key} className={cls || undefined}>
+            {sectionMap[key]}
+          </div>
+        );
+      })}
       {customSections.items
         .filter((s) => s.visible)
         .map((s) => (
