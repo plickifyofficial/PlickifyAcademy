@@ -26,6 +26,23 @@ export default async function SiteLayout({
     getSiteContent("global.popup", popupDefaults),
   ]);
 
+  // Custom pages flagged "show in footer" appear in the footer link columns.
+  const supabase = await createClient();
+  const { data: footerPages } = await supabase
+    .from("custom_pages")
+    .select("slug, title")
+    .eq("is_published", true)
+    .eq("show_in_footer", true);
+  if (footerPages && footerPages.length > 0) {
+    footer.supportLinks = [
+      ...footer.supportLinks,
+      ...footerPages.map((p) => ({
+        label: p.title,
+        href: `/p/${p.slug}`,
+      })),
+    ];
+  }
+
   if (settings?.maintenance_mode) {
     const supabase = await createClient();
     const {

@@ -2571,3 +2571,37 @@ create policy "Only admins can manage drafts"
   on public.site_content_drafts for all
   using (public.is_admin())
   with check (public.is_admin());
+
+
+-- PHASE 11: CUSTOM PAGES (admin-created pages at /p/{slug})
+create table if not exists public.custom_pages (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  title text not null,
+  body text not null default '',
+  is_published boolean not null default true,
+  show_in_footer boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.custom_pages enable row level security;
+drop policy if exists "Anyone can read published custom pages" on public.custom_pages;
+create policy "Anyone can read published custom pages"
+  on public.custom_pages for select
+  using (is_published = true);
+drop policy if exists "Admins can read all custom pages" on public.custom_pages;
+create policy "Admins can read all custom pages"
+  on public.custom_pages for select
+  using (public.is_admin());
+drop policy if exists "Admins can insert custom pages" on public.custom_pages;
+create policy "Admins can insert custom pages"
+  on public.custom_pages for insert
+  with check (public.is_admin());
+drop policy if exists "Admins can update custom pages" on public.custom_pages;
+create policy "Admins can update custom pages"
+  on public.custom_pages for update
+  using (public.is_admin());
+drop policy if exists "Admins can delete custom pages" on public.custom_pages;
+create policy "Admins can delete custom pages"
+  on public.custom_pages for delete
+  using (public.is_admin());

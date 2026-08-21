@@ -15,7 +15,8 @@ const menu = [
     group: "Content",
     items: [
       { href: "/admin/home", label: "Home Page", icon: "fa-solid fa-house" },
-      { href: "/admin/pages", label: "Pages", icon: "fa-solid fa-file-lines" },
+      { href: "/admin/pages", label: "Static Pages", icon: "fa-solid fa-file-lines" },
+      { href: "/admin/custom-pages", label: "Custom Pages", icon: "fa-solid fa-file-circle-plus" },
       { href: "/admin/courses", label: "Courses", icon: "fa-solid fa-book-open" },
       { href: "/admin/courses?add=1", label: "New Course", icon: "fa-solid fa-file-circle-plus" },
       { href: "/admin/assignments", label: "Assignments", icon: "fa-solid fa-clipboard-check" },
