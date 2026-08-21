@@ -30,7 +30,7 @@ export function Products({
           data-aos-delay="100"
         >
           {(products && products.length > 0
-            ? products
+            ? products.slice(0, content.limit || 8)
             : content.items
           ).map((product) => {
             const isDb = !!(product as Product).id;

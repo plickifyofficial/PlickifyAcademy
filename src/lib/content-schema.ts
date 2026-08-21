@@ -41,9 +41,9 @@ export const heroDefaults = {
   titleB: "with AI",
   subtitle:
     "Build your digital career by learning AI Skills, Freelancing, Passive Income and Real-World Projects.",
-  primaryBtn: "Get Started Now",
+  primaryBtn: "এখনই শুরু করুন",
   primaryBtnLink: "/signup",
-  secondaryBtn: "Browse Courses",
+  secondaryBtn: "কোর্সগুলো দেখুন",
   secondaryBtnLink: "/courses",
   rating: "4.9/5",
   reviews: "500+ Reviews",
@@ -86,12 +86,12 @@ export const skillsDefaults = {
   eyebrow: "What You Will Learn",
   title: "Every Skill You Need for Your Future",
   items: [
-    { icon: "fa-solid fa-brain", title: "AI Productivity", desc: "Learn to work smarter using AI tools." },
-    { icon: "fa-solid fa-briefcase", title: "Freelancing", desc: "Learn online marketplaces and client work." },
-    { icon: "fa-solid fa-chart-line", title: "Passive Income", desc: "Digital assets and online income strategies." },
-    { icon: "fa-solid fa-palette", title: "Graphic Design", desc: "Modern graphic design powered by AI." },
-    { icon: "fa-solid fa-bullhorn", title: "Digital Marketing", desc: "Marketing, ads and audience growth." },
-    { icon: "fa-solid fa-globe", title: "Web & Tech", desc: "Modern web and digital technology." },
+    { icon: "fa-solid fa-brain", title: "AI Productivity", desc: "Learn to work smarter using AI tools.", link: "/courses" },
+    { icon: "fa-solid fa-briefcase", title: "Freelancing", desc: "Learn online marketplaces and client work.", link: "/courses" },
+    { icon: "fa-solid fa-chart-line", title: "Passive Income", desc: "Digital assets and online income strategies.", link: "/courses" },
+    { icon: "fa-solid fa-palette", title: "Graphic Design", desc: "Modern graphic design powered by AI.", link: "/courses" },
+    { icon: "fa-solid fa-bullhorn", title: "Digital Marketing", desc: "Marketing, ads and audience growth.", link: "/courses" },
+    { icon: "fa-solid fa-globe", title: "Web & Tech", desc: "Modern web and digital technology.", link: "/courses" },
   ],
 };
 export type SkillsContent = typeof skillsDefaults;
@@ -176,6 +176,7 @@ export const productsDefaults = {
   title: "Premium Digital Resources",
   viewAllText: "View All Resources",
   viewAllLink: "/digital-products",
+  limit: 8,
   items: [
     { name: "AI Prompt Pack", price: "৳490", oldPrice: "", tag: "PROMPTS", icon: "fa-solid fa-bolt", gradient: "from-blue-600 to-indigo-600" },
     { name: "Canva Templates", price: "৳690", oldPrice: "৳990", tag: "DESIGN", icon: "fa-solid fa-palette", gradient: "from-violet-600 to-fuchsia-600" },
@@ -1046,9 +1047,15 @@ export const homeSections: SectionDef[] = [
       { kind: "text", key: "viewAllText", label: "View All Button Text" },
       { kind: "url", key: "viewAllLink", label: "View All Link" },
       {
+        kind: "number",
+        key: "limit",
+        label: "Products To Show (from database)",
+        hint: "e.g. 4, 6, 8 or 12",
+      },
+      {
         kind: "list",
         key: "items",
-        label: "Products",
+        label: "Fallback Products (used only if database is empty)",
         itemLabel: "Product",
         fields: [
           { kind: "text", key: "name", label: "Name" },
@@ -1758,11 +1765,12 @@ export const courseContentFields: FieldDef[] = [
     key: "whoFor",
     label: "Who This Course Is For",
     itemLabel: "Card",
-    fields: [
-      iconFields("icon", "Icon"),
-      { kind: "text", key: "title", label: "Title" },
-      { kind: "text", key: "desc", label: "Description" },
-    ],
+        fields: [
+          iconFields("icon", "Icon"),
+          { kind: "text", key: "title", label: "Title" },
+          { kind: "text", key: "desc", label: "Description" },
+          { kind: "url", key: "link", label: "Link (optional)" },
+        ],
   },
   { kind: "text", key: "outcomeTitle", label: "Outcome Title" },
   { kind: "text", key: "outcomeSubtitle", label: "Outcome Subtitle" },

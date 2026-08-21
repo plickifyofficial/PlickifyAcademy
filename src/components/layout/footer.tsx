@@ -18,8 +18,8 @@ export function Footer({
 
   return (
     <footer id="contact" className="bg-brand-900 text-zinc-300">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
+<div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+<div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.4fr] lg:gap-12">
           <div className="pb-2 md:pb-0">
             <div className="flex items-center gap-2.5">
               {settings?.logo_url ? (

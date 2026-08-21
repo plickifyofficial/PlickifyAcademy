@@ -38,12 +38,12 @@ export function Header({
           : "border-zinc-100 shadow-none",
       )}
     >
-      <div
-        className={cn(
-          "mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 transition-all duration-200 sm:px-6",
-          scrolled ? "h-14 lg:h-16" : "h-16 lg:h-[72px]",
-        )}
-      >
+        <div
+          className={cn(
+            "mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 transition-all duration-200 sm:px-6",
+            scrolled ? "h-16 lg:h-[76px]" : "h-[72px] lg:h-20",
+          )}
+        >
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           {settings?.logo_url ? (
             // eslint-disable-next-line @next/next/no-img-element

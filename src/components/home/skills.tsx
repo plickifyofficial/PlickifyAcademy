@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { SkillsContent } from "@/lib/content-schema";
 
 export function Skills({ content }: { content: SkillsContent }) {
@@ -17,22 +18,32 @@ export function Skills({ content }: { content: SkillsContent }) {
         data-aos="fade-up"
         data-aos-delay="100"
       >
-        {content.items.map((skill) => (
-          <div
-            key={skill.title}
-            className="group rounded-2xl border border-zinc-100 bg-white p-5 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-100"
-          >
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-xl text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
-              <i className={skill.icon} />
-            </span>
-            <h3 className="mt-3 text-sm font-bold text-zinc-900">
-              {skill.title}
-            </h3>
-            <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
-              {skill.desc}
-            </p>
-          </div>
-        ))}
+        {content.items.map((skill) => {
+          const inner = (
+            <>
+              <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-xl text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
+                <i className={skill.icon} />
+              </span>
+              <h3 className="mt-3 text-sm font-bold text-zinc-900">
+                {skill.title}
+              </h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
+                {skill.desc}
+              </p>
+            </>
+          );
+          const classes =
+            "group rounded-2xl border border-zinc-100 bg-white p-5 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-100";
+          return skill.link ? (
+            <Link key={skill.title} href={skill.link} className={classes}>
+              {inner}
+            </Link>
+          ) : (
+            <div key={skill.title} className={classes}>
+              {inner}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
