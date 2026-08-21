@@ -12,19 +12,21 @@ export function AiTools({ content }: { content: ToolsContent }) {
           style={{ scrollbarWidth: "none" }}
           data-aos="fade-up"
         >
-          {content.tools.map((tool) => (
-            <div
-              key={tool.name}
-              className="flex shrink-0 items-center gap-2.5 text-zinc-500 transition-colors hover:text-brand-600"
-            >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-sm shadow-sm">
-                <i className={tool.icon} />
-              </span>
-              <span className="whitespace-nowrap text-sm font-semibold">
-                {tool.name}
-              </span>
-            </div>
-          ))}
+          {content.tools
+            .filter((tool) => tool.visible !== false)
+            .map((tool) => (
+              <div
+                key={tool.name}
+                className="flex shrink-0 items-center gap-2.5 text-zinc-500 transition-colors hover:text-brand-600"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-sm shadow-sm">
+                  <i className={tool.icon} />
+                </span>
+                <span className="whitespace-nowrap text-sm font-semibold">
+                  {tool.name}
+                </span>
+              </div>
+            ))}
         </div>
       </div>
     </section>

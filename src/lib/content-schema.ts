@@ -72,12 +72,12 @@ export type StatsContent = typeof statsDefaults;
 export const toolsDefaults = {
   label: "We work with the tools you use",
   tools: [
-    { icon: "fa-solid fa-comment-dots", name: "ChatGPT" },
-    { icon: "fa-solid fa-palette", name: "Canva" },
-    { icon: "fa-solid fa-brain", name: "Google AI" },
-    { icon: "fa-solid fa-wand-magic-sparkles", name: "Midjourney" },
-    { icon: "fa-solid fa-gem", name: "Gemini" },
-    { icon: "fa-solid fa-robot", name: "Claude" },
+    { icon: "fa-solid fa-comment-dots", name: "ChatGPT", visible: true },
+    { icon: "fa-solid fa-palette", name: "Canva", visible: true },
+    { icon: "fa-solid fa-brain", name: "Google AI", visible: true },
+    { icon: "fa-solid fa-wand-magic-sparkles", name: "Midjourney", visible: true },
+    { icon: "fa-solid fa-gem", name: "Gemini", visible: true },
+    { icon: "fa-solid fa-robot", name: "Claude", visible: true },
   ],
 };
 export type ToolsContent = typeof toolsDefaults;
@@ -906,6 +906,7 @@ export const homeSections: SectionDef[] = [
         fields: [
           iconFields("icon", "Icon"),
           { kind: "text", key: "name", label: "Name" },
+          { kind: "boolean", key: "visible", label: "Visible" },
         ],
       },
     ],
