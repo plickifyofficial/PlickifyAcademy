@@ -1109,6 +1109,11 @@ export const homeSections: SectionDef[] = [
     fields: [
       { kind: "text", key: "title", label: "Title" },
       {
+        kind: "number",
+        key: "limit",
+        label: "How Many FAQs To Show",
+      },
+      {
         kind: "list",
         key: "items",
         label: "Questions",

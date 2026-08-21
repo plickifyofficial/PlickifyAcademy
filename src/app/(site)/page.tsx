@@ -92,7 +92,10 @@ export default async function HomePage() {
     rating: t.rating,
     course: t.course,
   }));
-  const faqItems = dbFaqs.map((f) => ({ q: f.question, a: f.answer }));
+  const faqLimit = (faq as { limit?: number }).limit || 6;
+  const faqItems = dbFaqs
+    .map((f) => ({ q: f.question, a: f.answer }))
+    .slice(0, faqLimit);
 
   const hiddenSet = new Set(sectionsMeta.hidden);
   const knownKeys = new Set(sectionsMetaDefaults.order);
