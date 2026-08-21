@@ -66,6 +66,15 @@ const menu = [
     items: [{ href: "/admin/media", label: "Media Library", icon: "fa-solid fa-images" }],
   },
   {
+    group: "AI Assistant",
+    items: [
+      { href: "/admin/ai", label: "AI Overview", icon: "fa-solid fa-robot" },
+      { href: "/admin/ai/settings", label: "AI Settings", icon: "fa-solid fa-sliders" },
+      { href: "/admin/ai/knowledge", label: "Knowledge Base", icon: "fa-solid fa-database" },
+      { href: "/admin/ai/logs", label: "Conversation Logs", icon: "fa-solid fa-comments" },
+    ],
+  },
+  {
     group: "Contact",
     items: [
       { href: "/admin/contact-system", label: "Contact System", icon: "fa-solid fa-comment-dots" },

@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { PopupBanner } from "@/components/layout/popup-banner";
+import { AiChatWidget } from "@/components/chat/ai-chat-widget";
 import { AosProvider } from "@/components/ui/aos-provider";
 import { getSiteContent } from "@/lib/site-content";
 import { getSiteSettings } from "@/lib/settings";
@@ -11,6 +12,7 @@ import {
   navDefaults,
   popupDefaults,
 } from "@/lib/content-schema";
+import { getAiAssistantSettings } from "@/lib/ai/config";
 
 export const dynamic = "force-dynamic";
 
@@ -19,11 +21,12 @@ export default async function SiteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, nav, footer, popup] = await Promise.all([
+  const [settings, nav, footer, popup, ai] = await Promise.all([
     getSiteSettings(),
     getSiteContent("global.nav", navDefaults),
     getSiteContent("global.footer", footerDefaults),
     getSiteContent("global.popup", popupDefaults),
+    getAiAssistantSettings(),
   ]);
 
   // Custom pages flagged "show in footer" appear in the footer link columns.
@@ -84,6 +87,13 @@ export default async function SiteLayout({
       </AosProvider>
       <Footer settings={settings} content={footer} />
       {popup.is_enabled ? <PopupBanner content={popup} /> : null}
+      {ai.is_enabled ? (
+        <AiChatWidget
+          name={ai.name}
+          welcomeMessage={ai.welcomeMessage}
+          suggestedQuestions={ai.suggestedQuestions}
+        />
+      ) : null}
     </>
   );
 }

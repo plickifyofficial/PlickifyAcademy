@@ -2625,3 +2625,65 @@ create policy "Admins can manage media metadata"
   on public.media_files for all
   using (public.is_admin())
   with check (public.is_admin());
+
+
+-- PHASE 13: AI ASSISTANT (RAG knowledge base + conversations)
+create table if not exists public.ai_knowledge_chunks (
+  id uuid primary key default gen_random_uuid(),
+  source_type text not null,
+  source_id text not null,
+  title text not null default '',
+  subtitle text not null default '',
+  body text not null default '',
+  url text not null default '',
+  meta jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (source_type, source_id)
+);
+create index if not exists ai_knowledge_chunks_source_type_idx on public.ai_knowledge_chunks (source_type);
+create table if not exists public.ai_conversations (
+  id uuid primary key default gen_random_uuid(),
+  session_id text not null,
+  user_id uuid references public.profiles(id) on delete set null,
+  first_message text not null default '',
+  message_count int not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists ai_conversations_session_idx on public.ai_conversations (session_id);
+create table if not exists public.ai_messages (
+  id uuid primary key default gen_random_uuid(),
+  conversation_id uuid not null references public.ai_conversations(id) on delete cascade,
+  role text not null check (role in ('user','assistant')),
+  content text not null,
+  feedback text null check (feedback in ('up','down')),
+  tokens_est int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists ai_messages_conversation_idx on public.ai_messages (conversation_id, created_at);
+alter table public.ai_knowledge_chunks enable row level security;
+drop policy if exists "Admins manage AI knowledge" on public.ai_knowledge_chunks;
+create policy "Admins manage AI knowledge"
+  on public.ai_knowledge_chunks for all
+  using (public.is_admin())
+  with check (public.is_admin());
+alter table public.ai_conversations enable row level security;
+drop policy if exists "Anyone can create conversations" on public.ai_conversations;
+create policy "Anyone can create conversations"
+  on public.ai_conversations for insert with check (true);
+drop policy if exists "Admins read conversations" on public.ai_conversations;
+create policy "Admins read conversations"
+  on public.ai_conversations for select using (public.is_admin());
+alter table public.ai_messages enable row level security;
+drop policy if exists "Anyone can insert messages" on public.ai_messages;
+create policy "Anyone can insert messages"
+  on public.ai_messages for insert with check (true);
+drop policy if exists "Anyone rates own conversation messages" on public.ai_messages;
+create policy "Anyone rates own conversation messages"
+  on public.ai_messages for update using (
+    exists (
+      select 1 from public.ai_conversations c
+      where c.id = conversation_id and ((c.user_id is null and auth.uid() is null) or c.user_id = auth.uid())
+    ) or public.is_admin()
+  );
