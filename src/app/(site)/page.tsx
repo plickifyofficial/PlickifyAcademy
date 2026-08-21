@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata("/", {
-    title: "Plickify Academy | AI Skills, Freelancing & Digital Career",
+    title: { absolute: "Plickify Academy | AI Skills, Freelancing & Digital Career" },
   });
 }
 
