@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ContentEditor } from "@/components/admin/content-editor";
 import { SectionManager } from "@/components/admin/section-manager";
 import { CustomSectionsManager } from "@/components/admin/custom-sections-manager";
+import { DraftsBar } from "@/components/admin/drafts-bar";
 import {
   allSections,
   customSectionsDefaults,
@@ -44,6 +46,22 @@ export default async function AdminHomeEditorPage() {
     customSectionsDefaults,
   );
 
+  const admin = createAdminClient();
+  const { data: draftRows } = await admin
+    .from("site_content_drafts")
+    .select("key, updated_at")
+    .order("updated_at", { ascending: false });
+
+  const labels: Record<string, string> = {
+    ...homeSectionLabels,
+    ...Object.fromEntries(allSections.map((s) => [s.key, s.title])),
+  };
+  const drafts = (draftRows ?? []).map((d) => ({
+    key: d.key,
+    label: labels[d.key] ?? d.key,
+    updatedAt: d.updated_at,
+  }));
+
   return (
     <div className="max-w-5xl">
       <h1 className="wp-page-title">Home Page & Site Content</h1>
@@ -60,6 +78,10 @@ export default async function AdminHomeEditorPage() {
         <a href="/admin/media" className="wp-btn">
           <i className="fa-solid fa-images" /> Media Library
         </a>
+      </div>
+
+      <div className="mt-6">
+        <DraftsBar drafts={drafts} />
       </div>
 
       <div className="mt-6">

@@ -93,6 +93,85 @@ export async function getRevisionValue(revisionId: string) {
   return { key: data.key, value: data.value };
 }
 
+// ============================================================
+// DRAFTS (Save Draft / Preview / Publish)
+// ============================================================
+
+export async function saveSectionDraft(key: string, value: unknown) {
+  await requireAdmin();
+  if (!key) throw new Error("Section key is missing");
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("site_content_drafts")
+    .upsert(
+      { key, value, updated_at: new Date().toISOString() },
+      { onConflict: "key" },
+    );
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/preview");
+  revalidatePath("/admin/home");
+  return { ok: true };
+}
+
+export async function publishDraft(key: string) {
+  await requireAdmin();
+  if (!key) throw new Error("Section key is missing");
+
+  const admin = createAdminClient();
+  const { data: draft } = await admin
+    .from("site_content_drafts")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle();
+
+  if (!draft) throw new Error("Draft not found");
+
+  await saveSectionContent(key, draft.value);
+
+  const { error } = await admin
+    .from("site_content_drafts")
+    .delete()
+    .eq("key", key);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/home");
+  return { ok: true };
+}
+
+export async function publishAllDrafts() {
+  await requireAdmin();
+
+  const admin = createAdminClient();
+  const { data: drafts } = await admin
+    .from("site_content_drafts")
+    .select("key");
+
+  for (const d of drafts ?? []) {
+    await publishDraft(d.key);
+  }
+
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/home");
+  return { ok: true, count: (drafts ?? []).length };
+}
+
+export async function discardDraft(key: string) {
+  await requireAdmin();
+  if (!key) throw new Error("Section key is missing");
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("site_content_drafts")
+    .delete()
+    .eq("key", key);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/home");
+  return { ok: true };
+}
+
 export async function saveSectionsMeta(order: string[], hidden: string[]) {
   await requireAdmin();
 

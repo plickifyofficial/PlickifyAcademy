@@ -45,3 +45,22 @@ export const getSiteContent = unstable_cache(
   ["site-content"],
   { revalidate: 60 },
 );
+
+// Draft-aware read for the admin preview page (uncached).
+export async function readSiteContentWithDraft<T>(
+  key: string,
+  defaults: T,
+): Promise<T> {
+  try {
+    const supabase = createAdminClient();
+    const { data: draft } = await supabase
+      .from("site_content_drafts")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle();
+    if (draft?.value) return deepMerge(defaults, draft.value);
+    return readSiteContent(key, defaults);
+  } catch {
+    return readSiteContent(key, defaults);
+  }
+}

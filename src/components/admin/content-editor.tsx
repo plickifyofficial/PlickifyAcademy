@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { FieldDef, SectionDef } from "@/lib/content-schema";
-import { saveSectionContent, uploadContentImage } from "@/lib/actions/content";
+import { saveSectionContent, saveSectionDraft, uploadContentImage } from "@/lib/actions/content";
 import { useToast } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 
@@ -131,10 +131,23 @@ export function ContentEditor({
     setPending(section.key);
     try {
       await saveSectionContent(section.key, values[section.key] ?? {});
-      showToast(`${section.title} saved`);
+      showToast(`${section.title} published`);
       router.refresh();
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Could not save", "error");
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function saveDraft(section: SectionDef) {
+    setPending(`${section.key}:draft`);
+    try {
+      await saveSectionDraft(section.key, values[section.key] ?? {});
+      showToast(`${section.title} saved as draft — use Preview to check, then Publish`);
+      router.refresh();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Could not save draft", "error");
     } finally {
       setPending(null);
     }
@@ -231,9 +244,27 @@ export function ContentEditor({
                     disabled={pending === section.key}
                     className="wp-btn wp-btn-primary"
                   >
-                    <i className="fa-solid fa-floppy-disk" />
-                    {pending === section.key ? "Saving..." : "Save"}
+                    <i className="fa-solid fa-cloud-arrow-up" />
+                    {pending === section.key ? "Publishing..." : "Publish"}
                   </button>
+                  <button
+                    onClick={() => saveDraft(section)}
+                    disabled={pending === `${section.key}:draft`}
+                    className="wp-btn"
+                  >
+                    <i className="fa-solid fa-pen-to-square" />
+                    {pending === `${section.key}:draft`
+                      ? "Saving..."
+                      : "Save Draft"}
+                  </button>
+                  <a
+                    href="/preview"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="wp-btn"
+                  >
+                    <i className="fa-solid fa-eye" /> Preview
+                  </a>
                   <button
                     onClick={() => reset(section)}
                     disabled={pending === section.key}

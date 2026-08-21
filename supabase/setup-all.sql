@@ -2548,3 +2548,26 @@ drop policy if exists "Only admins can insert revisions" on public.site_content_
 create policy "Only admins can insert revisions"
   on public.site_content_revisions for insert
   with check (public.is_admin());
+
+-- ============================================================
+-- PHASE 10: SITE CONTENT DRAFTS (Save Draft / Preview / Publish)
+-- Drafts live here until published to site_content.
+-- ============================================================
+create table if not exists public.site_content_drafts (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.site_content_drafts enable row level security;
+
+drop policy if exists "Only admins can view drafts" on public.site_content_drafts;
+create policy "Only admins can view drafts"
+  on public.site_content_drafts for select
+  using (public.is_admin());
+
+drop policy if exists "Only admins can manage drafts" on public.site_content_drafts;
+create policy "Only admins can manage drafts"
+  on public.site_content_drafts for all
+  using (public.is_admin())
+  with check (public.is_admin());
