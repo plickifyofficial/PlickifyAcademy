@@ -2,10 +2,15 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
+import { PopupBanner } from "@/components/layout/popup-banner";
 import { AosProvider } from "@/components/ui/aos-provider";
 import { getSiteContent } from "@/lib/site-content";
 import { getSiteSettings } from "@/lib/settings";
-import { footerDefaults, navDefaults } from "@/lib/content-schema";
+import {
+  footerDefaults,
+  navDefaults,
+  popupDefaults,
+} from "@/lib/content-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -14,10 +19,11 @@ export default async function SiteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, nav, footer] = await Promise.all([
+  const [settings, nav, footer, popup] = await Promise.all([
     getSiteSettings(),
     getSiteContent("global.nav", navDefaults),
     getSiteContent("global.footer", footerDefaults),
+    getSiteContent("global.popup", popupDefaults),
   ]);
 
   if (settings?.maintenance_mode) {
@@ -60,6 +66,7 @@ export default async function SiteLayout({
         <div className="flex flex-1 flex-col">{children}</div>
       </AosProvider>
       <Footer settings={settings} content={footer} />
+      {popup.is_enabled ? <PopupBanner content={popup} /> : null}
     </>
   );
 }

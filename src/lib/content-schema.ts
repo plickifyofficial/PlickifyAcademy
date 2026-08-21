@@ -383,6 +383,18 @@ export const announcementDefaults = {
 };
 export type AnnouncementContent = typeof announcementDefaults;
 
+export const popupDefaults = {
+  is_enabled: false,
+  title: "🎉 Special Offer!",
+  body: "<p>Enroll in any course this week and get <strong>50% OFF</strong>. Limited time offer!</p>",
+  image: "",
+  buttonText: "Enroll Now",
+  buttonLink: "/courses",
+  delaySeconds: 5,
+  showOncePerSession: true,
+};
+export type PopupContent = typeof popupDefaults;
+
 export const footerDefaults = {
   about:
     "A practical learning platform for AI, Freelancing and Digital Skills.",
@@ -1495,6 +1507,22 @@ export const globalSections: SectionDef[] = [
         label: "Background (Tailwind class)",
         hint: "e.g. bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600",
       },
+    ],
+  },
+  {
+    key: "global.popup",
+    title: "Popup Banner",
+    description: "A popup shown to visitors after a few seconds — for offers and announcements.",
+    defaults: popupDefaults,
+    fields: [
+      { kind: "boolean", key: "is_enabled", label: "Show Popup" },
+      { kind: "text", key: "title", label: "Title" },
+      { kind: "textarea", key: "body", label: "Body (HTML allowed)" },
+      { kind: "image", key: "image", label: "Image (optional)" },
+      { kind: "text", key: "buttonText", label: "Button Text" },
+      { kind: "url", key: "buttonLink", label: "Button Link" },
+      { kind: "number", key: "delaySeconds", label: "Delay Before Showing (seconds)" },
+      { kind: "boolean", key: "showOncePerSession", label: "Show Only Once Per Visit" },
     ],
   },
   {
