@@ -14,11 +14,40 @@ const ALLOWED_IMAGE = [
   "image/gif",
 ];
 
+const MAX_REVISIONS_PER_KEY = 20;
+
 export async function saveSectionContent(key: string, value: unknown) {
   await requireAdmin();
   if (!key) throw new Error("Section key is missing");
 
   const admin = createAdminClient();
+
+  // Snapshot the current value before overwriting (revision history).
+  const { data: current } = await admin
+    .from("site_content")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle();
+
+  if (current?.value) {
+    await admin.from("site_content_revisions").insert({
+      key,
+      value: current.value,
+    });
+
+    // Keep only the latest N revisions per key.
+    const { data: all } = await admin
+      .from("site_content_revisions")
+      .select("id")
+      .eq("key", key)
+      .order("created_at", { ascending: false });
+
+    const stale = (all ?? []).slice(MAX_REVISIONS_PER_KEY).map((r) => r.id);
+    if (stale.length > 0) {
+      await admin.from("site_content_revisions").delete().in("id", stale);
+    }
+  }
+
   const { error } = await admin
     .from("site_content")
     .upsert(
@@ -31,6 +60,37 @@ export async function saveSectionContent(key: string, value: unknown) {
   revalidatePath("/", "layout");
   revalidatePath("/admin/home");
   return { ok: true };
+}
+
+export async function restoreRevision(revisionId: string) {
+  await requireAdmin();
+  if (!revisionId) throw new Error("Revision id is missing");
+
+  const admin = createAdminClient();
+  const { data: revision } = await admin
+    .from("site_content_revisions")
+    .select("key, value")
+    .eq("id", revisionId)
+    .maybeSingle();
+
+  if (!revision) throw new Error("Revision not found");
+
+  return saveSectionContent(revision.key, revision.value);
+}
+
+export async function getRevisionValue(revisionId: string) {
+  await requireAdmin();
+  if (!revisionId) throw new Error("Revision id is missing");
+
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("site_content_revisions")
+    .select("key, value")
+    .eq("id", revisionId)
+    .maybeSingle();
+
+  if (!data) throw new Error("Revision not found");
+  return { key: data.key, value: data.value };
 }
 
 export async function saveSectionsMeta(order: string[], hidden: string[]) {

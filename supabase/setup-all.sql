@@ -2520,3 +2520,31 @@ drop policy if exists "Only admins can view contact events" on public.contact_ev
 create policy "Only admins can view contact events"
   on public.contact_events for select
   using (public.is_admin());
+
+-- ============================================================
+-- PHASE 10: SITE CONTENT REVISION HISTORY
+-- Every save of site_content snapshots the previous value.
+-- Admins can view and restore old versions (last 20 per key).
+-- ============================================================
+create table if not exists public.site_content_revisions (
+  id uuid primary key default gen_random_uuid(),
+  key text not null,
+  value jsonb not null,
+  created_by uuid,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists site_content_revisions_key_idx
+  on public.site_content_revisions (key, created_at desc);
+
+alter table public.site_content_revisions enable row level security;
+
+drop policy if exists "Only admins can view revisions" on public.site_content_revisions;
+create policy "Only admins can view revisions"
+  on public.site_content_revisions for select
+  using (public.is_admin());
+
+drop policy if exists "Only admins can insert revisions" on public.site_content_revisions;
+create policy "Only admins can insert revisions"
+  on public.site_content_revisions for insert
+  with check (public.is_admin());
