@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/home/page-hero";
 import { LiveBatch } from "@/components/home/live-batch";
 import { FinalCta } from "@/components/home/final-cta";
@@ -8,10 +9,13 @@ import { ctaDefaults, liveBatchDefaults } from "@/lib/content-schema";
 import type { Batch } from "@/lib/types";
 import { ProseContent } from "@/components/editor/prose-content";
 import { renderContent } from "@/lib/rte";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Live Batch | Plickify Academy",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/live-batch", {
+    title: "Live Batch | Plickify Academy",
+  });
+}
 
 export const revalidate = 60;
 

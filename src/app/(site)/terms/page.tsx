@@ -1,12 +1,16 @@
+import type { Metadata } from "next";
 import { PageHero } from "@/components/home/page-hero";
 import { LegalContent } from "@/components/home/legal-content";
 import { FinalCta } from "@/components/home/final-cta";
 import { getSiteContent } from "@/lib/site-content";
 import { ctaDefaults, termsPageDefaults } from "@/lib/content-schema";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Terms & Conditions | Plickify Academy",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/terms", {
+    title: "Terms & Conditions | Plickify Academy",
+  });
+}
 
 export const revalidate = 60;
 

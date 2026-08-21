@@ -79,6 +79,7 @@ const menu = [
       { href: "/admin/footer", label: "Footer", icon: "fa-solid fa-shoe-prints" },
       { href: "/admin/announcement", label: "Announcement Bar", icon: "fa-solid fa-bullhorn" },
       { href: "/admin/popup", label: "Popup Banner", icon: "fa-solid fa-window-restore" },
+      { href: "/admin/seo", label: "SEO Settings", icon: "fa-solid fa-magnifying-glass-chart" },
       { href: "/admin/revisions", label: "Revision History", icon: "fa-solid fa-clock-rotate-left" },
       { href: "/admin/system", label: "System Status", icon: "fa-solid fa-gauge-high" },
     ],

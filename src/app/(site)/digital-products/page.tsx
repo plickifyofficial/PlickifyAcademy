@@ -1,12 +1,16 @@
+import type { Metadata } from "next";
 import { ProductsBrowser } from "@/components/products/products-browser";
 import { getPublishedProducts } from "@/lib/products";
 import { getCategories, getPublishedFaqs } from "@/lib/content-modules";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Digital Products | Plickify Academy",
-  description:
-    "AI Prompt, Canva Templates, eBooks, Design Resources এবং Freelancing Tools — premium digital resources এক জায়গায়।",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/digital-products", {
+    title: "Digital Products | Plickify Academy",
+    description:
+      "AI Prompt, Canva Templates, eBooks, Design Resources এবং Freelancing Tools — premium digital resources এক জায়গায়।",
+  });
+}
 
 export const revalidate = 60;
 

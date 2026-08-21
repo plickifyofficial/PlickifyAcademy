@@ -1,10 +1,14 @@
+import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CoursesBrowser } from "@/components/courses/courses-browser";
 import { getCategories, getPublishedFaqs } from "@/lib/content-modules";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Courses | Plickify Academy",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/courses", {
+    title: "Courses | Plickify Academy",
+  });
+}
 
 export const revalidate = 60;
 

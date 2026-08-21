@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Digital Products | Plickify Academy",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/products", {
+    title: "Digital Products | Plickify Academy",
+  });
+}
 
 export const revalidate = 60;
 

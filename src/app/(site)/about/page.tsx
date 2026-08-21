@@ -1,14 +1,18 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Faq } from "@/components/home/faq";
 import { getSiteContent } from "@/lib/site-content";
 import { getPublishedFaqs, getPublishedInstructors } from "@/lib/content-modules";
 import { aboutDefaults, type AboutContent } from "@/lib/content-schema";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "About Us | Plickify Academy",
-  description:
-    "AI, Freelancing এবং Digital Skills শেখার practical learning platform। শেখার মাধ্যমে নিজের ভবিষ্যৎ তৈরি করুন।",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/about", {
+    title: "About Us | Plickify Academy",
+    description:
+      "AI, Freelancing এবং Digital Skills শেখার practical learning platform। শেখার মাধ্যমে নিজের ভবিষ্যৎ তৈরি করুন।",
+  });
+}
 
 export const revalidate = 60;
 

@@ -1,12 +1,16 @@
+import type { Metadata } from "next";
 import { PageHero } from "@/components/home/page-hero";
 import { Faq } from "@/components/home/faq";
 import { FinalCta } from "@/components/home/final-cta";
 import { getSiteContent } from "@/lib/site-content";
 import { ctaDefaults, faqPageDefaults } from "@/lib/content-schema";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "FAQ | Plickify Academy",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/faq", {
+    title: "FAQ | Plickify Academy",
+  });
+}
 
 export const revalidate = 60;
 

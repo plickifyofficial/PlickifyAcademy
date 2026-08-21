@@ -1,9 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Live Courses | Plickify Academy",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/live-course", {
+    title: "Live Courses | Plickify Academy",
+  });
+}
 
 export const revalidate = 60;
 

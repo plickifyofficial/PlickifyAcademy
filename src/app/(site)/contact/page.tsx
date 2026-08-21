@@ -1,15 +1,19 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Faq } from "@/components/home/faq";
 import { ContactForm } from "@/components/contact/contact-form";
 import { getSiteContent } from "@/lib/site-content";
 import { getPublishedFaqs } from "@/lib/content-modules";
 import { contactDefaults, type ContactContent } from "@/lib/content-schema";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Contact Us | Plickify Academy",
-  description:
-    "কোর্স, ভর্তি, পেমেন্ট, ডিজিটাল প্রোডাক্ট অথবা যেকোনো প্রশ্নের জন্য আমাদের সাথে যোগাযোগ করুন।",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/contact", {
+    title: "Contact Us | Plickify Academy",
+    description:
+      "কোর্স, ভর্তি, পেমেন্ট, ডিজিটাল প্রোডাক্ট অথবা যেকোনো প্রশ্নের জন্য আমাদের সাথে যোগাযোগ করুন।",
+  });
+}
 
 export const revalidate = 60;
 

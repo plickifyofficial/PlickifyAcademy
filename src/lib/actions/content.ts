@@ -248,6 +248,26 @@ export async function saveCustomSections(items: CustomSectionItem[]) {
   return saveSectionContent("home.custom_sections", { items: clean });
 }
 
+export async function saveSeoOverrides(
+  pages: Record<string, { title?: string; description?: string }>,
+) {
+  await requireAdmin();
+
+  const { SEO_PAGES } = await import("@/lib/seo");
+  const validPaths = new Set(SEO_PAGES.map((p) => p.path));
+
+  const clean: Record<string, { title: string; description: string }> = {};
+  for (const [path, v] of Object.entries(pages ?? {})) {
+    if (!validPaths.has(path) || !v || typeof v !== "object") continue;
+    const title = String(v.title ?? "").trim().slice(0, 200);
+    const description = String(v.description ?? "").trim().slice(0, 320);
+    if (!title && !description) continue;
+    clean[path] = { title, description };
+  }
+
+  return saveSectionContent("global.seo_overrides", clean);
+}
+
 export async function uploadContentImage(formData: FormData) {
   await requireAdmin();
 
