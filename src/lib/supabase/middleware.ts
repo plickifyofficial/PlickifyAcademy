@@ -42,7 +42,7 @@ export async function updateSession(request: NextRequest) {
   if (isAuthedRoute && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", path);
+    url.searchParams.set("next", path);
     return NextResponse.redirect(url);
   }
 
@@ -52,7 +52,7 @@ export async function updateSession(request: NextRequest) {
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
-    url.search = "";
+    url.searchParams.delete("next");
     return NextResponse.redirect(url);
   }
 

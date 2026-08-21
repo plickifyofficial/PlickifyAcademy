@@ -4,10 +4,21 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 export function SiteNav({ links }: { links: { label: string; href: string }[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string } | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href.split("#")[0]);
@@ -99,20 +110,32 @@ export function SiteNav({ links }: { links: { label: string; href: string }[] })
         </nav>
 
         <div className="safe-bottom shrink-0 border-t border-zinc-100 px-4 py-4">
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
-            className="flex min-h-12 items-center justify-center rounded-full border border-zinc-300 px-4 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600"
-          >
-            Login
-          </Link>
-          <Link
-            href="/signup"
-            onClick={() => setOpen(false)}
-            className="mt-2 flex min-h-12 items-center justify-center rounded-full bg-brand-600 px-4 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-colors hover:bg-brand-700"
-          >
-            Join Now
-          </Link>
+          {user ? (
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="flex min-h-12 items-center justify-center rounded-full bg-brand-600 px-4 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-colors hover:bg-brand-700"
+            >
+              My Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="flex min-h-12 items-center justify-center rounded-full border border-zinc-300 px-4 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-500 hover:text-brand-600"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                onClick={() => setOpen(false)}
+                className="mt-2 flex min-h-12 items-center justify-center rounded-full bg-brand-600 px-4 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition-colors hover:bg-brand-700"
+              >
+                Join Now
+              </Link>
+            </>
+          )}
         </div>
       </div>
 

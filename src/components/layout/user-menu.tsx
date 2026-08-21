@@ -75,20 +75,42 @@ export function UserMenu() {
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
             >
-              Dashboard
+              My Dashboard
+            </Link>
+            <Link
+              href="/dashboard/courses"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+            >
+              My Courses
             </Link>
             <Link
               href="/dashboard/profile"
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
             >
-              Profile
+              My Profile
             </Link>
+            <Link
+              href="/dashboard/certificates"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+            >
+              Certificates
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+            >
+              Settings
+            </Link>
+            <div className="my-1 border-t border-zinc-100" />
             <button
               onClick={handleSignOut}
               className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
             >
-              Log Out
+              Logout
             </button>
           </div>
         </>
