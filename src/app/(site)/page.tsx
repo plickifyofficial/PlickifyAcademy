@@ -11,6 +11,7 @@ import { Products } from "@/components/home/products";
 import { Testimonials } from "@/components/home/testimonials";
 import { Faq } from "@/components/home/faq";
 import { FinalCta } from "@/components/home/final-cta";
+import { CustomSectionBlock } from "@/components/home/custom-section-block";
 import { getSiteContent } from "@/lib/site-content";
 import { getPublishedProducts } from "@/lib/products";
 import { getPublishedFaqs, getPublishedTestimonials } from "@/lib/content-modules";
@@ -23,6 +24,7 @@ import {
   ourCoursesDefaults,
   processDefaults,
   productsDefaults,
+  customSectionsDefaults,
   sectionsMetaDefaults,
   skillsDefaults,
   statsDefaults,
@@ -36,7 +38,7 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts, dbTestimonials, dbFaqs, sectionsMeta] =
+  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts, dbTestimonials, dbFaqs, sectionsMeta, customSections] =
     await Promise.all([
       getSiteContent("home.hero", heroDefaults),
       getSiteContent("home.stats", statsDefaults),
@@ -55,6 +57,7 @@ export default async function HomePage() {
       getPublishedTestimonials(),
       getPublishedFaqs("homepage"),
       getSiteContent("home.sections_meta", sectionsMetaDefaults),
+      getSiteContent("home.custom_sections", customSectionsDefaults),
     ]);
 
   const testimonialItems = dbTestimonials.map((t) => ({
@@ -97,6 +100,11 @@ export default async function HomePage() {
       {orderedKeys.map((key) => (
         <div key={key}>{sectionMap[key]}</div>
       ))}
+      {customSections.items
+        .filter((s) => s.visible)
+        .map((s) => (
+          <CustomSectionBlock key={s.id} section={s} />
+        ))}
     </>
   );
 }

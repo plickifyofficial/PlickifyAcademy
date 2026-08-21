@@ -47,6 +47,9 @@ export const heroDefaults = {
   secondaryBtnLink: "/courses",
   rating: "4.9/5",
   reviews: "500+ Reviews",
+  studentsCount: "500+ Happy Students",
+  heroImage: "",
+  heroImageAlt: "Plickify Academy dashboard preview",
   avatars: [
     { initials: "RH", color: "bg-blue-500" },
     { initials: "NJ", color: "bg-violet-500" },
@@ -836,6 +839,9 @@ export const homeSections: SectionDef[] = [
       { kind: "url", key: "secondaryBtnLink", label: "Secondary Button Link" },
       { kind: "text", key: "rating", label: "Rating" },
       { kind: "text", key: "reviews", label: "Reviews Text" },
+      { kind: "text", key: "studentsCount", label: "Students Count Text" },
+      { kind: "image", key: "heroImage", label: "Hero Image (optional, replaces mockup)" },
+      { kind: "text", key: "heroImageAlt", label: "Hero Image Alt Text" },
       {
         kind: "list",
         key: "avatars",
@@ -1901,3 +1907,18 @@ export const sectionsMetaDefaults = {
 };
 
 export type SectionsMeta = typeof sectionsMetaDefaults;
+
+// ============================================================
+// CUSTOM HOMEPAGE SECTIONS (admin-created, rich text)
+// ============================================================
+export const customSectionsDefaults = {
+  items: [] as {
+    id: string;
+    title: string;
+    eyebrow: string;
+    body: string;
+    visible: boolean;
+  }[],
+};
+
+export type CustomSectionsContent = typeof customSectionsDefaults;

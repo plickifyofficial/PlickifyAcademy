@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/actions/admin";
+import { sanitizeHtml } from "@/lib/rte";
 
 const MAX_IMAGE = 2 * 1024 * 1024;
 const ALLOWED_IMAGE = [
@@ -61,6 +62,31 @@ export async function saveSectionsMeta(order: string[], hidden: string[]) {
     order: cleanOrder,
     hidden: cleanHidden,
   });
+}
+
+export type CustomSectionItem = {
+  id: string;
+  title: string;
+  eyebrow: string;
+  body: string;
+  visible: boolean;
+};
+
+export async function saveCustomSections(items: CustomSectionItem[]) {
+  await requireAdmin();
+
+  const clean = items
+    .filter((s) => s && typeof s.id === "string" && s.id)
+    .slice(0, 20)
+    .map((s) => ({
+      id: s.id,
+      title: String(s.title ?? "").slice(0, 200),
+      eyebrow: String(s.eyebrow ?? "").slice(0, 100),
+      body: sanitizeHtml(String(s.body ?? "")),
+      visible: s.visible !== false,
+    }));
+
+  return saveSectionContent("home.custom_sections", { items: clean });
 }
 
 export async function uploadContentImage(formData: FormData) {

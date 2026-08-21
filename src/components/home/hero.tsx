@@ -69,11 +69,36 @@ export function Hero({ content }: { content: HeroContent }) {
                 {content.reviews}
               </p>
             </div>
+            {content.studentsCount ? (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="hidden h-8 w-px bg-zinc-200 sm:block"
+                />
+                <div className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                    <i className="fa-solid fa-user-group text-sm" />
+                  </span>
+                  <span className="text-sm font-bold text-zinc-900">
+                    {content.studentsCount}
+                  </span>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
 
         <div data-aos="fade-up" data-aos-delay="150">
-          <DashboardMockup />
+          {content.heroImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={content.heroImage}
+              alt={content.heroImageAlt || "Hero"}
+              className="w-full rounded-2xl object-cover shadow-2xl shadow-brand-900/10"
+            />
+          ) : (
+            <DashboardMockup />
+          )}
         </div>
       </div>
 

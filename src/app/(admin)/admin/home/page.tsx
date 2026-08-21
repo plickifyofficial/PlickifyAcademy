@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ContentEditor } from "@/components/admin/content-editor";
 import { SectionManager } from "@/components/admin/section-manager";
+import { CustomSectionsManager } from "@/components/admin/custom-sections-manager";
 import {
   allSections,
+  customSectionsDefaults,
   homeSectionLabels,
   sectionsMetaDefaults,
 } from "@/lib/content-schema";
@@ -37,6 +39,10 @@ export default async function AdminHomeEditorPage() {
     "home.sections_meta",
     sectionsMetaDefaults,
   );
+  const customSections = await readSiteContent(
+    "home.custom_sections",
+    customSectionsDefaults,
+  );
 
   return (
     <div className="max-w-5xl">
@@ -62,6 +68,10 @@ export default async function AdminHomeEditorPage() {
           initialHidden={sectionsMeta.hidden}
           labels={homeSectionLabels}
         />
+      </div>
+
+      <div className="mt-6">
+        <CustomSectionsManager initialItems={customSections.items} />
       </div>
 
       <div className="mt-6">
