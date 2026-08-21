@@ -1894,6 +1894,10 @@ export const pageSections: SectionDef[] = [
 
 export const allSections = [...homeSections, ...globalSections, ...pageSections];
 
+export function findSection(key: string): SectionDef | undefined {
+  return allSections.find((s) => s.key === key);
+}
+
 // ============================================================
 // HOMEPAGE SECTION MANAGER (order + visibility)
 // ============================================================

@@ -74,6 +74,9 @@ const menu = [
     group: "Settings",
     items: [
       { href: "/admin/settings", label: "Site Settings", icon: "fa-solid fa-sliders" },
+      { href: "/admin/header", label: "Header & Navigation", icon: "fa-solid fa-bars" },
+      { href: "/admin/footer", label: "Footer", icon: "fa-solid fa-shoe-prints" },
+      { href: "/admin/announcement", label: "Announcement Bar", icon: "fa-solid fa-bullhorn" },
       { href: "/admin/system", label: "System Status", icon: "fa-solid fa-gauge-high" },
     ],
   },
