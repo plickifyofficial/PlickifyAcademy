@@ -2605,3 +2605,23 @@ drop policy if exists "Admins can delete custom pages" on public.custom_pages;
 create policy "Admins can delete custom pages"
   on public.custom_pages for delete
   using (public.is_admin());
+
+
+-- PHASE 12: MEDIA LIBRARY METADATA (display name, alt text, caption)
+create table if not exists public.media_files (
+  id uuid primary key default gen_random_uuid(),
+  bucket text not null,
+  path text not null,
+  display_name text not null default '',
+  alt_text text not null default '',
+  caption text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (bucket, path)
+);
+alter table public.media_files enable row level security;
+drop policy if exists "Admins can manage media metadata" on public.media_files;
+create policy "Admins can manage media metadata"
+  on public.media_files for all
+  using (public.is_admin())
+  with check (public.is_admin());

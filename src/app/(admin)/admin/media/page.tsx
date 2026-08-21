@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MediaDeleteButton } from "@/components/admin/media-delete-button";
+import { MediaMetaButton } from "@/components/admin/media-meta-button";
 
 export const metadata = { title: "Media Library" };
 export const dynamic = "force-dynamic";
@@ -12,6 +13,9 @@ type MediaFile = {
   size: number;
   type: string;
   created_at: string;
+  display_name: string;
+  alt_text: string;
+  caption: string;
 };
 
 async function listBucket(bucket: string): Promise<MediaFile[]> {
@@ -30,19 +34,42 @@ async function listBucket(bucket: string): Promise<MediaFile[]> {
         size: f.metadata?.size ?? 0,
         type: f.metadata?.mimetype ?? "image",
         created_at: f.created_at ?? "",
+        display_name: "",
+        alt_text: "",
+        caption: "",
       }));
   } catch {
     return [];
   }
 }
 
+async function loadMeta() {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("media_files")
+    .select("bucket, path, display_name, alt_text, caption");
+  const map = new Map<string, { display_name: string; alt_text: string; caption: string }>();
+  for (const m of data ?? []) {
+    map.set(`${m.bucket}/${m.path}`, {
+      display_name: m.display_name ?? "",
+      alt_text: m.alt_text ?? "",
+      caption: m.caption ?? "",
+    });
+  }
+  return map;
+}
+
 export default async function AdminMediaPage() {
-  const [siteAssets, courseImages] = await Promise.all([
+  const [siteAssets, courseImages, meta] = await Promise.all([
     listBucket("site-assets"),
     listBucket("course-images"),
+    loadMeta(),
   ]);
 
-  const files = [...siteAssets, ...courseImages];
+  const files = [...siteAssets, ...courseImages].map((f) => {
+    const m = meta.get(`${f.bucket}/${f.name}`);
+    return m ? { ...f, ...m } : f;
+  });
 
   function formatSize(bytes: number) {
     if (bytes < 1024) return `${bytes} B`;
@@ -79,10 +106,22 @@ export default async function AdminMediaPage() {
                 </div>
                 <div className="p-3">
                   <p className="truncate text-sm font-semibold text-[#1d2327]">
-                    {file.name}
+                    {file.display_name || file.name}
                   </p>
-                  <p className="mt-0.5 text-xs text-[#646970]">
+                  <p className="mt-0.5 truncate text-xs text-[#646970]">
                     {file.bucket} · {formatSize(file.size)}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-[#646970]">
+                    {file.alt_text ? (
+                      <>
+                        <i className="fa-solid fa-universal-access mr-1 text-[#2271b1]" />
+                        {file.alt_text}
+                      </>
+                    ) : file.caption ? (
+                      file.caption
+                    ) : (
+                      <span className="italic opacity-60">No alt text set</span>
+                    )}
                   </p>
                   <div className="mt-2 flex items-center gap-2">
                     <a
@@ -95,6 +134,15 @@ export default async function AdminMediaPage() {
                     </a>
                     <MediaDeleteButton bucket={file.bucket} path={file.name} />
                   </div>
+                  <MediaMetaButton
+                    bucket={file.bucket}
+                    path={file.name}
+                    initial={{
+                      display_name: file.display_name,
+                      alt_text: file.alt_text,
+                      caption: file.caption,
+                    }}
+                  />
                 </div>
               </div>
             ))}
