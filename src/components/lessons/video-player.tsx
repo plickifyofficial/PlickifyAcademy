@@ -96,7 +96,10 @@ export function VideoPlayer({
 
   if (render.kind === "embed") {
     return (
-      <div className="relative aspect-video w-full overflow-hidden bg-black">
+      <div
+        className="relative w-full overflow-hidden bg-black"
+        style={{ paddingTop: "56.25%" }}
+      >
         <div
           className="absolute inset-0 [&>*]:absolute [&>*]:inset-0 [&>*]:h-full [&>*]:w-full [&_iframe]:absolute [&_iframe]:inset-0 [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0"
           dangerouslySetInnerHTML={{ __html: render.html }}
@@ -107,7 +110,10 @@ export function VideoPlayer({
 
   if (render.kind === "iframe") {
     return (
-      <div className="relative aspect-video w-full overflow-hidden bg-black">
+      <div
+        className="relative w-full overflow-hidden bg-black"
+        style={{ paddingTop: "56.25%" }}
+      >
         <iframe
           src={render.src}
           title={title ?? "Video"}
@@ -120,7 +126,10 @@ export function VideoPlayer({
   }
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden bg-black">
+    <div
+      className="relative w-full overflow-hidden bg-black"
+      style={{ paddingTop: "56.25%" }}
+    >
       <video
         ref={videoRef}
         src={render.src}
@@ -128,9 +137,10 @@ export function VideoPlayer({
         controlsList="nodownload"
         disablePictureInPicture={!tracking}
         playsInline
+        preload="metadata"
         poster={poster ?? undefined}
         onContextMenu={(e) => e.preventDefault()}
-        className="absolute inset-0 h-full w-full"
+        className="absolute inset-0 h-full w-full bg-black"
       />
     </div>
   );
