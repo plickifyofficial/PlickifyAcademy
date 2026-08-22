@@ -171,7 +171,7 @@ export default async function LessonPage({
       ) : (
         <>
           {lesson.video_url || lesson.video_embed ? (
-            <div className="mt-6 overflow-hidden rounded-2xl bg-black">
+            <div className="-mx-4 mt-0 overflow-hidden bg-black sm:mx-0 sm:mt-6 sm:rounded-2xl">
               <VideoPlayer
                 render={buildProtectedRender(
                   lesson.video_url,

@@ -96,9 +96,9 @@ export function VideoPlayer({
 
   if (render.kind === "embed") {
     return (
-      <div className="relative aspect-video w-full">
+      <div className="relative aspect-video w-full overflow-hidden bg-black">
         <div
-          className="absolute inset-0 [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0"
+          className="absolute inset-0 [&>*]:absolute [&>*]:inset-0 [&>*]:h-full [&>*]:w-full [&_iframe]:absolute [&_iframe]:inset-0 [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0"
           dangerouslySetInnerHTML={{ __html: render.html }}
         />
       </div>
@@ -107,26 +107,31 @@ export function VideoPlayer({
 
   if (render.kind === "iframe") {
     return (
-      <iframe
-        src={render.src}
-        title={title ?? "Video"}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-        className="aspect-video w-full"
-      />
+      <div className="relative aspect-video w-full overflow-hidden bg-black">
+        <iframe
+          src={render.src}
+          title={title ?? "Video"}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="absolute inset-0 h-full w-full border-0"
+        />
+      </div>
     );
   }
 
   return (
-    <video
-      ref={videoRef}
-      src={render.src}
-      controls
-      controlsList="nodownload"
-      disablePictureInPicture={!tracking}
-      poster={poster ?? undefined}
-      onContextMenu={(e) => e.preventDefault()}
-      className="aspect-video w-full"
-    />
+    <div className="relative aspect-video w-full overflow-hidden bg-black">
+      <video
+        ref={videoRef}
+        src={render.src}
+        controls
+        controlsList="nodownload"
+        disablePictureInPicture={!tracking}
+        playsInline
+        poster={poster ?? undefined}
+        onContextMenu={(e) => e.preventDefault()}
+        className="absolute inset-0 h-full w-full"
+      />
+    </div>
   );
 }
