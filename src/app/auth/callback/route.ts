@@ -10,6 +10,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=auth`);
   }
 
+  // Capture cookies set during the session exchange so we can write them to
+  // the outgoing response (mutating request.cookies does NOT persist them).
+  const outgoing: { name: string; value: string; options?: Record<string, unknown> }[] =
+    [];
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,8 +24,8 @@ export async function GET(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
+          cookiesToSet.forEach(({ name, value, options }) =>
+            outgoing.push({ name, value, options }),
           );
         },
       },
@@ -33,26 +38,29 @@ export async function GET(request: NextRequest) {
   }
 
   // Explicit next path wins (e.g. course page the user came from).
+  let target = `${origin}/dashboard`;
   if (next) {
-    return NextResponse.redirect(`${origin}${next}`);
-  }
-
-  // Role-based redirect: admin -> /admin, everyone else -> /dashboard
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.role === "admin") {
-      return NextResponse.redirect(`${origin}/admin`);
+    target = `${origin}${next}`;
+  } else {
+    // Role-based redirect: admin -> /admin, everyone else -> /dashboard
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (profile?.role === "admin") {
+        target = `${origin}/admin`;
+      }
     }
   }
 
-  return NextResponse.redirect(`${origin}/dashboard`);
+  const response = NextResponse.redirect(target);
+  outgoing.forEach(({ name, value, options }) =>
+    response.cookies.set(name, value, options),
+  );
+  return response;
 }
