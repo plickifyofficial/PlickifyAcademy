@@ -2687,3 +2687,21 @@ create policy "Anyone rates own conversation messages"
       where c.id = conversation_id and ((c.user_id is null and auth.uid() is null) or c.user_id = auth.uid())
     ) or public.is_admin()
   );
+
+
+-- PHASE 14: AI PROVIDER CONFIG (admin-editable, admin-only RLS)
+create table if not exists public.ai_provider_config (
+  id int primary key default 1 check (id = 1),
+  provider_label text not null default 'Mistral AI',
+  api_key text not null default '',
+  model text not null default '',
+  base_url text not null default '',
+  updated_at timestamptz not null default now()
+);
+insert into public.ai_provider_config (id) values (1) on conflict (id) do nothing;
+alter table public.ai_provider_config enable row level security;
+drop policy if exists "Only admins manage AI provider config" on public.ai_provider_config;
+create policy "Only admins manage AI provider config"
+  on public.ai_provider_config for all
+  using (public.is_admin())
+  with check (public.is_admin());

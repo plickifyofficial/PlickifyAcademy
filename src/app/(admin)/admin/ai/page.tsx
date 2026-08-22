@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAiAssistantSettings, aiProviderStatus } from "@/lib/ai/config";
+import { getAiAssistantSettings } from "@/lib/ai/config";
+import { getAiStatus } from "@/lib/ai/provider";
 import { getKnowledgeStats } from "@/lib/ai/knowledge";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function AiOverviewPage() {
   const [settings, provider, stats] = await Promise.all([
     getAiAssistantSettings(),
-    Promise.resolve(aiProviderStatus()),
+    getAiStatus(),
     getKnowledgeStats(),
   ]);
 

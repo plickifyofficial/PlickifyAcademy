@@ -65,3 +65,72 @@ export async function rateAiMessage(messageId: string, feedback: "up" | "down") 
     .update({ feedback })
     .eq("id", messageId);
 }
+
+export async function saveAiProviderConfig(input: {
+  providerLabel?: string;
+  apiKey?: string;
+  model?: string;
+  baseUrl?: string;
+}) {
+  await requireAdmin();
+
+  const admin = (await import("@/lib/supabase/admin")).createAdminClient();
+  const { data: existing } = await admin
+    .from("ai_provider_config")
+    .select("api_key")
+    .eq("id", 1)
+    .maybeSingle();
+
+  // Blank key = keep the saved one (key is write-only from the UI).
+  const apiKey =
+    input.apiKey && input.apiKey.trim()
+      ? input.apiKey.trim().slice(0, 300)
+      : existing?.api_key || "";
+
+  const { error } = await admin.from("ai_provider_config").upsert(
+    {
+      id: 1,
+      provider_label:
+        input.providerLabel?.trim().slice(0, 60) || "Mistral AI",
+      api_key: apiKey,
+      model: input.model?.trim().slice(0, 100) || "",
+      base_url: input.baseUrl?.trim().slice(0, 200) || "",
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "id" },
+  );
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/ai");
+  revalidatePath("/admin/ai/settings");
+}
+
+export async function testAiProviderConnection(): Promise<{
+  ok: boolean;
+  message: string;
+}> {
+  await requireAdmin();
+
+  const { getAiProviderConfig } = await import("@/lib/ai/provider");
+  const cfg = await getAiProviderConfig();
+  if (!cfg.apiKey) {
+    return { ok: false, message: "No API key saved yet." };
+  }
+  if (!cfg.model) {
+    return { ok: false, message: "Model name is empty — e.g. mistral-small-latest" };
+  }
+
+  try {
+    const { aiChatComplete } = await import("@/lib/ai/provider");
+    const reply = await aiChatComplete(
+      [{ role: "user", content: "Reply with exactly one word: OK" }],
+      { maxTokens: 10 },
+    );
+    return { ok: true, message: `Connected! Model replied: "${reply.slice(0, 40)}"` };
+  } catch (err) {
+    return {
+      ok: false,
+      message: err instanceof Error ? err.message : "Connection failed",
+    };
+  }
+}

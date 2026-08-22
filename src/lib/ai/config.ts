@@ -56,14 +56,3 @@ export const aiAssistantDefaults: AiAssistantSettings = {
 export async function getAiAssistantSettings(): Promise<AiAssistantSettings> {
   return getSiteContent(AI_ASSISTANT_KEY, aiAssistantDefaults);
 }
-
-/** Provider env status — never exposes key values. */
-export function aiProviderStatus() {
-  const apiKey = process.env.AI_API_KEY || "";
-  return {
-    configured: Boolean(apiKey),
-    provider: process.env.AI_PROVIDER || (apiKey ? "openai-compatible" : "not-set"),
-    model: process.env.AI_MODEL || "gpt-4o-mini",
-    baseUrl: process.env.AI_BASE_URL || "https://api.openai.com/v1",
-  };
-}

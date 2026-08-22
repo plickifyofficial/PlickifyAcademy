@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/toaster";
 import { getSiteSettings } from "@/lib/settings";
 import { getContactSettings } from "@/lib/contact-settings";
+import { getAiAssistantSettings } from "@/lib/ai/config";
 import { GlobalFloaters } from "@/components/floating/global-floaters";
 
 const hindSiliguri = Hind_Siliguri({
@@ -69,11 +70,19 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const contactSettings = await getContactSettings();
+  const aiSettings = await getAiAssistantSettings();
+  const ai = aiSettings.is_enabled
+    ? {
+        name: aiSettings.name,
+        welcomeMessage: aiSettings.welcomeMessage,
+        suggestedQuestions: aiSettings.suggestedQuestions,
+      }
+    : null;
   return (
     <html lang="en" className={`${hindSiliguri.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <ToastProvider>{children}</ToastProvider>
-        <GlobalFloaters settings={contactSettings} />
+        <GlobalFloaters settings={contactSettings} ai={ai} />
       </body>
     </html>
   );

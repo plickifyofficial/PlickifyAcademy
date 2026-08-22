@@ -18,8 +18,14 @@ const LiveChatWidget = dynamic(
 
 export function GlobalFloaters({
   settings,
+  ai = null,
 }: {
   settings: ContactSettingsContent;
+  ai?: {
+    name: string;
+    welcomeMessage: string;
+    suggestedQuestions: string[];
+  } | null;
 }) {
   const pathname = usePathname();
   const [chatOpen, setChatOpen] = useState(false);
@@ -84,7 +90,11 @@ export function GlobalFloaters({
         />
       )}
       {chatOpen && settings.liveChatEnabled && (
-        <LiveChatWidget settings={settings} onClose={() => setChatOpen(false)} />
+        <LiveChatWidget
+          settings={settings}
+          ai={ai}
+          onClose={() => setChatOpen(false)}
+        />
       )}
     </>
   );
