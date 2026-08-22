@@ -9,7 +9,7 @@ export const SEO_PAGES: { path: string; label: string }[] = [
   { path: "/digital-products", label: "Digital Products" },
   { path: "/faq", label: "FAQ" },
   { path: "/live-batch", label: "Live Batch" },
-  { path: "/live-course", label: "Live Course" },
+  { path: "/live-batch", label: "Live Batch" },
   { path: "/privacy", label: "Privacy Policy" },
   { path: "/products", label: "Products" },
   { path: "/refund", label: "Refund Policy" },

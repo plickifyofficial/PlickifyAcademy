@@ -306,7 +306,7 @@ export const navDefaults = {
   links: [
     { label: "Home", href: "/" },
     { label: "Courses", href: "/courses" },
-    { label: "Live Courses", href: "/live-course" },
+    { label: "Live Batch", href: "/live-batch" },
     { label: "Digital Products", href: "/digital-products" },
     { label: "Blog", href: "/blog" },
     { label: "About", href: "/about" },
@@ -827,7 +827,7 @@ export const contactDefaults = {
     { q: "Technical সমস্যা হলে কী করবো?", a: "এই page-এর form-এ Technical Support subject নির্বাচন করে মেসেজ পাঠান, আমাদের team সাহায্য করবে।" },
     { q: "Support team-এর সাথে কিভাবে যোগাযোগ করবো?", a: "Email (hello@plickifyacademy.com) অথবা এই page-এর contact form দিয়ে যোগাযোগ করতে পারবেন।" },
     { q: "Refund policy কী?", a: "Refund policy বিস্তারিত জানতে আমাদের Refund Policy page দেখুন।" },
-    { q: "Live class সম্পর্কে কোথায় জানতে পারবো?", a: "Live Courses page-এ upcoming live classes, schedule এবং registration তথ্য দেখতে পাবেন।" },
+    { q: "Live class সম্পর্কে কোথায় জানতে পাবেন?", a: "Live Batch page-এ upcoming live classes, schedule এবং registration তথ্য দেখতে পাবেন।" },
   ],
   mapLabel: "FIND US",
   mapTitle: "আমাদের Location",

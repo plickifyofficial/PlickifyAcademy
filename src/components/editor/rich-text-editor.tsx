@@ -84,7 +84,6 @@ const INTERNAL_PAGES = [
   { label: "All Courses", url: "/courses" },
   { label: "Digital Products", url: "/digital-products" },
   { label: "Live Batch", url: "/live-batch" },
-  { label: "Live Course", url: "/live-course" },
   { label: "Blog", url: "/blog" },
   { label: "FAQ", url: "/faq" },
   { label: "About Us", url: "/about" },

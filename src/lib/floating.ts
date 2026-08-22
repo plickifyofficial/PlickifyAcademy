@@ -20,7 +20,7 @@ export function resolvePlacement(
   if (path === "/") return placement.home;
   if (
     path.startsWith("/courses") ||
-    path.startsWith("/live-course") ||
+    path.startsWith("/live-batch") ||
     path.startsWith("/live-batch")
   ) {
     return placement.courses;
