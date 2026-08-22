@@ -278,9 +278,9 @@ export function LiveChatWidget({
             type="button"
             onClick={onClose}
             aria-label="Close chat"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg hover:bg-white/10"
+            className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/15 hover:text-white"
           >
-            <i className="fa-solid fa-xmark text-lg" />
+            <i className="fa-solid fa-xmark text-base" />
           </button>
         </div>
 

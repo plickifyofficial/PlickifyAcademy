@@ -67,8 +67,8 @@ export function GlobalFloaters({
 
   if (!resolvePlacement(settings.placement, pathname)) return null;
 
-  const contactBottom = (isMobile ? 140 : 90) + extra;
-  const bttBottom = contactBottom + 60;
+  const contactBottom = (isMobile ? 20 : 24) + extra;
+  const bttBottom = contactBottom + 72;
 
   const showContact =
     settings.enabled &&
