@@ -4,6 +4,18 @@ import { useEffect, useRef } from "react";
 import { updateLessonProgress } from "@/lib/actions/learning";
 import type { VideoRender } from "@/lib/video";
 
+// Extract a safe iframe src from pasted embed code so we can render a clean,
+// responsive iframe instead of injecting arbitrary HTML (which breaks for
+// script-based embeds and is an XSS risk).
+function extractEmbedSrc(html: string): string | null {
+  const m = html.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
+  const src = m?.[1]?.trim();
+  if (!src) return null;
+  if (/^(https?:)?\/\//i.test(src)) return src;
+  return null;
+}
+
+
 type Props = {
   render: VideoRender;
   poster?: string | null;
@@ -95,6 +107,24 @@ export function VideoPlayer({
   if (!render) return null;
 
   if (render.kind === "embed") {
+    const embedSrc = extractEmbedSrc(render.html);
+    if (embedSrc) {
+      return (
+        <div
+          className="relative w-full overflow-hidden bg-black"
+          style={{ paddingTop: "56.25%" }}
+        >
+          <iframe
+            src={embedSrc}
+            title={title ?? "Video"}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+          />
+        </div>
+      );
+    }
+    // Fallback for script-based embeds (lite-youtube etc.)
     return (
       <div
         className="relative w-full overflow-hidden bg-black"
