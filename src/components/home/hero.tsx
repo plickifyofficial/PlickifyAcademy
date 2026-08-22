@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { DashboardMockup } from "@/components/home/dashboard-mockup";
-import type { HeroContent } from "@/lib/content-schema";
+import type { HeroContent, DashboardContent } from "@/lib/content-schema";
+import { dashboardDefaults } from "@/lib/content-schema";
 
-export function Hero({ content }: { content: HeroContent }) {
+export function Hero({
+  content,
+  dashboard,
+}: {
+  content: HeroContent;
+  dashboard?: DashboardContent;
+}) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white">
       <div className="pointer-events-none absolute -top-28 right-[-8%] h-96 w-96 rounded-full bg-brand-100/70 blur-3xl" />
@@ -106,7 +113,7 @@ export function Hero({ content }: { content: HeroContent }) {
               className="w-full rounded-2xl object-cover shadow-2xl shadow-brand-900/10"
             />
           ) : (
-            <DashboardMockup />
+            <DashboardMockup content={dashboard ?? dashboardDefaults} />
           )}
         </div>
       </div>

@@ -59,6 +59,43 @@ export const heroDefaults = {
 };
 export type HeroContent = typeof heroDefaults;
 
+export const dashboardDefaults = {
+  navItems: [
+    "Dashboard",
+    "My Courses",
+    "Live Classes",
+    "Certificates",
+    "Products",
+    "Profile",
+    "Settings",
+    "Logout",
+  ],
+  userName: "Minhajul Islam",
+  userInitials: "MI",
+  welcomeText: "Welcome back,",
+  tagline: "Keep learning, keep growing!",
+  stats: [
+    { value: "8", label: "Total Courses" },
+    { value: "5", label: "Completed" },
+    { value: "3", label: "Certificates" },
+    { value: "78%", label: "Progress" },
+  ],
+  myCoursesTitle: "My Courses",
+  myCoursesViewAll: "View All",
+  courses: [
+    { title: "AI Income Mastery", pct: 78, cta: "Continue" },
+    { title: "Digital Marketing Pro", pct: 45, cta: "Continue" },
+  ],
+  earningsLabel: "Earnings Overview",
+  earningsValue: "+$1,240",
+  achievementsTitle: "Achievements",
+  achievements: [
+    { title: "Course Completed", subtitle: "Certificate issued" },
+    { title: "Top Student", subtitle: "Certificate issued" },
+  ],
+};
+export type DashboardContent = typeof dashboardDefaults;
+
 export const statsDefaults = {
   items: [
     { icon: "fa-solid fa-user-group", value: "500+", label: "Happy Students" },
@@ -862,22 +899,77 @@ export const homeSections: SectionDef[] = [
       { kind: "text", key: "studentsCount", label: "Students Count Text" },
       { kind: "image", key: "heroImage", label: "Dashboard Mockup / Hero Image (replaces default mockup)" },
       { kind: "text", key: "heroImageAlt", label: "Hero Image Alt Text" },
-       {
-         kind: "list",
-         key: "avatars",
-         label: "Profile Avatars",
-         itemLabel: "Avatar",
-         fields: [
-           { kind: "image", key: "image", label: "Avatar Image (optional, overrides initials)" },
-           { kind: "text", key: "initials", label: "Initials (e.g. RH)" },
-           {
-             kind: "text",
-             key: "color",
-             label: "Color (Tailwind class)",
-             hint: "e.g. bg-blue-500",
-           },
-         ],
-       },
+      {
+        kind: "list",
+        key: "avatars",
+        label: "Profile Avatars",
+        itemLabel: "Avatar",
+        fields: [
+          { kind: "image", key: "image", label: "Avatar Image (optional, overrides initials)" },
+          { kind: "text", key: "initials", label: "Initials (e.g. RH)" },
+          {
+            kind: "text",
+            key: "color",
+            label: "Color (Tailwind class)",
+            hint: "e.g. bg-blue-500",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    key: "home.dashboard",
+    title: "Hero Dashboard Mockup",
+    description:
+      "Editable text inside the hero dashboard preview (used when no hero image is uploaded).",
+    defaults: dashboardDefaults,
+    fields: [
+      {
+        kind: "stringlist",
+        key: "navItems",
+        label: "Sidebar Menu Items",
+        itemLabel: "Item",
+      },
+      { kind: "text", key: "welcomeText", label: "Welcome Text (before name)" },
+      { kind: "text", key: "userName", label: "User Name" },
+      { kind: "text", key: "userInitials", label: "User Initials" },
+      { kind: "text", key: "tagline", label: "Tagline" },
+      {
+        kind: "list",
+        key: "stats",
+        label: "Stat Cards",
+        itemLabel: "Stat",
+        fields: [
+          { kind: "text", key: "value", label: "Value" },
+          { kind: "text", key: "label", label: "Label" },
+        ],
+      },
+      { kind: "text", key: "myCoursesTitle", label: "My Courses Title" },
+      { kind: "text", key: "myCoursesViewAll", label: "View All Text" },
+      {
+        kind: "list",
+        key: "courses",
+        label: "Course Rows",
+        itemLabel: "Course",
+        fields: [
+          { kind: "text", key: "title", label: "Title" },
+          { kind: "number", key: "pct", label: "Progress %" },
+          { kind: "text", key: "cta", label: "Button Text" },
+        ],
+      },
+      { kind: "text", key: "earningsLabel", label: "Earnings Label" },
+      { kind: "text", key: "earningsValue", label: "Earnings Value" },
+      { kind: "text", key: "achievementsTitle", label: "Achievements Title" },
+      {
+        kind: "list",
+        key: "achievements",
+        label: "Achievements",
+        itemLabel: "Achievement",
+        fields: [
+          { kind: "text", key: "title", label: "Title" },
+          { kind: "text", key: "subtitle", label: "Subtitle" },
+        ],
+      },
     ],
   },
   {

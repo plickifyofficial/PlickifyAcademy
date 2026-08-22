@@ -21,6 +21,7 @@ import { getPublishedFaqs, getPublishedTestimonials } from "@/lib/content-module
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   ctaDefaults,
+  dashboardDefaults,
   faqDefaults,
   featuredDefaults,
   heroDefaults,
@@ -43,7 +44,7 @@ export async function HomeSections({ useDrafts = false }: { useDrafts?: boolean 
       ? readSiteContentWithDraft(key, defaults)
       : getSiteContent(key, defaults);
 
-  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dbProducts, dbTestimonials, dbFaqs, sectionsMeta, customSections, featuredCourse, featuredBatch] =
+  const [hero, stats, tools, skills, featured, ourCourses, why, process, liveBatch, products, testimonials, faq, cta, dashboard, dbProducts, dbTestimonials, dbFaqs, sectionsMeta, customSections, featuredCourse, featuredBatch] =
     await Promise.all([
       read("home.hero", heroDefaults),
       read("home.stats", statsDefaults),
@@ -58,6 +59,7 @@ export async function HomeSections({ useDrafts = false }: { useDrafts?: boolean 
       read("home.testimonials", testimonialsDefaults),
       read("home.faq", faqDefaults),
       read("home.cta", ctaDefaults),
+      read("home.dashboard", dashboardDefaults),
       getPublishedProducts(),
       getPublishedTestimonials(),
       getPublishedFaqs("homepage"),
@@ -141,7 +143,7 @@ export async function HomeSections({ useDrafts = false }: { useDrafts?: boolean 
   };
 
   const sectionMap: Record<string, React.ReactNode> = {
-    "home.hero": <Hero content={hero} />,
+    "home.hero": <Hero content={hero} dashboard={dashboard} />,
     "home.stats": <Stats content={stats} />,
     "home.tools": <AiTools content={tools} />,
     "home.skills": <Skills content={skills} />,
