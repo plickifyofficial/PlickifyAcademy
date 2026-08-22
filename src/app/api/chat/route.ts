@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAiAssistantSettings } from "@/lib/ai/config";
-import { aiChatComplete, isAiConfigured, type ChatMessage } from "@/lib/ai/provider";
+import { aiChatComplete, getAiProviderConfig, type ChatMessage } from "@/lib/ai/provider";
 import {
   ensureKnowledgeFresh,
   retrieveKnowledge,
@@ -153,7 +153,8 @@ export async function POST(req: Request) {
 
     const history = conversationId ? await loadHistory(conversationId) : [];
 
-    if (!isAiConfigured()) {
+    const providerConfig = await getAiProviderConfig();
+    if (!providerConfig.apiKey) {
       const fallback =
         "AI Assistant এখনো সম্পূর্ণভাবে চালু হয়নি। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন, অথবা আমাদের Contact পেজে যোগাযোগ করুন।";
       return NextResponse.json({ reply: fallback });
