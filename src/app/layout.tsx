@@ -79,7 +79,7 @@ export default async function RootLayout({
       }
     : null;
   return (
-    <html lang="en" className={`${hindSiliguri.variable} h-full antialiased`}>
+    <html lang="en" className={`${hindSiliguri.variable} h-full antialiased scroll-smooth`}>
       <body className="min-h-full flex flex-col">
         <ToastProvider>{children}</ToastProvider>
         <GlobalFloaters settings={contactSettings} ai={ai} />

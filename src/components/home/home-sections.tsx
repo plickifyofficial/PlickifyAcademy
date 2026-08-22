@@ -123,6 +123,23 @@ export async function HomeSections({ useDrafts = false }: { useDrafts?: boolean 
     return cls.trim();
   }
 
+  // Stable anchor ids so buttons can deep-link to a section, e.g. `#featured`.
+  const sectionIds: Record<string, string> = {
+    "home.hero": "hero",
+    "home.stats": "stats",
+    "home.tools": "tools",
+    "home.skills": "skills",
+    "home.featured": "featured",
+    "home.our_courses": "courses",
+    "home.why": "why",
+    "home.process": "process",
+    "home.live_batch": "live-batch",
+    "home.products": "products",
+    "home.testimonials": "testimonials",
+    "home.faq": "faq",
+    "home.cta": "contact",
+  };
+
   const sectionMap: Record<string, React.ReactNode> = {
     "home.hero": <Hero content={hero} />,
     "home.stats": <Stats content={stats} />,
@@ -143,8 +160,13 @@ export async function HomeSections({ useDrafts = false }: { useDrafts?: boolean 
     <>
       {orderedKeys.map((key) => {
         const cls = deviceClass(sectionsMeta.devices?.[key]);
+        const id = sectionIds[key];
         return (
-          <div key={key} className={cls || undefined}>
+          <div
+            key={key}
+            id={id}
+            className={cls ? `scroll-mt-24 ${cls}` : "scroll-mt-24"}
+          >
             {sectionMap[key]}
           </div>
         );
@@ -152,7 +174,9 @@ export async function HomeSections({ useDrafts = false }: { useDrafts?: boolean 
       {customSections.items
         .filter((s) => s.visible)
         .map((s) => (
-          <CustomSectionBlock key={s.id} section={s} />
+          <div key={s.id} id={s.id} className="scroll-mt-24">
+            <CustomSectionBlock section={s} />
+          </div>
         ))}
     </>
   );
