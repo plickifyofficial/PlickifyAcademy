@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,9 @@ export function SiteNav({ links }: { links: { label: string; href: string }[] })
     };
   }, [open]);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <>
       <nav className="hidden items-center gap-7 lg:flex">
@@ -65,14 +69,17 @@ export function SiteNav({ links }: { links: { label: string; href: string }[] })
         <i className={`fa-solid ${open ? "fa-xmark" : "fa-bars"} text-xl`} />
       </button>
 
-      <div
-        id="mobile-nav-drawer"
-        aria-hidden={!open}
-        className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-80 max-w-[85vw] flex-col bg-white shadow-2xl transition-transform duration-200 ease-out lg:hidden",
-          open ? "translate-x-0" : "translate-x-full",
-        )}
-      >
+      {mounted &&
+        createPortal(
+          <>
+            <div
+              id="mobile-nav-drawer"
+              aria-hidden={!open}
+              className={cn(
+                "fixed inset-y-0 right-0 z-50 flex w-80 max-w-[85vw] flex-col bg-white shadow-2xl transition-transform duration-200 ease-out lg:hidden",
+                open ? "translate-x-0" : "translate-x-full",
+              )}
+            >
         <div className="safe-top flex h-16 shrink-0 items-center justify-between border-b border-zinc-100 px-5">
           <span className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800">
@@ -141,12 +148,15 @@ export function SiteNav({ links }: { links: { label: string; href: string }[] })
 
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 lg:hidden",
+          "fixed inset-0 z-[49] bg-black/50 transition-opacity duration-200 lg:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={() => setOpen(false)}
         aria-hidden="true"
       />
+          </>,
+          document.body,
+        )}
     </>
   );
 }
