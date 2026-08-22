@@ -51,10 +51,10 @@ export const heroDefaults = {
   heroImage: "",
   heroImageAlt: "Plickify Academy dashboard preview",
   avatars: [
-    { initials: "RH", color: "bg-blue-500" },
-    { initials: "NJ", color: "bg-violet-500" },
-    { initials: "MH", color: "bg-emerald-500" },
-    { initials: "SA", color: "bg-amber-500" },
+    { initials: "RH", color: "bg-blue-500", image: "" },
+    { initials: "NJ", color: "bg-violet-500", image: "" },
+    { initials: "MH", color: "bg-emerald-500", image: "" },
+    { initials: "SA", color: "bg-amber-500", image: "" },
   ],
 };
 export type HeroContent = typeof heroDefaults;
@@ -71,13 +71,14 @@ export type StatsContent = typeof statsDefaults;
 
 export const toolsDefaults = {
   label: "We work with the tools you use",
+  autoScroll: true,
   tools: [
-    { icon: "fa-solid fa-comment-dots", name: "ChatGPT", visible: true },
-    { icon: "fa-solid fa-palette", name: "Canva", visible: true },
-    { icon: "fa-solid fa-brain", name: "Google AI", visible: true },
-    { icon: "fa-solid fa-wand-magic-sparkles", name: "Midjourney", visible: true },
-    { icon: "fa-solid fa-gem", name: "Gemini", visible: true },
-    { icon: "fa-solid fa-robot", name: "Claude", visible: true },
+    { icon: "fa-solid fa-comment-dots", name: "ChatGPT", visible: true, image: "" },
+    { icon: "fa-solid fa-palette", name: "Canva", visible: true, image: "" },
+    { icon: "fa-solid fa-brain", name: "Google AI", visible: true, image: "" },
+    { icon: "fa-solid fa-wand-magic-sparkles", name: "Midjourney", visible: true, image: "" },
+    { icon: "fa-solid fa-gem", name: "Gemini", visible: true, image: "" },
+    { icon: "fa-solid fa-robot", name: "Claude", visible: true, image: "" },
   ],
 };
 export type ToolsContent = typeof toolsDefaults;
@@ -116,6 +117,8 @@ export const featuredDefaults = {
   description: "A complete practical course to build smart income with AI.",
   buttonText: "Enroll Now",
   buttonLink: "/signup",
+  featuredImage: "",
+  featuredImageAlt: "Featured course cover",
   features: [
     "40+ Video Lessons",
     "Live Classes",
@@ -197,6 +200,7 @@ export const testimonialsDefaults = {
         "Within the first month of the AI Income Mastery course, my freelancing income started. The practical videos in the course are outstanding.",
       color: "bg-blue-500",
       initials: "RH",
+      image: "",
     },
     {
       name: "Nusrat Jahan",
@@ -205,6 +209,7 @@ export const testimonialsDefaults = {
         "After learning Canva and AI tools, I now get design work directly from clients. Plickify's support is truly great.",
       color: "bg-violet-500",
       initials: "NJ",
+      image: "",
     },
     {
       name: "Mahadi Hasan",
@@ -213,6 +218,7 @@ export const testimonialsDefaults = {
         "The digital marketing course changed my career. The live classes and Q&A sessions were extremely helpful.",
       color: "bg-emerald-500",
       initials: "MH",
+      image: "",
     },
   ],
 };
@@ -428,6 +434,7 @@ export const footerDefaults = {
   newsletterButton: "Subscribe",
   copyright: "© 2026 Plickify Academy. All rights reserved.",
   paymentBadges: ["VISA", "MC", "BKASH", "NAGAD"],
+  paymentIcons: [],
 };
 export type FooterContent = typeof footerDefaults;
 
@@ -853,23 +860,24 @@ export const homeSections: SectionDef[] = [
       { kind: "text", key: "rating", label: "Rating" },
       { kind: "text", key: "reviews", label: "Reviews Text" },
       { kind: "text", key: "studentsCount", label: "Students Count Text" },
-      { kind: "image", key: "heroImage", label: "Hero Image (optional, replaces mockup)" },
+      { kind: "image", key: "heroImage", label: "Dashboard Mockup / Hero Image (replaces default mockup)" },
       { kind: "text", key: "heroImageAlt", label: "Hero Image Alt Text" },
-      {
-        kind: "list",
-        key: "avatars",
-        label: "Profile Avatars",
-        itemLabel: "Avatar",
-        fields: [
-          { kind: "text", key: "initials", label: "Initials (e.g. RH)" },
-          {
-            kind: "text",
-            key: "color",
-            label: "Color (Tailwind class)",
-            hint: "e.g. bg-blue-500",
-          },
-        ],
-      },
+       {
+         kind: "list",
+         key: "avatars",
+         label: "Profile Avatars",
+         itemLabel: "Avatar",
+         fields: [
+           { kind: "image", key: "image", label: "Avatar Image (optional, overrides initials)" },
+           { kind: "text", key: "initials", label: "Initials (e.g. RH)" },
+           {
+             kind: "text",
+             key: "color",
+             label: "Color (Tailwind class)",
+             hint: "e.g. bg-blue-500",
+           },
+         ],
+       },
     ],
   },
   {
@@ -899,12 +907,19 @@ export const homeSections: SectionDef[] = [
     fields: [
       { kind: "text", key: "label", label: "Label" },
       {
+        kind: "boolean",
+        key: "autoScroll",
+        label: "Auto-running marquee (on/off)",
+        hint: "When on, the tool icons scroll automatically.",
+      },
+      {
         kind: "list",
         key: "tools",
         label: "Tools",
         itemLabel: "Tool",
         fields: [
           iconFields("icon", "Icon"),
+          { kind: "image", key: "image", label: "Icon Image (optional, replaces FA icon)" },
           { kind: "text", key: "name", label: "Name" },
           { kind: "boolean", key: "visible", label: "Visible" },
         ],
@@ -947,6 +962,8 @@ export const homeSections: SectionDef[] = [
       { kind: "textarea", key: "description", label: "Description" },
       { kind: "text", key: "buttonText", label: "Button Text" },
       { kind: "url", key: "buttonLink", label: "Button Link" },
+      { kind: "image", key: "featuredImage", label: "Feature Image (optional, overrides course cover)" },
+      { kind: "text", key: "featuredImageAlt", label: "Feature Image Alt Text" },
       {
         kind: "stringlist",
         key: "features",
@@ -1103,6 +1120,7 @@ export const homeSections: SectionDef[] = [
           { kind: "text", key: "name", label: "Name" },
           { kind: "text", key: "role", label: "Profession/Role" },
           { kind: "textarea", key: "quote", label: "Testimonial" },
+          { kind: "image", key: "image", label: "Avatar Image (optional, overrides initials)" },
           { kind: "text", key: "initials", label: "Initials" },
           {
             kind: "text",
@@ -1593,8 +1611,14 @@ export const globalSections: SectionDef[] = [
       {
         kind: "stringlist",
         key: "paymentBadges",
-        label: "Payment Badges",
+        label: "Payment Badge Labels (text shown if no icon)",
         itemLabel: "Badge",
+      },
+      {
+        kind: "stringlist",
+        key: "paymentIcons",
+        label: "Payment Icon Images (same order; shown instead of text)",
+        itemLabel: "Icon URL",
       },
     ],
   },

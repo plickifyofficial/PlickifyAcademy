@@ -771,6 +771,24 @@ body {
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* ============ Auto-running tools marquee ============ */
+@keyframes plickify-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: plickify-marquee 24s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
 @layer utilities {
   .z-floating { z-index: 45; }
   .z-contact-menu { z-index: 46; }

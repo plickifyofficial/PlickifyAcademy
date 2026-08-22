@@ -15,17 +15,18 @@ export function FeaturedCourse({
       .replace(/<[^>]*>/g, "")
       .slice(0, 220);
   const buttonLink = course ? `/courses/${course.slug}` : content.buttonLink;
+  const cardImage = content.featuredImage || course?.cover_image;
 
   return (
     <section className="bg-gradient-to-b from-white via-brand-50/60 to-white px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-7xl" data-aos="fade-up">
         <div className="grid grid-cols-1 gap-8 rounded-[2rem] border border-brand-100 bg-white p-6 shadow-xl shadow-brand-100/60 sm:p-10 lg:grid-cols-[1.05fr_1.3fr_0.85fr] lg:gap-10">
           <div className="relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl bg-gradient-to-br from-brand-800 via-brand-700 to-brand-500 p-6">
-            {course?.cover_image ? (
+            {cardImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={course.cover_image}
-                alt={course.title}
+                src={cardImage}
+                alt={content.featuredImageAlt || course?.title || content.title}
                 loading="lazy"
                 className="absolute inset-0 h-full w-full object-cover"
               />
@@ -41,7 +42,7 @@ export function FeaturedCourse({
               {content.badge}
             </span>
 
-            {!course?.cover_image && (
+            {!cardImage && (
               <div>
                 <p className="text-lg font-black uppercase leading-none tracking-wide text-white sm:text-2xl">
                   {content.cardTop1}

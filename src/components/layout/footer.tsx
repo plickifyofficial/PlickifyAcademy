@@ -99,14 +99,29 @@ export function Footer({
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
           <p className="text-xs text-zinc-500">{content.copyright}</p>
           <div className="flex items-center gap-2 text-zinc-500">
-            {content.paymentBadges.map((b) => (
-              <span
-                key={b}
-                className="flex h-7 w-10 items-center justify-center rounded border border-white/10 bg-white/5 text-[10px] font-bold text-zinc-400"
-              >
-                {b}
-              </span>
-            ))}
+            {(content.paymentBadges ?? []).map((label, i) => {
+              const img = (content.paymentIcons ?? [])[i];
+              return img ? (
+                <span
+                  key={i}
+                  className="flex h-7 w-10 items-center justify-center overflow-hidden rounded border border-white/10 bg-white p-0.5"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img}
+                    alt={label}
+                    className="h-full w-full object-contain"
+                  />
+                </span>
+              ) : (
+                <span
+                  key={i}
+                  className="flex h-7 w-10 items-center justify-center rounded border border-white/10 bg-white/5 px-1 text-[10px] font-bold text-zinc-400"
+                >
+                  {label}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>

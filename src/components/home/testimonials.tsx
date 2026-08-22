@@ -9,6 +9,7 @@ export type TestimonialItem = {
   quote: string;
   initials?: string | null;
   color?: string | null;
+  image?: string | null;
   rating?: number;
   course?: string | null;
 };
@@ -99,11 +100,20 @@ export function Testimonials({
                   &ldquo;{t.quote}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3 border-t border-zinc-100 pt-4">
-                  <span
-                    className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white ${t.color ?? "bg-blue-600"}`}
-                  >
-                    {t.initials ?? t.name.slice(0, 2).toUpperCase()}
-                  </span>
+                  {t.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={t.image}
+                      alt={t.name}
+                      className="h-11 w-11 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span
+                      className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white ${t.color ?? "bg-blue-600"}`}
+                    >
+                      {t.initials ?? t.name.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
                   <div>
                     <p className="text-sm font-bold text-zinc-900">{t.name}</p>
                     <p className="text-xs font-medium text-zinc-500">

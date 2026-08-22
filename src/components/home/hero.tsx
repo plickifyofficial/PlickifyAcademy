@@ -43,12 +43,21 @@ export function Hero({ content }: { content: HeroContent }) {
 
           <div className="mt-10 flex flex-wrap items-center gap-5">
             <div className="flex -space-x-2.5">
-              {content.avatars.map((a) => (
+              {content.avatars.map((a, i) => (
                 <span
-                  key={a.initials}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-[11px] font-bold text-white shadow-sm ${a.color}`}
+                  key={a.image || a.initials || i}
+                  className={`flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white text-[11px] font-bold text-white shadow-sm ${a.color}`}
                 >
-                  {a.initials}
+                  {a.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={a.image}
+                      alt={a.initials || "Student"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    a.initials
+                  )}
                 </span>
               ))}
             </div>
