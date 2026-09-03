@@ -9,10 +9,8 @@ import {
   getPostBySlug,
   getPrevNextPosts,
   getRelatedPosts,
-  readLikedCommentIds,
 } from "@/lib/content-modules";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { ensureHeadingIds, renderContent, renderHeadings } from "@/lib/rte";
 import { RecordView } from "@/components/blog/record-view";
 import { ReadingProgress } from "@/components/blog/reading-progress";
@@ -37,6 +35,8 @@ export async function generateStaticParams() {
   const posts = await getPublishedPosts();
   return posts.map((p) => ({ slug: p.slug }));
 }
+
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -88,39 +88,14 @@ export default async function BlogPostPage({ params }: Props) {
     ? await getBlogAuthorById(post.author_id)
     : null;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const likedIds = user ? await readLikedCommentIds(user.id) : [];
-  const [loggedInName, myFeedback, feedbackCounts] = await Promise.all([
-    user
-      ? supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", user.id)
-          .maybeSingle()
-          .then((r) => r.data?.full_name ?? user.email?.split("@")[0] ?? null)
-      : Promise.resolve(null),
-    user
-      ? supabase
-          .from("blog_post_feedback")
-          .select("helpful")
-          .eq("post_id", post.id)
-          .eq("user_id", user.id)
-          .maybeSingle()
-          .then((r) => r.data)
-      : Promise.resolve(null),
+  const supabase = createAdminClient();
+  const [feedbackCounts, courseData, productData] = await Promise.all([
     supabase.rpc("blog_feedback_counts", { p_post_id: post.id }).then((r) => ({
       helpful: Number((r.data as { helpful?: number } | null)?.helpful ?? 0),
       not_helpful: Number((r.data as { not_helpful?: number } | null)?.not_helpful ?? 0),
     })),
-  ]);
-
-  const admin = createAdminClient();
-  const [courseData, productData] = await Promise.all([
     post.related_course_id
-      ? admin
+      ? supabase
           .from("courses")
           .select("title, slug, price, cover_image, category, description")
           .eq("id", post.related_course_id)
@@ -128,7 +103,7 @@ export default async function BlogPostPage({ params }: Props) {
           .maybeSingle()
       : Promise.resolve({ data: null }),
     post.related_product_ids.length > 0
-      ? admin
+      ? supabase
           .from("products")
           .select("name, slug, price, old_price, cover_image, icon, gradient")
           .eq("is_published", true)
@@ -319,13 +294,7 @@ export default async function BlogPostPage({ params }: Props) {
             <HelpfulFeedback
               postId={post.id}
               counts={feedbackCounts}
-              initial={
-                myFeedback === null
-                  ? null
-                  : myFeedback.helpful
-                    ? "yes"
-                    : "no"
-              }
+              initial={null}
             />
 
             {/* Author box */}
@@ -420,8 +389,8 @@ export default async function BlogPostPage({ params }: Props) {
         <Comments
           postId={post.id}
           comments={comments}
-          likedIds={likedIds}
-          loggedInName={loggedInName}
+          likedIds={[]}
+          loggedInName={null}
           enabled={settings.commentsEnabled}
         />
       </div>

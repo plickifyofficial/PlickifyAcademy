@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/format";
 import { BuyButton } from "@/components/products/buy-button";
@@ -9,6 +8,15 @@ import { renderContent } from "@/lib/rte";
 import type { Metadata } from "next";
 
 export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("products")
+    .select("slug")
+    .eq("is_published", true);
+  return (data ?? []).map((p) => ({ slug: p.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -45,21 +53,7 @@ export default async function ProductDetailPage({
 
   if (!product) notFound();
 
-  const serverSupabase = await createClient();
-  const {
-    data: { user },
-  } = await serverSupabase.auth.getUser();
-
   let owned = false;
-  if (user) {
-    const { data: purchase } = await serverSupabase
-      .from("product_purchases")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("product_id", product.id)
-      .maybeSingle();
-    owned = !!purchase;
-  }
 
   const discount =
     product.old_price > product.price

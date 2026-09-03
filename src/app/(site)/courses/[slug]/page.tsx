@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/format";
 import { getSiteContent } from "@/lib/site-content";
@@ -24,9 +23,19 @@ import { Faq } from "@/components/home/faq";
 import { ProseContent } from "@/components/editor/prose-content";
 import { renderContent, toPlainTextMd } from "@/lib/rte";
 import type { Lesson, Announcement, LiveClass } from "@/lib/types";
+import { CourseUserSection } from "@/components/courses/course-user-section";
 
 export const metadata = { title: "Course" };
 export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("courses")
+    .select("slug")
+    .eq("is_published", true);
+  return (data ?? []).map((c) => ({ slug: c.slug }));
+}
 
 const LEVEL_LABEL: Record<string, string> = {
   beginner: "Beginner",
@@ -40,20 +49,18 @@ export default async function CourseDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const admin = createAdminClient();
+  const supabase = createAdminClient();
 
-  const [{ data: course }, globalContent, authResult] = await Promise.all([
+  const [courseResult, globalContent] = await Promise.all([
     supabase.from("courses").select("*").eq("slug", slug).eq("is_published", true).single(),
     getSiteContent("page.course", coursePageDefaults),
-    supabase.auth.getUser(),
   ]);
+
+  const course = courseResult.data;
 
   if (!course) {
     notFound();
   }
-
-  const user = authResult.data.user;
 
   const storedContent =
     course.content && typeof course.content === "object" && !Array.isArray(course.content)
@@ -76,8 +83,8 @@ export default async function CourseDetailPage({
   ] = await Promise.all([
     supabase.from("course_sections").select("*").eq("course_id", course.id).order("position", { ascending: true }),
     supabase.from("lessons").select("*").eq("course_id", course.id).order("order", { ascending: true }),
-    admin.from("enrollments").select("id", { count: "exact", head: true }).eq("course_id", course.id),
-    admin.from("profiles").select("full_name, avatar_url").eq("id", course.created_by ?? "").maybeSingle(),
+    supabase.from("enrollments").select("id", { count: "exact", head: true }).eq("course_id", course.id),
+    supabase.from("profiles").select("full_name, avatar_url").eq("id", course.created_by ?? "").maybeSingle(),
     supabase.from("reviews").select("*, profiles(full_name)").eq("course_id", course.id).order("created_at", { ascending: false }),
     supabase.from("course_qna").select("*, profiles(full_name)").eq("course_id", course.id).order("created_at", { ascending: true }),
     supabase.from("course_announcements").select("*").eq("course_id", course.id).order("created_at", { ascending: false }),
@@ -104,43 +111,6 @@ export default async function CourseDetailPage({
     0,
   );
 
-  let isEnrolled = false;
-  let enrollmentDate: string | null = null;
-  let lastLessonId: string | null = null;
-  let isAdmin = false;
-  let wishlisted = false;
-  let completedIds = new Set<string>();
-  let ownReview: { rating: number; comment: string | null } | null = null;
-  let certificateId: string | null = null;
-
-  if (user) {
-    const [{ data: profile }, { data: wish }, { data: enrollment }, { data: state }, { data: review }, { data: cert }] = await Promise.all([
-      supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
-      supabase.from("wishlist").select("course_id").eq("user_id", user.id).eq("course_id", course.id).maybeSingle(),
-      supabase.from("enrollments").select("id, created_at").eq("user_id", user.id).eq("course_id", course.id).maybeSingle(),
-      supabase.from("user_course_state").select("last_lesson_id").eq("user_id", user.id).eq("course_id", course.id).maybeSingle(),
-      supabase.from("reviews").select("rating, comment").eq("user_id", user.id).eq("course_id", course.id).maybeSingle(),
-      supabase.from("certificates").select("id").eq("user_id", user.id).eq("course_id", course.id).maybeSingle(),
-    ]);
-
-    isAdmin = profile?.role === "admin";
-    wishlisted = !!wish;
-    isEnrolled = !!enrollment;
-    enrollmentDate = enrollment?.created_at ?? null;
-    lastLessonId = state?.last_lesson_id ?? null;
-    ownReview = review ?? null;
-    certificateId = cert?.id ?? null;
-
-    if (isEnrolled && allTopicIds.length > 0) {
-      const { data: progress } = await supabase
-        .from("lesson_progress")
-        .select("lesson_id")
-        .in("lesson_id", allTopicIds)
-        .eq("user_id", user.id);
-      completedIds = new Set((progress ?? []).map((p) => p.lesson_id));
-    }
-  }
-
   const reviews = (reviewsRaw ?? []) as unknown as {
     id: string;
     rating: number;
@@ -162,24 +132,6 @@ export default async function CourseDetailPage({
     profiles: { full_name: string | null } | null;
   }[];
 
-  function isDripLocked(topic: Lesson): boolean {
-    if (!isEnrolled || topic.is_free || (topic.release_days ?? 0) <= 0 || !enrollmentDate)
-      return false;
-    const unlock = new Date(new Date(enrollmentDate).getTime() + topic.release_days * 86400000);
-    return new Date() < unlock;
-  }
-
-  const completedCount = allTopicIds.filter((id) => completedIds.has(id)).length;
-  const progressPct =
-    allTopicIds.length > 0
-      ? Math.round((completedCount / allTopicIds.length) * 100)
-      : 0;
-
-  const canAccess = isEnrolled;
-  const firstTopic = allTopics[0];
-  const resumeTopic =
-    allTopics.find((t) => t.id === lastLessonId) ?? firstTopic;
-
   const curriculum: CurSection[] = (sections ?? []).map((section) => ({
     id: section.id,
     title: section.title,
@@ -189,9 +141,9 @@ export default async function CourseDetailPage({
       type: topic.type,
       duration_minutes: topic.duration_minutes,
       is_free: topic.is_free,
-      done: completedIds.has(topic.id),
-      locked: !canAccess || isDripLocked(topic),
-      drip: isDripLocked(topic),
+      done: false,
+      locked: true,
+      drip: false,
     })),
   }));
 
@@ -297,98 +249,24 @@ export default async function CourseDetailPage({
                   <i className="fa-solid fa-certificate text-white/60" /> Certificate
                 </span>
               </div>
-
-              {isEnrolled && (
-                <div className="mt-6 max-w-md">
-                  <div className="flex items-center justify-between text-sm text-brand-100">
-                    <span>Your Progress</span>
-                    <span className="font-semibold">{progressPct}%</span>
-                  </div>
-                  <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/20">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-400 transition-all"
-                      style={{ width: `${progressPct}%` }}
-                    />
-                  </div>
-                  <p className="mt-1.5 text-xs text-brand-200">
-                    {completedCount}/{allTopicIds.length} topics completed
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Purchase card */}
             <div className="lg:sticky lg:top-24">
-              <div className="overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/30">
-                <div className="relative overflow-hidden rounded-t-2xl">
-                  <PromoVideo
-                    coverImage={course.cover_image}
-                    title={course.title}
-                    url={course.promo_video_url}
-                    embed={course.promo_video_embed}
-                  />
-                  {course.price > 0 && originalPrice > course.price && (
-                    <span className="absolute right-3 top-3 rounded-full bg-amber-400 px-3 py-1 text-xs font-extrabold text-amber-950 shadow">
-                      {content.discountLabel}
-                    </span>
-                  )}
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-extrabold text-zinc-900">
-                      {formatPrice(course.price)}
-                    </span>
-                    {course.price > 0 && originalPrice > course.price && (
-                      <span className="text-sm text-zinc-400 line-through">
-                        {formatPrice(originalPrice)}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-xs text-zinc-500">{content.pricingNote}</p>
-
-                  <div className="mt-5 space-y-2.5">
-                    {canAccess ? (
-                      resumeTopic ? (
-                        <Link
-                          href={`/courses/${course.slug}/lessons/${resumeTopic.id}`}
-                          className="block rounded-xl bg-brand-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-0.5 hover:bg-brand-700"
-                        >
-                          <i className="fa-solid fa-play mr-2" />
-                          {isEnrolled && lastLessonId ? "Continue Learning" : "Start Learning"}
-                        </Link>
-                      ) : (
-                        <p className="rounded-xl bg-zinc-100 py-3.5 text-center text-sm font-semibold text-zinc-600">
-No topics added yet
-                        </p>
-                      )
-                    ) : (
-                      <CheckoutButton courseId={course.id} price={course.price} />
-                    )}
-                  </div>
-
-                  <div className="mt-3">
-                    {!isEnrolled && (
-                      <WishlistButton courseId={course.id} initialSaved={wishlisted} />
-                    )}
-                  </div>
-
-                  {isEnrolled && (
-                    <div className="mt-4">
-                      <CertificateButton
-                        courseId={course.id}
-                        completed={progressPct === 100}
-                        certificateId={certificateId}
-                      />
-                    </div>
-                  )}
-
-                  <p className="mt-5 flex items-center justify-center gap-2 border-t border-zinc-100 pt-4 text-xs font-medium text-zinc-500">
-                    <i className="fa-solid fa-shield-halved text-green-600" />
-                    {content.secureText}
-                  </p>
-                </div>
-              </div>
+              <CourseUserSection
+                courseId={course.id}
+                courseSlug={course.slug}
+                coursePrice={course.price}
+                originalPrice={originalPrice}
+                allTopicIds={allTopicIds}
+                discountLabel={content.discountLabel}
+                pricingNote={content.pricingNote}
+                secureText={content.secureText}
+                coverImage={course.cover_image}
+                promoVideoUrl={course.promo_video_url}
+                promoVideoEmbed={course.promo_video_embed}
+                title={course.title}
+              />
             </div>
           </div>
         </div>
@@ -465,19 +343,19 @@ No topics added yet
           </div>
         </section>
 
-        {isEnrolled && ((liveClasses ?? []) as LiveClass[]).length > 0 && (
+        {((liveClasses ?? []) as LiveClass[]).length > 0 && (
           <section className="mt-16" data-aos="fade-up">
             {sectionTitle("fa-solid fa-calendar-days", "Live Classes")}
             <div className="mt-6">
               <LiveClassesSection
                 classes={liveClasses as LiveClass[]}
-                isEnrolled={isEnrolled}
+                isEnrolled={false}
               />
             </div>
           </section>
         )}
 
-        {isEnrolled && (announcements ?? []).length > 0 && (
+        {(announcements ?? []).length > 0 && (
           <section className="mt-16" data-aos="fade-up">
             {sectionTitle("fa-solid fa-bullhorn", "Announcements")}
             <div className="mt-6 space-y-3">
@@ -620,11 +498,11 @@ No topics added yet
         <section className="mt-16" data-aos="fade-up">
           <ReviewsSection
             courseId={course.id}
-            isEnrolled={isEnrolled}
+            isEnrolled={false}
             reviews={reviews}
             avg={avg}
             count={reviews.length}
-            ownReview={ownReview}
+            ownReview={null}
           />
         </section>
 
@@ -632,8 +510,8 @@ No topics added yet
         <section className="mt-16" data-aos="fade-up">
           <QnaSection
             courseId={course.id}
-            isEnrolled={isEnrolled}
-            isAdmin={isAdmin}
+            isEnrolled={false}
+            isAdmin={false}
             items={qnaItems}
           />
         </section>
@@ -665,20 +543,13 @@ No topics added yet
               <p className="mt-2 text-sm text-brand-100">{content.pricingNote}</p>
 
               <div className="mt-8 flex justify-center">
-                {canAccess ? (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-9 py-4 text-base font-bold text-brand-700 shadow-lg">
-                    <i className="fa-solid fa-circle-check text-green-600" />
-                    You are already enrolled
-                  </span>
-                ) : (
-                  <a
-                    href={`/checkout/${course.id}`}
-                    className="inline-flex items-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-brand-700 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-50"
-                  >
-                    Enroll Now
-                    <i className="fa-solid fa-arrow-right text-sm" />
-                  </a>
-                )}
+                <a
+                  href={`/checkout/${course.id}`}
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-10 py-4 text-base font-bold text-brand-700 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-50"
+                >
+                  Enroll Now
+                  <i className="fa-solid fa-arrow-right text-sm" />
+                </a>
               </div>
 
               <p className="mt-5 flex items-center justify-center gap-2 text-xs font-medium text-brand-100">
@@ -739,27 +610,13 @@ No topics added yet
             </div>
             <p className="truncate text-xs text-zinc-500">{course.title}</p>
           </div>
-          {canAccess ? (
-            <Link
-              href={
-                resumeTopic
-                  ? `/courses/${course.slug}/lessons/${resumeTopic.id}`
-                  : `/courses/${course.slug}`
-              }
-              className="flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-colors hover:bg-brand-700"
-            >
-              <i className="fa-solid fa-play" />
-              {isEnrolled && lastLessonId ? "Continue" : "Start Learning"}
-            </Link>
-          ) : (
-            <Link
-              href={`/checkout/${course.id}`}
-              className="flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-colors hover:bg-brand-700"
-            >
-              Enroll Now
-              <i className="fa-solid fa-arrow-right text-xs" />
-            </Link>
-          )}
+          <Link
+            href={`/checkout/${course.id}`}
+            className="flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-colors hover:bg-brand-700"
+          >
+            Enroll Now
+            <i className="fa-solid fa-arrow-right text-xs" />
+          </Link>
         </div>
       </div>
     </main>

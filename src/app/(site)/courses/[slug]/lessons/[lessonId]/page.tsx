@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { MarkCompleteButton } from "@/components/lessons/mark-complete-button";
 import { QuizPlayer } from "@/components/lessons/quiz-player";
 import { ResumeTracker } from "@/components/lessons/resume-tracker";
@@ -11,6 +11,7 @@ import { renderContent } from "@/lib/rte";
 import type { QuizQuestion } from "@/lib/types";
 
 export const metadata = { title: "Lesson" };
+export const revalidate = 60;
 
 export default async function LessonPage({
   params,
@@ -18,7 +19,7 @@ export default async function LessonPage({
   params: Promise<{ slug: string; lessonId: string }>;
 }) {
   const { slug, lessonId } = await params;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: course } = await supabase
     .from("courses")
@@ -61,28 +62,34 @@ export default async function LessonPage({
       return pa - pb || a.order - b.order;
     });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   let isEnrolled = false;
   let enrollmentDate: string | null = null;
-  if (user) {
-    const { data: enrollment } = await supabase
-      .from("enrollments")
-      .select("id, created_at")
-      .eq("user_id", user.id)
-      .eq("course_id", course.id)
-      .maybeSingle();
-    isEnrolled = !!enrollment;
-    enrollmentDate = enrollment?.created_at ?? null;
+  let dripLocked = false;
+  let unlockAt: Date | null = null;
+
+  let user = null;
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const authSupabase = await createClient();
+    const authResult = await authSupabase.auth.getUser();
+    user = authResult.data.user;
+
+    if (user) {
+      const { data: enrollment } = await supabase
+        .from("enrollments")
+        .select("id, created_at")
+        .eq("user_id", user.id)
+        .eq("course_id", course.id)
+        .maybeSingle();
+      isEnrolled = !!enrollment;
+      enrollmentDate = enrollment?.created_at ?? null;
+    }
+  } catch {
+    // Auth unavailable - render without user context
   }
 
   const canAccess = isEnrolled;
 
-  // drip content: release N days after enrollment
-  let dripLocked = false;
-  let unlockAt: Date | null = null;
   if (isEnrolled && !lesson.is_free && (lesson.release_days ?? 0) > 0 && enrollmentDate) {
     unlockAt = new Date(new Date(enrollmentDate).getTime() + (lesson.release_days ?? 0) * 86400000);
     dripLocked = new Date() < unlockAt;
