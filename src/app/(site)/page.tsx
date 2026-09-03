@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { HomeSections } from "@/components/home/home-sections";
 import { pageMetadata } from "@/lib/seo";
 
+export const revalidate = 60;
+
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata("/", {
     title: { absolute: "Plickify Academy | AI Skills, Freelancing & Digital Career" },

@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ProseContent } from "@/components/editor/prose-content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 type PageRow = {
   id: string;
@@ -15,7 +15,7 @@ type PageRow = {
 };
 
 async function getPage(slug: string): Promise<PageRow | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data } = await supabase
     .from("custom_pages")
     .select("id, slug, title, body, is_published")
@@ -24,6 +24,15 @@ async function getPage(slug: string): Promise<PageRow | null> {
 
   if (!data || !data.is_published) return null;
   return data;
+}
+
+export async function generateStaticParams() {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("custom_pages")
+    .select("slug")
+    .eq("is_published", true);
+  return (data ?? []).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
