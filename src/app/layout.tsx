@@ -6,6 +6,7 @@ import { getSiteSettings } from "@/lib/settings";
 import { getContactSettings } from "@/lib/contact-settings";
 import { getAiAssistantSettings } from "@/lib/ai/config";
 import { GlobalFloaters } from "@/components/floating/global-floaters";
+import { NavigationLoader } from "@/components/ui/navigation-loader";
 
 const hindSiliguri = Hind_Siliguri({
   variable: "--font-hind-siliguri",
@@ -85,6 +86,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${hindSiliguri.variable} h-full antialiased scroll-smooth`}>
       <body className="min-h-full flex flex-col">
+        <NavigationLoader />
         <ToastProvider>{children}</ToastProvider>
         <GlobalFloaters settings={contactSettings} ai={ai} />
       </body>
