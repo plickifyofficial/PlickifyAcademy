@@ -14,17 +14,18 @@ export default async function DashboardLayout({
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, full_name, avatar_url")
-    .eq("id", user.id)
-    .single();
-
-  const { data: settings } = await supabase
-    .from("site_settings")
-    .select("site_name, logo_url")
-    .eq("id", 1)
-    .single();
+  const [{ data: profile }, { data: settings }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("role, full_name, avatar_url")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("site_settings")
+      .select("site_name, logo_url")
+      .eq("id", 1)
+      .single(),
+  ]);
 
   const name = profile?.full_name || user.user_metadata?.full_name || "Student";
   const avatarUrl =

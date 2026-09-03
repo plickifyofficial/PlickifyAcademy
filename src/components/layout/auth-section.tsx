@@ -7,25 +7,17 @@ import { UserMenu } from "@/components/layout/user-menu";
 
 export function AuthSection() {
   const [user, setUser] = useState<{ id: string } | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
-      setLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="h-10 w-16 animate-pulse rounded-full bg-zinc-200 sm:w-20" />
-    );
-  }
 
   if (user) return <UserMenu />;
 

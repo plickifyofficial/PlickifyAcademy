@@ -16,23 +16,23 @@ export default async function AdminLayout({
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { data: settings }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("role, full_name")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("site_settings")
+      .select("site_name, logo_url")
+      .eq("id", 1)
+      .single(),
+  ]);
 
   if (profile?.role !== "admin" && profile?.role !== "instructor")
     redirect("/dashboard");
 
   const isInstructor = profile?.role === "instructor";
-
-  const { data: settings } = await supabase
-    .from("site_settings")
-    .select("site_name, logo_url")
-    .eq("id", 1)
-    .single();
-
   const siteName = settings?.site_name || "Plickify Academy";
   const adminName = profile?.full_name || user.email;
 
