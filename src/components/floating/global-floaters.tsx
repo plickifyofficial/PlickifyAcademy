@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { resolvePlacement } from "@/lib/floating";
@@ -32,10 +32,12 @@ export function GlobalFloaters({
   const [menuOpen, setMenuOpen] = useState(false);
   const [extra, setExtra] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const rafRef = useRef<number>(0);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const update = () => {
+  const recalc = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const mq = window.matchMedia("(max-width: 767px)");
       setIsMobile(mq.matches);
       let max = 0;
       document.querySelectorAll<HTMLElement>("[data-floating-obstacle]").forEach(
@@ -53,17 +55,22 @@ export function GlobalFloaters({
       const n = parseFloat(v);
       if (!Number.isNaN(n)) safe = n;
       setExtra(max + safe);
-    };
-    update();
-    mq.addEventListener("change", update);
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", update, { passive: true });
+    });
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    recalc();
+    mq.addEventListener("change", recalc);
+    window.addEventListener("resize", recalc);
+    window.addEventListener("scroll", recalc, { passive: true });
     return () => {
-      mq.removeEventListener("change", update);
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update);
+      mq.removeEventListener("change", recalc);
+      window.removeEventListener("resize", recalc);
+      window.removeEventListener("scroll", recalc);
+      cancelAnimationFrame(rafRef.current);
     };
-  }, [pathname]);
+  }, [recalc, pathname]);
 
   if (!resolvePlacement(settings.placement, pathname)) return null;
 
