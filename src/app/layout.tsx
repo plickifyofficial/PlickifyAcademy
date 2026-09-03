@@ -69,8 +69,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const contactSettings = await getContactSettings();
-  const aiSettings = await getAiAssistantSettings();
+  const [contactSettings, aiSettings] = await Promise.all([
+    getContactSettings(),
+    getAiAssistantSettings(),
+  ]);
   const ai = aiSettings.is_enabled
     ? {
         name: aiSettings.name,

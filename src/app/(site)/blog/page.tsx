@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/blog" },
 };
 
+export const revalidate = 60;
+
 type Props = {
   searchParams: Promise<{ search?: string; category?: string; sort?: string }>;
 };

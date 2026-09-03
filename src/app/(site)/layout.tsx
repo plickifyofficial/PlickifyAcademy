@@ -12,28 +12,30 @@ import {
   popupDefaults,
 } from "@/lib/content-schema";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function SiteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, nav, footer, popup] = await Promise.all([
+  const [settings, nav, footer, popup, footerPages] = await Promise.all([
     getSiteSettings(),
     getSiteContent("global.nav", navDefaults),
     getSiteContent("global.footer", footerDefaults),
     getSiteContent("global.popup", popupDefaults),
+    (async () => {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("custom_pages")
+        .select("slug, title")
+        .eq("is_published", true)
+        .eq("show_in_footer", true);
+      return data ?? [];
+    })(),
   ]);
 
-  // Custom pages flagged "show in footer" appear in the footer link columns.
-  const supabase = await createClient();
-  const { data: footerPages } = await supabase
-    .from("custom_pages")
-    .select("slug, title")
-    .eq("is_published", true)
-    .eq("show_in_footer", true);
-  if (footerPages && footerPages.length > 0) {
+  if (footerPages.length > 0) {
     footer.supportLinks = [
       ...footer.supportLinks,
       ...footerPages.map((p) => ({

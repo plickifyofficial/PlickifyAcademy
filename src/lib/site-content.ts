@@ -40,13 +40,33 @@ export async function readSiteContent<T>(key: string, defaults: T): Promise<T> {
   }
 }
 
-export const getSiteContent = unstable_cache(
-  async <T>(key: string, defaults: T): Promise<T> => readSiteContent(key, defaults),
+async function fetchSiteContentRaw(key: string): Promise<unknown> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("site_content")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle();
+    if (error || !data?.value) return null;
+    return data.value;
+  } catch {
+    return null;
+  }
+}
+
+const cachedSiteContent = unstable_cache(
+  fetchSiteContentRaw,
   ["site-content"],
   { revalidate: 60 },
 );
 
-// Draft-aware read for the admin preview page (uncached).
+export async function getSiteContent<T>(key: string, defaults: T): Promise<T> {
+  const cached = await cachedSiteContent(key);
+  if (!cached) return defaults;
+  return deepMerge(defaults, cached);
+}
+
 export async function readSiteContentWithDraft<T>(
   key: string,
   defaults: T,
