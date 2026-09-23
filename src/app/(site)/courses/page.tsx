@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CoursesBrowser } from "@/components/courses/courses-browser";
 import { getCategories, getPublishedFaqs } from "@/lib/content-modules";
+import { getSiteContent } from "@/lib/site-content";
+import { courseListDefaults } from "@/lib/content-schema";
 import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,7 +24,7 @@ export default async function CoursesPage({
 
   const supabase = createAdminClient();
 
-  const [{ data: courses }, { data: reviews }, { data: lessons }, { data: enrollments }, { data: liveClasses }, { data: products }, { data: profiles }, categories, faqItems] =
+  const [{ data: courses }, { data: reviews }, { data: lessons }, { data: enrollments }, { data: liveClasses }, { data: products }, { data: profiles }, categories, faqItems, pageSettings] =
     await Promise.all([
       supabase
         .from("courses")
@@ -37,6 +39,7 @@ export default async function CoursesPage({
       supabase.from("profiles").select("id", { count: "exact", head: true }),
       getCategories("course"),
       getPublishedFaqs("courses"),
+      getSiteContent("page.courses", courseListDefaults),
     ]);
 
   const lessonCounts: Record<string, number> = {};
@@ -130,6 +133,7 @@ export default async function CoursesPage({
         desc: c.description ?? "",
       }))}
       faqItems={faqItems.map((f) => ({ q: f.question, a: f.answer }))}
+      showFeatured={pageSettings.showFeatured ?? true}
     />
   );
 }

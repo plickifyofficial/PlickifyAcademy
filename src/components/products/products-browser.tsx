@@ -391,12 +391,14 @@ export function ProductsBrowser({
   initialCategory,
   categories,
   faqItems,
+  showFeatured = true,
 }: {
   products: Product[];
   initialQuery?: string;
   initialCategory?: string;
   categories?: { name: string; slug: string; icon: string; desc?: string }[];
   faqItems?: { q: string; a: string }[];
+  showFeatured?: boolean;
 }) {
   const [query, setQuery] = useState(initialQuery ?? "");
   const [chip, setChip] = useState(
@@ -673,7 +675,7 @@ export function ProductsBrowser({
       </section>
 
       {/* Featured */}
-      {featured && (
+      {showFeatured && featured && (
         <section className="px-4 py-12 sm:px-6">
           <div className="mx-auto max-w-7xl">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { ProductsBrowser } from "@/components/products/products-browser";
 import { getPublishedProducts } from "@/lib/products";
 import { getCategories, getPublishedFaqs } from "@/lib/content-modules";
+import { getSiteContent } from "@/lib/site-content";
+import { productListDefaults } from "@/lib/content-schema";
 import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,11 +21,12 @@ export default async function DigitalProductsPage({
 }: {
   searchParams: Promise<{ q?: string; category?: string }>;
 }) {
-  const [{ q, category }, products, categories, faqItems] = await Promise.all([
+  const [{ q, category }, products, categories, faqItems, pageSettings] = await Promise.all([
     searchParams,
     getPublishedProducts(),
     getCategories("product"),
     getPublishedFaqs("products"),
+    getSiteContent("page.products", productListDefaults),
   ]);
 
   return (
@@ -38,6 +41,7 @@ export default async function DigitalProductsPage({
         desc: c.description ?? "",
       }))}
       faqItems={faqItems.map((f) => ({ q: f.question, a: f.answer }))}
+      showFeatured={pageSettings.showFeatured ?? true}
     />
   );
 }

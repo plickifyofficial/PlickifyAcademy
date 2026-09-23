@@ -339,12 +339,14 @@ export function CoursesBrowser({
   stats,
   categories,
   faqItems,
+  showFeatured = true,
 }: {
   initialCourses: CourseItem[];
   initialQuery: string;
   stats: { courses: number; students: number; resources: number; rating: number };
   categories?: CategoryOption[];
   faqItems?: { q: string; a: string }[];
+  showFeatured?: boolean;
 }) {
   const [query, setQuery] = useState(initialQuery);
   const [cats, setCats] = useState<string[]>([]);
@@ -679,7 +681,7 @@ export function CoursesBrowser({
       </section>
 
       {/* Featured */}
-      {featured && (
+      {showFeatured && featured && (
         <section className="px-4 sm:px-6">
           <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-600 to-brand-900 shadow-xl shadow-brand-700/20">
             <div className="grid grid-cols-1 md:grid-cols-2">

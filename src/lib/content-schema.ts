@@ -1956,7 +1956,31 @@ export const courseContentFields: FieldDef[] = [
   { kind: "text", key: "ctaButtonText", label: "Final CTA Button Text" },
 ];
 
+export const courseListDefaults = {
+  showFeatured: true,
+};
+export type CourseListContent = typeof courseListDefaults;
+
+export const productListDefaults = {
+  showFeatured: true,
+};
+export type ProductListContent = typeof productListDefaults;
+
 export const pageSections: SectionDef[] = [
+  {
+    key: "page.courses",
+    title: "Courses Listing Page",
+    description: "Control featured section on /courses",
+    defaults: courseListDefaults,
+    fields: [{ kind: "boolean", key: "showFeatured", label: "Show Featured Course" }],
+  },
+  {
+    key: "page.products",
+    title: "Digital Products Listing Page",
+    description: "Control featured section on /digital-products",
+    defaults: productListDefaults,
+    fields: [{ kind: "boolean", key: "showFeatured", label: "Show Featured Product" }],
+  },
   {
     key: "page.course",
     title: "Course Detail Page",
