@@ -19,10 +19,18 @@ export default async function AdminLayout({
 
   if (!user) redirect("/login");
 
-  // sites.bd flow: no server DB — instant shell
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, full_name")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin" && profile?.role !== "instructor")
+    redirect("/dashboard");
+
+  const isInstructor = profile?.role === "instructor";
   const siteName = "Plickify Academy";
-  const adminName = user.email;
-  const isInstructor = false;
+  const adminName = profile?.full_name || user.email;
 
   return (
     <div className="flex min-h-screen bg-[#f0f0f1]">
