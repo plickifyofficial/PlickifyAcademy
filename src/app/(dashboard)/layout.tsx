@@ -9,40 +9,26 @@ export default async function DashboardLayout({
 }) {
   const supabase = await createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   if (!user) redirect("/login");
 
-  const [{ data: profile }, { data: settings }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("role, full_name, avatar_url")
-      .eq("id", user.id)
-      .single(),
-    supabase
-      .from("site_settings")
-      .select("site_name, logo_url")
-      .eq("id", 1)
-      .single(),
-  ]);
-
-  const name = profile?.full_name || user.user_metadata?.full_name || "Student";
+  // sites.bd flow: no server DB — shell gets data client-side (instant)
+  const name = user.user_metadata?.full_name || "Student";
   const avatarUrl =
-    profile?.avatar_url ||
-    user.user_metadata?.avatar_url ||
-    user.user_metadata?.picture ||
-    "";
-  const siteName = settings?.site_name || "Plickify Academy";
+    user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+  const siteName = "Plickify Academy";
 
   return (
     <StudentShell
       name={name}
       email={user.email ?? ""}
       avatarUrl={avatarUrl}
-      role={profile?.role ?? "student"}
+      role={(user.user_metadata?.role as string) ?? "student"}
       siteName={siteName}
-      logoUrl={settings?.logo_url ?? null}
+      logoUrl={null}
     >
       {children}
     </StudentShell>

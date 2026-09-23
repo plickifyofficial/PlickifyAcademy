@@ -11,30 +11,16 @@ export default async function AdminLayout({
 }) {
   const supabase = await createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   if (!user) redirect("/login");
 
-  const [{ data: profile }, { data: settings }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("role, full_name")
-      .eq("id", user.id)
-      .single(),
-    supabase
-      .from("site_settings")
-      .select("site_name, logo_url")
-      .eq("id", 1)
-      .single(),
-  ]);
-
-  if (profile?.role !== "admin" && profile?.role !== "instructor")
-    redirect("/dashboard");
-
-  const isInstructor = profile?.role === "instructor";
-  const siteName = settings?.site_name || "Plickify Academy";
-  const adminName = profile?.full_name || user.email;
+  // sites.bd flow: no server DB — instant shell
+  const siteName = "Plickify Academy";
+  const adminName = user.email;
+  const isInstructor = false;
 
   return (
     <div className="flex min-h-screen bg-[#f0f0f1]">
@@ -44,16 +30,7 @@ export default async function AdminLayout({
         <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-black/10 bg-[#1d2327] px-4">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-bold text-zinc-800">
-              {settings?.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={settings.logo_url}
-                  alt={siteName}
-                  className="h-7 w-7 rounded-full object-contain"
-                />
-              ) : (
-                "P"
-              )}
+              P
             </span>
             <Link href="/admin" className="text-sm font-semibold text-white hover:text-zinc-300">
               {siteName}
