@@ -13,7 +13,8 @@ import {
   popupDefaults,
 } from "@/lib/content-schema";
 
-export const revalidate = 60;
+export const revalidate = 3600;
+export const dynamic = "force-static";
 
 export default async function SiteLayout({
   children,

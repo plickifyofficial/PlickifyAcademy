@@ -15,7 +15,8 @@ const hindSiliguri = Hind_Siliguri({
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.plickifyacademy.com";
 
-export const revalidate = 60;
+export const revalidate = 3600;
+export const dynamic = "force-static";
 
 export const viewport: Viewport = {
   width: "device-width",
