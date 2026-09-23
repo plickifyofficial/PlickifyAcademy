@@ -29,9 +29,11 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  // Fast local check — no network (was getUser() which blocks 5-10s)
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   const path = request.nextUrl.pathname;
   const isAuthedRoute =
