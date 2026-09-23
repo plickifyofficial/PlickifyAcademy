@@ -11,10 +11,13 @@ export const metadata = { title: "Checkout" };
 
 export default async function ProductCheckoutPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ variant?: string }>;
 }) {
   const { slug } = await params;
+  const sp = searchParams ? await searchParams : {};
   const supabase = await createClient();
   const settings = await getSiteSettings();
 
@@ -24,13 +27,19 @@ export default async function ProductCheckoutPage({
   if (!user) redirect("/login");
 
   const admin = createAdminClient();
-  const { data: product } = await admin
+  const { data: product } = (await admin
     .from("products")
-    .select("id, name, slug, description, price, old_price, cover_image, gradient, file_count, file_format, file_size")
+    .select("*")
     .eq("slug", slug)
     .eq("is_published", true)
-    .maybeSingle();
+    .maybeSingle()) as { data: import("@/lib/types").Product | null };
   if (!product) notFound();
+
+  const variants = ((product as import("@/lib/types").Product).variants as { id: string; name: string; price: number; old_price?: number }[] | null) ?? [];
+  const selectedVariant = sp?.variant ? variants.find((v) => v.id === sp.variant) ?? null : null;
+  const effectivePrice = selectedVariant ? Number(selectedVariant.price) : Number((product as import("@/lib/types").Product).price);
+  const effectiveOldPrice = selectedVariant?.old_price ? Number(selectedVariant.old_price) : Number((product as import("@/lib/types").Product).old_price);
+  const deliveryType = ((product as import("@/lib/types").Product).delivery_type as string) ?? "download";
 
   const { data: owned } = await admin
     .from("product_purchases")
@@ -77,6 +86,8 @@ export default async function ProductCheckoutPage({
                     alt={product.name}
                     className="h-full w-full object-cover"
                   />
+                ) : product.icon ? (
+                  <i className={`${product.icon} text-2xl`} />
                 ) : (
                   product.name.charAt(0)
                 )}
@@ -85,14 +96,15 @@ export default async function ProductCheckoutPage({
                 <h3 className="font-semibold leading-snug text-zinc-900">
                   {product.name}
                 </h3>
+                {selectedVariant && <p className="text-xs font-semibold text-brand-600">Variant: {selectedVariant.name}</p>}
                 {product.description && (
                   <p className="mt-1 line-clamp-2 text-sm text-zinc-500">
                     {product.description}
                   </p>
                 )}
                 <p className="mt-2 text-xs font-medium text-zinc-500">
-                  <i className="fa-solid fa-bolt mr-1 text-brand-600" />
-                  Instant download after verification
+                  <i className={`fa-solid ${deliveryType === "access" ? "fa-envelope" : "fa-bolt"} mr-1 text-brand-600`} />
+                  {deliveryType === "access" ? "Access via Email & WhatsApp" : "Instant download after verification"}
                   <span className="mx-2 text-zinc-300">·</span>
                   <i className="fa-solid fa-infinity mr-1 text-brand-600" />
                   Lifetime access
@@ -102,15 +114,15 @@ export default async function ProductCheckoutPage({
 
             <div className="mt-5 flex items-baseline justify-between border-t border-zinc-100 pt-4">
               <div>
-                {product.old_price > product.price && (
+                {effectiveOldPrice > effectivePrice && (
                   <span className="mr-2 text-sm text-zinc-400 line-through">
-                    {formatPrice(product.old_price)}
+                    {formatPrice(effectiveOldPrice)}
                   </span>
                 )}
                 <span className="text-2xl font-extrabold text-zinc-900">
-                  {formatPrice(product.price)}
+                  {formatPrice(effectivePrice)}
                 </span>
-                {product.price <= 0 && (
+                {effectivePrice <= 0 && (
                   <span className="ml-2 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
                     Free
                   </span>
@@ -123,24 +135,28 @@ export default async function ProductCheckoutPage({
         <div className="lg:sticky lg:top-24">
           <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
             <h2 className="text-base font-bold text-zinc-900">
-              {product.price > 0 ? "Payment Details" : "Get the Product"}
+              {effectivePrice > 0 ? "Payment Details" : "Get the Product"}
             </h2>
             <p className="mt-1 text-xs text-zinc-500">
-              {product.price > 0
-                ? "Send the amount via bKash or Nagad, then submit your TrxID below."
+              {effectivePrice > 0
+                ? deliveryType === "access"
+                  ? "Send payment then provide email & WhatsApp for access"
+                  : "Send the amount via bKash or Nagad, then submit your TrxID below."
                 : "This product is free — unlock it with one click."}
             </p>
             <div className="mt-4">
               <ProductCheckoutPanel
                 productId={product.id}
-                price={Number(product.price)}
+                price={effectivePrice}
+                variantId={selectedVariant?.id ?? null}
+                deliveryType={deliveryType as "download" | "access"}
                 bkashNumber={settings?.bkash_number ?? ""}
                 nagadNumber={settings?.nagad_number ?? ""}
               />
             </div>
             <p className="mt-4 flex items-center gap-2 border-t border-zinc-100 pt-3 text-xs font-medium text-zinc-500">
               <i className="fa-solid fa-shield-halved text-green-600" />
-              Secure Payment · Instant Download · Lifetime Access
+              {deliveryType === "access" ? "Secure Payment · Access via Email/WhatsApp" : "Secure Payment · Instant Download · Lifetime Access"}
             </p>
           </div>
         </div>

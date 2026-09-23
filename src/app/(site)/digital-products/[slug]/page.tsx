@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/format";
-import { BuyButton } from "@/components/products/buy-button";
+import { ProductDetailClient } from "@/components/products/product-detail-client";
 import { ProseContent } from "@/components/editor/prose-content";
 import { renderContent } from "@/lib/rte";
 import type { Metadata } from "next";
@@ -168,53 +168,9 @@ export default async function ProductDetailPage({
                 </div>
               )}
 
-              <div className="mt-8 border-t border-zinc-100 pt-6">
-                <div className="flex items-baseline gap-3">
-                  <span className="text-4xl font-extrabold text-brand-600">
-                    {product.price <= 0 ? "Free" : formatPrice(product.price)}
-                  </span>
-                  {product.old_price > product.price && (
-                    <span className="text-xl text-zinc-400 line-through">
-                      {formatPrice(product.old_price)}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-zinc-400">
-                  <i className="fa-solid fa-bolt mr-1 text-brand-500" />
-                  Instant Download · Lifetime Access
-                </p>
-                <div className="mt-5">
-                  <BuyButton slug={product.slug} name={product.name} owned={owned} />
-                </div>
-              </div>
+              <ProductDetailClient product={product as never} owned={owned} />
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Sticky mobile purchase bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-200 bg-white/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur lg:hidden" data-floating-obstacle>
-        <div className="safe-bottom mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-extrabold text-brand-600">
-                {product.price <= 0 ? "Free" : formatPrice(product.price)}
-              </span>
-              {product.old_price > product.price && (
-                <span className="text-sm text-zinc-400 line-through">
-                  {formatPrice(product.old_price)}
-                </span>
-              )}
-            </div>
-            <p className="truncate text-xs text-zinc-500">{product.name}</p>
-          </div>
-          <Link
-            href={owned ? `/dashboard/my-products` : `/checkout/product/${product.slug}`}
-            className="flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-600/30 transition-colors hover:bg-brand-700"
-          >
-            {owned ? "My Downloads" : "Buy Now"}
-            <i className="fa-solid fa-arrow-right text-xs" />
-          </Link>
         </div>
       </div>
     </main>

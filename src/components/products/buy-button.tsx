@@ -7,10 +7,12 @@ export function BuyButton({
   slug,
   name,
   owned,
+  variantId,
 }: {
   slug: string;
   name: string;
   owned?: boolean;
+  variantId?: string;
 }) {
   const router = useRouter();
   const [buying, setBuying] = useState(false);
@@ -32,7 +34,7 @@ export function BuyButton({
       onClick={() => {
         if (buying) return;
         setBuying(true);
-        router.push(`/checkout/product/${slug}`);
+        router.push(`/checkout/product/${slug}${variantId ? `?variant=${variantId}` : ""}`);
       }}
       className="w-full rounded-full bg-brand-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-brand-600/30 transition-all hover:bg-brand-700 sm:w-auto"
     >

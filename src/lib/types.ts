@@ -31,6 +31,14 @@ export type Course = {
   content: Record<string, unknown> | null;
 };
 
+export type ProductVariant = {
+  id: string;
+  name: string;
+  price: number;
+  old_price?: number | null;
+  sku?: string | null;
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -56,6 +64,8 @@ export type Product = {
   is_featured: boolean;
   is_bestseller: boolean;
   is_published: boolean;
+  delivery_type?: "download" | "access" | null;
+  variants?: ProductVariant[] | null;
   created_at: string;
   updated_at: string;
 };

@@ -103,9 +103,12 @@ export async function submitManualPayment(input: {
 
 export async function submitProductPayment(input: {
   productId: string;
+  variantId?: string;
   method: string;
   senderNumber: string;
   trxId: string;
+  accessEmail?: string;
+  accessWhatsapp?: string;
 }): Promise<{ error?: string }> {
   const supabase = await createClient();
   const {
@@ -121,13 +124,28 @@ export async function submitProductPayment(input: {
 
   if (!productId) return { error: "Product not found" };
 
-  const { data: product } = await supabase
+  const { data: product } = (await supabase
     .from("products")
-    .select("id, price, name")
+    .select("*")
     .eq("id", productId)
     .eq("is_published", true)
-    .single();
+    .single()) as { data: import("@/lib/types").Product | null };
   if (!product) return { error: "Product not found" };
+
+  // Handle variant pricing
+  let amount = Number((product as import("@/lib/types").Product).price);
+  if (input.variantId && Array.isArray((product as import("@/lib/types").Product).variants)) {
+    const v = ((product as import("@/lib/types").Product).variants as { id: string; price: number }[]).find((x) => x.id === input.variantId);
+    if (v) amount = Number(v.price);
+  }
+
+  // Handle access type extra fields
+  const deliveryType = ((product as import("@/lib/types").Product).delivery_type as string) || "download";
+  if (deliveryType === "access") {
+    if (!input.accessEmail?.trim() || !input.accessWhatsapp?.trim()) {
+      return { error: "Please provide email & WhatsApp for access delivery" };
+    }
+  }
 
   const admin = createAdminClient();
 
@@ -149,8 +167,6 @@ export async function submitProductPayment(input: {
   if (pendingOrder)
     return { error: "Your payment is under review — please wait" };
 
-  const amount = Number(product.price);
-
   if (amount <= 0) {
     const { error: insErr } = await admin
       .from("product_purchases")
@@ -167,14 +183,32 @@ export async function submitProductPayment(input: {
   if (!senderNumber || !trxId)
     return { error: "Please provide your sender number and TrxID" };
 
-  const { error } = await admin.from("orders").insert({
+  const orderPayload: Record<string, unknown> = {
     user_id: user.id,
     product_id: productId,
     amount,
     status: "pending",
     payment_method: method,
     trx_id: trxId,
-  });
+  };
+  if (input.variantId) orderPayload.variant_id = input.variantId;
+  if (deliveryType === "access") {
+    orderPayload.access_email = input.accessEmail;
+    orderPayload.access_whatsapp = input.accessWhatsapp;
+  }
+  let { error } = await admin.from("orders").insert(orderPayload as never);
+  if (error && error.code === "42703") {
+    // Fallback if new columns don't exist yet
+    const fallback = await admin.from("orders").insert({
+      user_id: user.id,
+      product_id: productId,
+      amount,
+      status: "pending",
+      payment_method: method,
+      trx_id: trxId + (deliveryType === "access" ? ` | access:${input.accessEmail}/${input.accessWhatsapp}` : "") + (input.variantId ? ` | variant:${input.variantId}` : ""),
+    } as never);
+    error = fallback.error;
+  }
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");

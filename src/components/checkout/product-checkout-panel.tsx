@@ -10,6 +10,8 @@ import { submitProductPayment } from "@/lib/actions/payments";
 type Props = {
   productId: string;
   price: number;
+  variantId?: string | null;
+  deliveryType?: "download" | "access";
   bkashNumber: string;
   nagadNumber: string;
 };
@@ -17,6 +19,8 @@ type Props = {
 export function ProductCheckoutPanel({
   productId,
   price,
+  variantId,
+  deliveryType = "download",
   bkashNumber,
   nagadNumber,
 }: Props) {
@@ -28,18 +32,24 @@ export function ProductCheckoutPanel({
   const [method, setMethod] = useState<"bkash" | "nagad">("bkash");
   const [senderNumber, setSenderNumber] = useState("");
   const [trxId, setTrxId] = useState("");
+  const [accessEmail, setAccessEmail] = useState("");
+  const [accessWhatsapp, setAccessWhatsapp] = useState("");
 
   const isFree = price <= 0;
+  const isAccess = deliveryType === "access";
   const merchantNumber = method === "bkash" ? bkashNumber : nagadNumber;
 
   async function handleSubmit() {
     setPending(true);
     const result = await submitProductPayment({
       productId,
+      variantId: variantId ?? undefined,
       method: isFree ? "bkash" : method,
       senderNumber: isFree ? "" : senderNumber,
       trxId: isFree ? "" : trxId,
-    });
+      accessEmail: isAccess ? accessEmail : undefined,
+      accessWhatsapp: isAccess ? accessWhatsapp : undefined,
+    } as never);
 
     setPending(false);
 
@@ -141,11 +151,29 @@ export function ProductCheckoutPanel({
               placeholder="Transaction ID (TrxID)"
               className="w-full rounded-lg border border-zinc-300 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
             />
+            {isAccess && (
+              <>
+                <input
+                  value={accessEmail}
+                  onChange={(e) => setAccessEmail(e.target.value)}
+                  placeholder="Email for access delivery"
+                  type="email"
+                  className="w-full rounded-lg border border-zinc-300 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                />
+                <input
+                  value={accessWhatsapp}
+                  onChange={(e) => setAccessWhatsapp(e.target.value)}
+                  placeholder="WhatsApp number for access"
+                  className="w-full rounded-lg border border-zinc-300 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                />
+                <p className="text-xs text-amber-600">Access will be sent to this email & WhatsApp — no download</p>
+              </>
+            )}
           </div>
 
           <button
             onClick={handleSubmit}
-            disabled={pending || !trxId.trim() || !senderNumber.trim()}
+            disabled={pending || !trxId.trim() || !senderNumber.trim() || (isAccess && (!accessEmail.trim() || !accessWhatsapp.trim()))}
             className="mt-4 flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
           >
             {pending ? "Submitting..." : "Submit Payment"}

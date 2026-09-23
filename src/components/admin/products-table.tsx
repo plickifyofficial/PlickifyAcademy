@@ -15,6 +15,7 @@ import { formatPrice } from "@/lib/format";
 import { useToast } from "@/components/ui/toaster";
 
 const iconOptions = [
+  { value: "", label: "None (Use Image)" },
   { value: "fa-solid fa-bolt", label: "Bolt" },
   { value: "fa-solid fa-palette", label: "Palette" },
   { value: "fa-solid fa-toolbox", label: "Toolbox" },
@@ -33,6 +34,7 @@ const iconOptions = [
 ];
 
 const gradientOptions = [
+  { value: "", label: "None (Use Image)" },
   { value: "from-blue-600 to-indigo-600", label: "Blue" },
   { value: "from-violet-600 to-fuchsia-600", label: "Violet" },
   { value: "from-cyan-600 to-blue-700", label: "Cyan" },
@@ -78,8 +80,8 @@ const emptyForm = {
   category: "",
   product_type: "",
   tags: "",
-  icon: "fa-solid fa-file-lines",
-  gradient: "from-blue-600 to-indigo-600",
+  icon: "",
+  gradient: "",
   cover_image: "",
   file_url: "",
   file_format: "",
@@ -91,6 +93,8 @@ const emptyForm = {
   is_featured: false,
   is_bestseller: false,
   is_published: true,
+  delivery_type: "download",
+  variants: "[]",
 };
 
 type FormState = typeof emptyForm;
@@ -146,8 +150,8 @@ export function ProductsTable({ products }: { products: Product[] }) {
       category: p.category ?? "",
       product_type: p.product_type ?? "",
       tags: (p.tags ?? []).join(", "),
-      icon: p.icon ?? "fa-solid fa-file-lines",
-      gradient: p.gradient ?? "from-blue-600 to-indigo-600",
+      icon: p.icon ?? "",
+      gradient: p.gradient ?? "",
       cover_image: p.cover_image ?? "",
       file_url: p.file_url ?? "",
       file_format: p.file_format ?? "",
@@ -159,6 +163,8 @@ export function ProductsTable({ products }: { products: Product[] }) {
       is_featured: p.is_featured,
       is_bestseller: p.is_bestseller,
       is_published: p.is_published,
+      delivery_type: (p.delivery_type as string) ?? "download",
+      variants: JSON.stringify(p.variants ?? []),
     });
     setEditing(p);
     setCreating(false);
@@ -179,6 +185,8 @@ export function ProductsTable({ products }: { products: Product[] }) {
     fd.set("tags", form.tags);
     fd.set("icon", form.icon);
     fd.set("gradient", form.gradient);
+    fd.set("delivery_type", form.delivery_type);
+    fd.set("variants", form.variants);
     fd.set("cover_image", form.cover_image);
     fd.set("file_url", form.file_url);
     fd.set("file_format", form.file_format);
@@ -427,36 +435,81 @@ export function ProductsTable({ products }: { products: Product[] }) {
                 />
               </div>
               <div>
-                <label className="wp-label">Category</label>
-                <select
+                <label className="wp-label">Category (custom allowed)</label>
+                <input
+                  list="category-list"
                   value={form.category}
-                  onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
                   className="wp-input"
-                >
+                  placeholder="Select or type custom category"
+                />
+                <datalist id="category-list">
                   {categoryOptions.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
+                    <option key={o.value} value={o.value} />
                   ))}
-                </select>
+                </datalist>
               </div>
               <div>
-                <label className="wp-label">Product Type</label>
-                <select
+                <label className="wp-label">Product Type (custom allowed)</label>
+                <input
+                  list="type-list"
                   value={form.product_type}
-                  onChange={(e) =>
-                    setForm({ ...form, product_type: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, product_type: e.target.value })}
+                  className="wp-input"
+                  placeholder="Select or type custom type"
+                />
+                <datalist id="type-list">
+                  {typeOptions.map((o) => (
+                    <option key={o.value} value={o.value} />
+                  ))}
+                </datalist>
+              </div>
+              <div>
+                <label className="wp-label">Delivery Type</label>
+                <select
+                  value={form.delivery_type}
+                  onChange={(e) => setForm({ ...form, delivery_type: e.target.value })}
                   className="wp-input"
                 >
-                  {typeOptions.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
+                  <option value="download">Downloadable — normal download</option>
+                  <option value="access">Accessible — collect email/whatsapp, no download</option>
                 </select>
+                <p className="mt-1 text-xs text-[#646970]">
+                  {form.delivery_type === "access" ? "Checkout will collect extra email & WhatsApp, no download button" : "Normal download flow"}
+                </p>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="wp-label">Variants (Pro/Plus/Ultra or 1m/6m/12m — each with own price)</label>
+                {(() => {
+                  let list: { id: string; name: string; price: string; old_price?: string }[] = [];
+                  try { list = JSON.parse(form.variants || "[]"); if (!Array.isArray(list)) list = []; } catch { list = []; }
+                  const update = (next: typeof list) => setForm({ ...form, variants: JSON.stringify(next) });
+                  return (
+                    <div className="space-y-2">
+                      {list.map((v, idx) => (
+                        <div key={v.id || idx} className="flex flex-wrap items-end gap-2 rounded border border-zinc-200 p-3">
+                          <div className="flex-1 min-w-[120px]">
+                            <label className="text-xs font-semibold text-zinc-600">Name</label>
+                            <input value={v.name} onChange={(e) => { const n = [...list]; n[idx] = { ...v, name: e.target.value }; update(n); }} placeholder="Pro / 1m" className="wp-input mt-1" />
+                          </div>
+                          <div className="w-28">
+                            <label className="text-xs font-semibold text-zinc-600">Price ৳</label>
+                            <input type="number" value={v.price} onChange={(e) => { const n = [...list]; n[idx] = { ...v, price: e.target.value }; update(n); }} className="wp-input mt-1" />
+                          </div>
+                          <div className="w-28">
+                            <label className="text-xs font-semibold text-zinc-600">Old Price</label>
+                            <input type="number" value={v.old_price || ""} onChange={(e) => { const n = [...list]; n[idx] = { ...v, old_price: e.target.value }; update(n); }} className="wp-input mt-1" placeholder="optional" />
+                          </div>
+                          <button type="button" onClick={() => update(list.filter((_, i) => i !== idx))} className="wp-btn wp-btn-danger !py-2">Remove</button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => update([...list, { id: Date.now().toString(36), name: "", price: "0" }])} className="wp-btn !py-2">
+                        <i className="fa-solid fa-plus" /> Add Variant
+                      </button>
+                      {list.length > 0 && <p className="text-xs text-[#646970]">Base Price field is used if no variant selected; each variant has its own price.</p>}
+                    </div>
+                  );
+                })()}
               </div>
               <div>
                 <label className="wp-label">Tags (comma separated)</label>

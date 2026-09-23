@@ -133,11 +133,19 @@ export async function createProduct(formData: FormData) {
 
   const price = readNumber(formData, "price");
   const oldPrice = readNumber(formData, "old_price");
-  const icon = readString(formData, "icon") || "fa-solid fa-file";
-  const gradient =
-    readString(formData, "gradient") || "from-blue-600 to-indigo-600";
+  const icon = readString(formData, "icon") || null;
+  const gradient = readString(formData, "gradient") || null;
+  const delivery_type = readString(formData, "delivery_type") || "download";
+  let variants: unknown[] = [];
+  try {
+    const raw = readString(formData, "variants");
+    variants = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(variants)) variants = [];
+  } catch {
+    variants = [];
+  }
 
-  const { error } = await supabase.from("products").insert({
+  const basePayload: Record<string, unknown> = {
     name,
     slug,
     description: readString(formData, "description"),
@@ -160,7 +168,18 @@ export async function createProduct(formData: FormData) {
     is_featured: readBool(formData, "is_featured"),
     is_bestseller: readBool(formData, "is_bestseller"),
     is_published: readBool(formData, "is_published"),
-  });
+  };
+
+  // Try with new columns, fallback without if columns don't exist yet (0 bug for existing DB)
+  let { error } = await supabase.from("products").insert({ ...basePayload, delivery_type, variants } as never);
+  if (error && error.code === "42703" && error.message.includes("column")) {
+    const retry = await supabase.from("products").insert(basePayload as never);
+    error = retry.error;
+    if (!error) {
+      // Columns missing — inform but don't fail
+      console.warn("products.delivery_type/variants columns missing — run SQL migration for full feature");
+    }
+  }
 
   if (error) return { error: error.message };
   revalidateProducts();
@@ -179,37 +198,51 @@ export async function updateProduct(productId: string, formData: FormData) {
 
   const price = readNumber(formData, "price");
   const oldPrice = readNumber(formData, "old_price");
-  const icon = readString(formData, "icon") || "fa-solid fa-file";
-  const gradient =
-    readString(formData, "gradient") || "from-blue-600 to-indigo-600";
+  const icon = readString(formData, "icon") || null;
+  const gradient = readString(formData, "gradient") || null;
+  const delivery_type = readString(formData, "delivery_type") || "download";
+  let variants: unknown[] = [];
+  try {
+    const raw = readString(formData, "variants");
+    variants = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(variants)) variants = [];
+  } catch {
+    variants = [];
+  }
 
-  const { error } = await supabase
+  const basePayload: Record<string, unknown> = {
+    name,
+    description: readString(formData, "description"),
+    price,
+    old_price: oldPrice > price ? oldPrice : 0,
+    tag: readString(formData, "tag"),
+    category: readString(formData, "category"),
+    product_type: readString(formData, "product_type"),
+    tags: readTags(formData),
+    icon,
+    gradient,
+    cover_image: readString(formData, "cover_image"),
+    file_url: readString(formData, "file_url"),
+    file_format: readString(formData, "file_format"),
+    file_size: readString(formData, "file_size"),
+    file_count: Math.floor(readNumber(formData, "file_count")),
+    rating_avg: readNumber(formData, "rating_avg"),
+    review_count: Math.floor(readNumber(formData, "review_count")),
+    download_count: Math.floor(readNumber(formData, "download_count")),
+    is_featured: readBool(formData, "is_featured"),
+    is_bestseller: readBool(formData, "is_bestseller"),
+    is_published: readBool(formData, "is_published"),
+    updated_at: new Date().toISOString(),
+  };
+
+  let { error } = await supabase
     .from("products")
-    .update({
-      name,
-      description: readString(formData, "description"),
-      price,
-      old_price: oldPrice > price ? oldPrice : 0,
-      tag: readString(formData, "tag"),
-      category: readString(formData, "category"),
-      product_type: readString(formData, "product_type"),
-      tags: readTags(formData),
-      icon,
-      gradient,
-      cover_image: readString(formData, "cover_image"),
-      file_url: readString(formData, "file_url"),
-      file_format: readString(formData, "file_format"),
-      file_size: readString(formData, "file_size"),
-      file_count: Math.floor(readNumber(formData, "file_count")),
-      rating_avg: readNumber(formData, "rating_avg"),
-      review_count: Math.floor(readNumber(formData, "review_count")),
-      download_count: Math.floor(readNumber(formData, "download_count")),
-      is_featured: readBool(formData, "is_featured"),
-      is_bestseller: readBool(formData, "is_bestseller"),
-      is_published: readBool(formData, "is_published"),
-      updated_at: new Date().toISOString(),
-    })
+    .update({ ...basePayload, delivery_type, variants } as never)
     .eq("id", productId);
+  if (error && error.code === "42703" && error.message.includes("column")) {
+    const retry = await supabase.from("products").update(basePayload as never).eq("id", productId);
+    error = retry.error;
+  }
 
   if (error) return { error: error.message };
   revalidateProducts();
