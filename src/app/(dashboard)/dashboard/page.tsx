@@ -17,8 +17,9 @@ export const metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   if (!user) redirect("/login");
 
@@ -32,29 +33,21 @@ export default async function DashboardPage() {
   const firstName = name.split(" ")[0];
 
   const courses = await getEnrolledCourses(user.id);
-  const stats = await getStudentStats(user.id, courses);
-  const continueLearning = await getContinueLearning(courses);
-  const liveClasses = await getUpcomingLiveClasses(
-    user.id,
-    courses.map((c) => c.id),
-  );
-  const activity = await getRecentActivity(
-    user.id,
-    courses.map((c) => c.id),
-  );
-  const recommended = await getRecommendedCourses(
-    user.id,
-    courses.map((c) => c.id),
-  );
-
-  const { data: purchases } = await supabase
-    .from("product_purchases")
-    .select(
-      "id, created_at, products(id, name, slug, cover_image, gradient, price)",
-    )
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(3);
+  const courseIds = courses.map((c) => c.id);
+  const [stats, continueLearning, liveClasses, activity, recommended, purchasesRes] = await Promise.all([
+    getStudentStats(user.id, courses),
+    getContinueLearning(courses),
+    getUpcomingLiveClasses(user.id, courseIds),
+    getRecentActivity(user.id, courseIds),
+    getRecommendedCourses(user.id, courseIds),
+    supabase
+      .from("product_purchases")
+      .select("id, created_at, products(id, name, slug, cover_image, gradient, price)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(3),
+  ]);
+  const { data: purchases } = purchasesRes;
 
   const recentProducts = (purchases ?? [])
     .map((p) => p.products as unknown as {
