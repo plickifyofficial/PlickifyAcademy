@@ -2,12 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { signOut } from "@/lib/actions/auth";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export function UserMenu() {
-  const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -39,10 +37,15 @@ export function UserMenu() {
     };
   }, [pathname]);
 
+  const [loggingOut, setLoggingOut] = useState(false);
   async function handleSignOut() {
-    await signOut();
-    router.push("/");
-    router.refresh();
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {}
+    window.location.href = "/";
   }
 
   return (
@@ -108,9 +111,11 @@ export function UserMenu() {
             <div className="my-1 border-t border-zinc-100" />
             <button
               onClick={handleSignOut}
-              className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+              disabled={loggingOut}
+              className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-60"
             >
-              Logout
+              {loggingOut ? <i className="fa-solid fa-spinner fa-spin" /> : <i className="fa-solid fa-right-from-bracket" />}
+              {loggingOut ? "Logging out..." : "Logout"}
             </button>
           </div>
         </>

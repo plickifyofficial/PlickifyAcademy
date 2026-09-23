@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { signOut } from "@/lib/actions/auth";
+import { createClient } from "@/lib/supabase/client";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 type Group = { title: string; items: { href: string; label: string; icon: string }[] };
@@ -69,7 +69,6 @@ export function StudentShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [drawerState, setDrawerState] = useState<{
     open: boolean;
     atPath: string;
@@ -79,6 +78,7 @@ export function StudentShell({
     open: boolean;
     atPath: string;
   }>({ open: false, atPath: pathname });
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const drawerOpen = drawerState.open && drawerState.atPath === pathname;
   const menuOpen = menuState.open && menuState.atPath === pathname;
@@ -88,9 +88,13 @@ export function StudentShell({
   }
 
   async function handleSignOut() {
-    await signOut();
-    router.push("/");
-    router.refresh();
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {}
+    window.location.href = "/";
   }
 
   const initials = (name || "S").charAt(0).toUpperCase();
@@ -226,9 +230,10 @@ export function StudentShell({
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                      disabled={loggingOut}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-60"
                     >
-                      <i className="fa-solid fa-right-from-bracket w-4 text-center" /> Log Out
+                      <i className={`fa-solid ${loggingOut ? "fa-spinner fa-spin" : "fa-right-from-bracket"} w-4 text-center`} /> {loggingOut ? "Logging out..." : "Log Out"}
                     </button>
                   </div>
                 </div>
@@ -318,13 +323,14 @@ export function StudentShell({
             <div className="border-t border-zinc-100 p-3">
               <button
                 onClick={handleSignOut}
+                disabled={loggingOut}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50",
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60",
                   collapsed && "w-full justify-center px-0",
                 )}
               >
-                <i className="fa-solid fa-right-from-bracket w-5 text-center" />
-                {!collapsed && "Log Out"}
+                <i className={`fa-solid ${loggingOut ? "fa-spinner fa-spin" : "fa-right-from-bracket"} w-5 text-center`} />
+                {!collapsed && (loggingOut ? "Logging out..." : "Log Out")}
               </button>
             </div>
           </div>
