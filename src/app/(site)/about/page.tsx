@@ -72,40 +72,23 @@ export default async function AboutPage() {
     instagram: { icon: "fa-brands fa-instagram", hover: "hover:bg-pink-600" },
   };
 
-  const instructors = dbInstructors.length > 0
-    ? dbInstructors.map((i) => ({
-        name: i.name,
-        role: i.role,
-        bio: i.bio,
-        expertise: i.expertise ?? [],
-        initials: i.initials || i.name.slice(0, 2).toUpperCase(),
-        gradient: GRADIENT_MAP[i.color] ?? "from-blue-600 to-indigo-600",
-        photo: i.photo,
-        socials: (
-          ["facebook", "youtube", "linkedin", "instagram"] as const
-        )
-          .filter((k) => i[k] && i[k] !== "#")
-          .map((k) => ({
-            url: i[k],
-            icon: SOCIAL_META[k].icon,
-            hover: SOCIAL_META[k].hover,
-            label: k,
-          })),
-      }))
-    : (content.instructors ?? []).map((inst) => ({
-        name: inst.name,
-        role: inst.role,
-        bio: inst.bio,
-        expertise: inst.expertise ?? [],
-        initials: inst.initials,
-        gradient: inst.color,
-        photo: null,
-        socials: [
-          { url: "https://facebook.com", icon: "fa-brands fa-facebook-f", hover: "hover:bg-brand-600", label: "Facebook" },
-          { url: "https://youtube.com", icon: "fa-brands fa-youtube", hover: "hover:bg-red-600", label: "YouTube" },
-          { url: "https://linkedin.com", icon: "fa-brands fa-linkedin-in", hover: "hover:bg-blue-600", label: "LinkedIn" },
-        ],
-      }));
+  const instructors = dbInstructors.map((i) => ({
+    name: i.name,
+    role: i.role,
+    bio: i.bio,
+    expertise: i.expertise ?? [],
+    initials: i.initials || i.name.slice(0, 2).toUpperCase(),
+    gradient: GRADIENT_MAP[i.color] ?? "from-blue-600 to-indigo-600",
+    photo: i.photo,
+    socials: (["facebook", "youtube", "linkedin", "instagram"] as const)
+      .filter((k) => i[k] && i[k] !== "#")
+      .map((k) => ({
+        url: i[k],
+        icon: SOCIAL_META[k].icon,
+        hover: SOCIAL_META[k].hover,
+        label: k,
+      })),
+  }));
 
   return (
     <main className="bg-white">
