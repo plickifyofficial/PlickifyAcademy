@@ -23,13 +23,7 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .single();
-
-  const name = profile?.full_name || user.user_metadata?.full_name || "";
+  const name = user.user_metadata?.full_name || (user.email ? user.email.split("@")[0] : "") || "";
   const firstName = name.split(" ")[0];
 
   const courses = await getEnrolledCourses(user.id);
