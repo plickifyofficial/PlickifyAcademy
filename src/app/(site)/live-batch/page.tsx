@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/home/page-hero";
 import { LiveBatch } from "@/components/home/live-batch";
+import { FeaturedCourse } from "@/components/home/featured-course";
 import { FinalCta } from "@/components/home/final-cta";
 import { getSiteContent } from "@/lib/site-content";
 import { getPublishedBatches } from "@/lib/content-modules";
-import { ctaDefaults, liveBatchDefaults } from "@/lib/content-schema";
+import { ctaDefaults, liveBatchDefaults, featuredDefaults } from "@/lib/content-schema";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Batch } from "@/lib/types";
 import { ProseContent } from "@/components/editor/prose-content";
 import { renderContent } from "@/lib/rte";
@@ -35,15 +37,25 @@ function formatDate(iso: string) {
 }
 
 export default async function LiveBatchPage() {
-  const [liveBatch, cta, batches] = await Promise.all([
+  const [liveBatch, cta, batches, featuredContent, featuredCourse, featuredBatch] = await Promise.all([
     getSiteContent("home.live_batch", liveBatchDefaults),
     getSiteContent("home.cta", ctaDefaults),
     getPublishedBatches(),
+    getSiteContent("home.featured", featuredDefaults),
+    (async () => {
+      const supabase = createAdminClient();
+      const { data } = await supabase.from("courses").select("*").eq("is_featured", true).eq("is_published", true).order("updated_at", { ascending: false }).limit(1);
+      return data?.[0] ?? null;
+    })(),
+    (async () => {
+      const supabase = createAdminClient();
+      const { data } = await supabase.from("batches").select("*").eq("is_featured", true).eq("is_published", true).order("sort_order", { ascending: true }).limit(1);
+      return data?.[0] ?? null;
+    })(),
   ]);
 
   const open = batches.filter((b) => b.status === "open" || b.status === "ongoing");
   const upcoming = batches.filter((b) => b.status === "upcoming");
-  const closed = batches.filter((b) => b.status === "closed");
 
   return (
     <>
@@ -52,7 +64,29 @@ export default async function LiveBatchPage() {
         title="Learn Live in Real-Time Classes"
         subtitle="Live classes, class recordings, and practical support — all on one platform. Secure your seat now."
       />
-      <LiveBatch content={liveBatch} />
+      <LiveBatch content={liveBatch} batch={featuredBatch} />
+
+      {/* Combined Upcoming Live Batch + Featured Course — connected to home.featured + home.live_batch */}
+      <section className="px-4 py-16 sm:px-6 bg-gradient-to-b from-white via-brand-50/30 to-white">
+        <div className="mx-auto max-w-7xl">
+          <div className="rounded-[2rem] border border-brand-100 bg-white p-6 shadow-xl shadow-brand-100/60 sm:p-8 lg:p-10">
+            <div className="text-center">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">
+                {featuredContent.tagline}
+              </span>
+              <h2 className="mt-3 text-3xl font-extrabold text-zinc-900 sm:text-4xl">
+                {featuredContent.title}
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-zinc-600">
+                {featuredCourse?.subtitle || featuredContent.description}
+              </p>
+            </div>
+            <div className="mt-10">
+              <FeaturedCourse content={featuredContent} course={featuredCourse} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {open.length > 0 && (
         <section className="bg-zinc-50/70 px-4 py-20 sm:px-6">
@@ -87,23 +121,6 @@ export default async function LiveBatchPage() {
             </div>
             <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
               {upcoming.map((b) => (
-                <BatchCard key={b.id} batch={b} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {closed.length > 0 && (
-        <section className="px-4 py-10 sm:px-6">
-          <div className="mx-auto max-w-7xl">
-            <div className="text-center">
-              <h2 className="text-2xl font-extrabold text-zinc-900">
-                Closed Batches
-              </h2>
-            </div>
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {closed.map((b) => (
                 <BatchCard key={b.id} batch={b} />
               ))}
             </div>

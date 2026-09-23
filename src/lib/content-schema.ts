@@ -146,7 +146,7 @@ export type OurCoursesContent = typeof ourCoursesDefaults;
 
 export const featuredDefaults = {
   badge: "BEST SELLER",
-  tagline: "FEATURED COURSE",
+  tagline: "UPCOMING LIVE BATCH",
   cardTop1: "AI Income",
   cardTop2: "Mastery",
   cardYear: "2026",
