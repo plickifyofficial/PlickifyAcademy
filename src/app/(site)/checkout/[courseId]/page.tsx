@@ -21,7 +21,7 @@ export default async function CheckoutPage({
     data: { session },
   } = await supabase.auth.getSession();
   const user = session?.user ?? null;
-  if (!user) redirect("/login");
+  if (!user) redirect(`/login?next=${encodeURIComponent(`/checkout/${courseId}`)}`);
 
   const { data: course } = await supabase
     .from("courses")

@@ -52,9 +52,12 @@ export async function updateSession(request: NextRequest) {
     (path.startsWith("/login") || path.startsWith("/signup")) &&
     user
   ) {
+    const next = request.nextUrl.searchParams.get("next");
+    const safeNext =
+      next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.searchParams.delete("next");
+    url.pathname = safeNext;
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

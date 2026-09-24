@@ -25,7 +25,10 @@ export default async function ProductCheckoutPage({
     data: { session },
   } = await supabase.auth.getSession();
   const user = session?.user ?? null;
-  if (!user) redirect("/login");
+  if (!user) {
+    const next = `/checkout/product/${slug}${sp?.variant ? `?variant=${encodeURIComponent(sp.variant)}` : ""}`;
+    redirect(`/login?next=${encodeURIComponent(next)}`);
+  }
 
   const admin = createAdminClient();
   const { data: product } = (await admin
