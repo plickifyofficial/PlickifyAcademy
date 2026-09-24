@@ -167,6 +167,16 @@ export async function submitProductPayment(input: {
   if (pendingOrder)
     return { error: "Your payment is under review — please wait" };
 
+  // Stock check
+  const stockQty = (product as { stock_quantity?: number | null }).stock_quantity;
+  const allowWaitlist = (product as { allow_waitlist?: boolean }).allow_waitlist ?? true;
+  if (stockQty != null && stockQty <= 0 && !allowWaitlist) {
+    return { error: "Out of stock" };
+  }
+  if (stockQty != null && stockQty <= 0 && allowWaitlist) {
+    // Allow waitlist instead of order - for now treat as order with waitlist flag
+  }
+
   if (amount <= 0) {
     const { error: insErr } = await admin
       .from("product_purchases")
@@ -196,24 +206,36 @@ export async function submitProductPayment(input: {
     orderPayload.access_email = input.accessEmail;
     orderPayload.access_whatsapp = input.accessWhatsapp;
   }
-  let { error } = await admin.from("orders").insert(orderPayload as never);
+  let { data: inserted, error } = await admin.from("orders").insert(orderPayload as never).select("id").single() as { data: { id: string } | null; error: { code: string; message: string } | null };
   if (error && error.code === "42703") {
-    // Fallback if new columns don't exist yet
-    const fallback = await admin.from("orders").insert({
-      user_id: user.id,
-      product_id: productId,
-      amount,
-      status: "pending",
-      payment_method: method,
-      trx_id: trxId + (deliveryType === "access" ? ` | access:${input.accessEmail}/${input.accessWhatsapp}` : "") + (input.variantId ? ` | variant:${input.variantId}` : ""),
-    } as never);
-    error = fallback.error;
+    const fallbackRes = await admin
+      .from("orders")
+      .insert({
+        user_id: user.id,
+        product_id: productId,
+        amount,
+        status: "pending",
+        payment_method: method,
+        trx_id: trxId + (deliveryType === "access" ? ` | access:${input.accessEmail}/${input.accessWhatsapp}` : "") + (input.variantId ? ` | variant:${input.variantId}` : ""),
+      } as never)
+      .select("id")
+      .single() as { data: { id: string } | null; error: { message: string } | null };
+    if (fallbackRes.error) return { error: fallbackRes.error.message };
+    inserted = fallbackRes.data;
+    error = null;
   }
-  if (error) return { error: error.message };
+  if (error) return { error: (error as { message: string }).message };
+  // Decrement stock if limited
+  if (stockQty != null && stockQty > 0) {
+    await admin
+      .from("products")
+      .update({ stock_quantity: stockQty - 1 })
+      .eq("id", productId);
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/orders");
-  return {};
+  return { orderId: inserted?.id } as { orderId: string };
 }
 
 export async function verifyOrder(
