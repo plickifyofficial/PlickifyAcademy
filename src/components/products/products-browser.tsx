@@ -383,10 +383,10 @@ function ProductCard({
           )}
           <Link
             href={detailHref}
-            className="rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-300 hover:text-brand-600"
+            className="flex flex-1 items-center justify-center rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-300 hover:text-brand-600"
           >
             Details
-          </button>
+          </Link>
         </div>
       </div>
     </div>
