@@ -545,32 +545,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   placeholder="Short description"
                 />
               </div>
-              <div>
-                <label className="wp-label">Price (৳)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  className="wp-input"
-                />
-              </div>
-              <div>
-                <label className="wp-label">Old Price (৳)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.old_price}
-                  onChange={(e) =>
-                    setForm({ ...form, old_price: e.target.value })
-                  }
-                  className="wp-input"
-                />
-              </div>
-              {fieldset("icon", "Icon", form, setForm, iconOptions)}
-              {fieldset("gradient", "Color", form, setForm, gradientOptions)}
+
               <div className="sm:col-span-2">
                 <label className="wp-label">Cover Image</label>
                 <div className="flex flex-wrap items-center gap-3">

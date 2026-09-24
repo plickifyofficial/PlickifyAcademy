@@ -133,8 +133,8 @@ export async function createProduct(formData: FormData) {
 
   const price = readNumber(formData, "price");
   const oldPrice = readNumber(formData, "old_price");
-  const icon = readString(formData, "icon") || null;
-  const gradient = readString(formData, "gradient") || null;
+  const icon = readString(formData, "icon") || "";
+  const gradient = readString(formData, "gradient") || "";
   const delivery_type = readString(formData, "delivery_type") || "download";
   let variants: unknown[] = [];
   try {
@@ -216,8 +216,8 @@ export async function updateProduct(productId: string, formData: FormData) {
 
   const price = readNumber(formData, "price");
   const oldPrice = readNumber(formData, "old_price");
-  const icon = readString(formData, "icon") || null;
-  const gradient = readString(formData, "gradient") || null;
+  const icon = readString(formData, "icon") || "";
+  const gradient = readString(formData, "gradient") || "";
   const delivery_type = readString(formData, "delivery_type") || "download";
   let variants: unknown[] = [];
   try {
