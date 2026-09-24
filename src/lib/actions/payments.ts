@@ -109,7 +109,7 @@ export async function submitProductPayment(input: {
   trxId: string;
   accessEmail?: string;
   accessWhatsapp?: string;
-}): Promise<{ error?: string }> {
+}): Promise<{ error?: string; orderId?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
