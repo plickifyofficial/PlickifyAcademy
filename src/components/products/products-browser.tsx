@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
+import { VariantPopup } from "@/components/products/variant-popup";
 
 const HERO_CATEGORIES = [
   "AI Tools",
@@ -304,32 +305,42 @@ function ProductCard({
   categoryOf: (p: Product) => string;
 }) {
   const badge = badgeOf(p);
+  const variants = (p.variants as unknown as { price: number }[] | null) ?? [];
+  const hasVariants = Array.isArray(variants) && variants.length > 0;
+  const stockQty = (p as { stock_quantity?: number | null }).stock_quantity;
+  const isOutOfStock = stockQty != null && Number(stockQty) <= 0;
+  let displayPrice = formatPrice(p.price);
+  let displayOldPrice: string | null = p.old_price > p.price ? formatPrice(p.old_price) : null;
+  if (hasVariants) {
+    const prices = variants.map((v) => Number(v.price)).filter((n) => Number.isFinite(n));
+    if (prices.length === 1) displayPrice = formatPrice(prices[0]);
+    else if (prices.length > 1) displayPrice = `${formatPrice(Math.min(...prices))} - ${formatPrice(Math.max(...prices))}`;
+    displayOldPrice = null;
+  } else if (p.price <= 0) displayPrice = "Free";
+  const detailHref = `/digital-products/${p.slug}`;
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-100">
-      <button
-        onClick={() => onQuickView(p)}
-        className="relative block text-left"
-      >
+      <Link href={detailHref} className="relative block">
         <Cover p={p} className="aspect-[16/10] w-full" />
         {badge && (
           <span className="absolute left-3 top-3 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-extrabold tracking-wider text-white backdrop-blur">
             {badge}
           </span>
         )}
+        {isOutOfStock && (
+          <span className="absolute right-3 top-3 rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-bold text-white">Out of Stock</span>
+        )}
         <span className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-sm text-brand-600 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
           <i className="fa-solid fa-eye" />
         </span>
-      </button>
+      </Link>
       <div className="flex flex-1 flex-col p-4">
         <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600">
           {categoryOf(p)}
         </span>
-        <button
-          onClick={() => onQuickView(p)}
-          className="mt-1 text-left text-lg font-bold text-zinc-900 transition-colors hover:text-brand-600"
-        >
+        <Link href={detailHref} className="mt-1 text-lg font-bold text-zinc-900 transition-colors hover:text-brand-600">
           {p.name}
-        </button>
+        </Link>
         {p.description && (
           <p className="mt-1 line-clamp-2 text-sm text-zinc-500">
             {p.description}
@@ -359,24 +370,19 @@ function ProductCard({
           <Stars value={p.rating_avg ?? 0} count={p.review_count ?? 0} />
         </div>
         <div className="mt-3 flex items-baseline gap-2">
-          <span className="text-xl font-extrabold text-brand-600">
-            {p.price <= 0 ? "Free" : formatPrice(p.price)}
-          </span>
-          {p.old_price > p.price && (
-            <span className="text-sm text-zinc-400 line-through">
-              {formatPrice(p.old_price)}
-            </span>
-          )}
+          <span className="text-xl font-extrabold text-brand-600">{displayPrice}</span>
+          {displayOldPrice && <span className="text-sm text-zinc-400 line-through">{displayOldPrice}</span>}
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <button
-            onClick={() => onQuickView(p)}
-            className="rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-          >
-            Buy Now
-          </button>
-          <button
-            onClick={() => onQuickView(p)}
+          {isOutOfStock ? (
+            <Link href={detailHref} className="flex items-center justify-center rounded-full bg-zinc-100 px-4 py-2.5 text-sm font-semibold text-zinc-600">Waitlist</Link>
+          ) : hasVariants ? (
+            <VariantPopup product={{ name: p.name, slug: p.slug }} variants={p.variants as unknown as import("@/lib/types").ProductVariant[]} slug={p.slug} />
+          ) : (
+            <Link href={`/checkout/product/${p.slug}`} className="flex items-center justify-center rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">Buy Now</Link>
+          )}
+          <Link
+            href={detailHref}
             className="rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-300 hover:text-brand-600"
           >
             Details
