@@ -289,6 +289,13 @@ export async function deleteProduct(productId: string) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Handle orders constraint — delete or detach orders for this product first
+  try {
+    const admin = (await import("@/lib/supabase/admin")).createAdminClient();
+    await admin.from("orders").delete().eq("product_id", productId);
+    await admin.from("product_purchases").delete().eq("product_id", productId);
+  } catch {}
+
   const { error } = await supabase
     .from("products")
     .delete()

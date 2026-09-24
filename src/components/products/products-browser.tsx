@@ -348,10 +348,12 @@ function ProductCard({
               Instant Download
             </span>
           )}
-          <span className="inline-flex items-center gap-1">
-            <i className="fa-solid fa-infinity text-brand-400" />
-            Lifetime Access
-          </span>
+          {(p as { lifetime_access?: boolean }).lifetime_access && (
+            <span className="inline-flex items-center gap-1">
+              <i className="fa-solid fa-infinity text-brand-400" />
+              Lifetime Access
+            </span>
+          )}
         </div>
         <div className="mt-3">
           <Stars value={p.rating_avg ?? 0} count={p.review_count ?? 0} />
@@ -702,9 +704,11 @@ export function ProductsBrowser({
                   {[
                     `${featured.file_count || 0}+ Resources`,
                     featured.file_format || "Premium Files",
-                    featured.has_file ? "Instant Download" : "Lifetime Access",
-                    "Lifetime Access",
-                  ].map((f) => (
+                    featured.has_file ? "Instant Download" : (featured as { lifetime_access?: boolean }).lifetime_access ? "Lifetime Access" : "No Download",
+                    (featured as { lifetime_access?: boolean }).lifetime_access ? "Lifetime Access" : null,
+                  ]
+                    .filter(Boolean)
+                    .map((f) => (
                     <li
                       key={f}
                       className="flex items-center gap-2 text-sm text-zinc-600"
