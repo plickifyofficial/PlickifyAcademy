@@ -98,7 +98,6 @@ const emptyForm = {
   stock_quantity: "",
   allow_waitlist: true,
   invite_link: "",
-  access_note: "",
 };
 
 type FormState = typeof emptyForm;
@@ -172,7 +171,6 @@ export function ProductsTable({ products }: { products: Product[] }) {
       stock_quantity: p.stock_quantity != null ? String(p.stock_quantity) : "",
       allow_waitlist: p.allow_waitlist ?? true,
       invite_link: (p as unknown as { invite_link?: string }).invite_link ?? "",
-      access_note: (p as unknown as { access_note?: string }).access_note ?? "",
     });
     setEditing(p);
     setCreating(false);
@@ -198,7 +196,6 @@ export function ProductsTable({ products }: { products: Product[] }) {
     fd.set("stock_quantity", form.stock_quantity);
     fd.set("allow_waitlist", form.allow_waitlist ? "on" : "");
     fd.set("invite_link", form.invite_link);
-    fd.set("access_note", form.access_note);
     fd.set("cover_image", form.cover_image);
     fd.set("file_url", form.file_url);
     fd.set("file_format", form.file_format);
@@ -690,12 +687,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   <p className="mt-1 text-xs text-[#646970]">Order confirm → Access button opens this link</p>
                 </div>
               )}
-              {form.delivery_type === "access" && (
-                <div className="sm:col-span-2">
-                  <label className="wp-label">Access Note (shown on View Detail)</label>
-                  <textarea value={form.access_note} onChange={(e) => setForm({ ...form, access_note: e.target.value })} className="wp-input min-h-[100px]" placeholder="Write anything — instructions, credentials, etc." />
-                </div>
-              )}
+
               <div>
                 <label className="wp-label">Rating</label>
                 <input

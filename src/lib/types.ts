@@ -70,7 +70,6 @@ export type Product = {
   stock_quantity?: number | null;
   allow_waitlist?: boolean | null;
   invite_link?: string | null;
-  access_note?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -86,6 +85,10 @@ export type Order = {
   payment_method: string | null;
   trx_id: string | null;
   coupon_id: string | null;
+  variant_id?: string | null;
+  access_email?: string | null;
+  access_whatsapp?: string | null;
+  admin_note?: string | null;
   created_at: string;
 };
 

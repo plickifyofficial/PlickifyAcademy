@@ -371,13 +371,13 @@ function ProductCard({
             onClick={() => onQuickView(p)}
             className="rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
           >
-            এখনই কিনুন
+            Buy Now
           </button>
           <button
             onClick={() => onQuickView(p)}
             className="rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-300 hover:text-brand-600"
           >
-            বিস্তারিত
+            Details
           </button>
         </div>
       </div>
@@ -729,13 +729,13 @@ export function ProductsBrowser({
                     onClick={() => setQuickView(featured)}
                     className="rounded-full bg-brand-600 px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
                   >
-                    এখনই কিনুন
+                    Buy Now
                   </button>
                   <Link
                     href={`/digital-products/${featured.slug}`}
                     className="rounded-full border border-zinc-200 bg-white px-8 py-3 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-300 hover:text-brand-600"
                   >
-                    বিস্তারিত দেখুন
+                    Details
                   </Link>
                 </div>
               </div>
@@ -1329,13 +1329,13 @@ export function ProductsBrowser({
                     href={`/digital-products/${quickView.slug}`}
                     className="rounded-full border border-zinc-200 px-6 py-3 text-sm font-semibold text-zinc-700 transition-colors hover:border-brand-300 hover:text-brand-600"
                   >
-                    বিস্তারিত দেখুন
+                    Details
                   </Link>
                   <Link
                     href={`/checkout/product/${quickView.slug}`}
                     className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
                   >
-                    এখনই কিনুন
+                    Buy Now
                   </Link>
                 </div>
               </div>
