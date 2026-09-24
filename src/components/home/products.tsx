@@ -61,21 +61,29 @@ export function Products({
               ? (product as Product).description
               : null;
 
+            const slug = isDb ? (product as Product).slug : null;
+            const stockQty = isDb ? (product as Product).stock_quantity : null;
+            const isOutOfStock = isDb && stockQty != null && stockQty <= 0;
+            const variants = isDb ? ((product as Product).variants as unknown as { price: number }[] | null) : null;
+            const hasVariants = Array.isArray(variants) && variants.length > 0;
+            let displayPrice = price;
+            if (isDb && hasVariants) {
+              const prices = variants!.map((v) => Number(v.price)).filter((n) => Number.isFinite(n));
+              if (prices.length === 1) displayPrice = formatPrice(prices[0]);
+              else if (prices.length > 1) displayPrice = `${formatPrice(Math.min(...prices))} - ${formatPrice(Math.max(...prices))}`;
+            }
+            const detailHref = slug ? `/digital-products/${slug}` : content.viewAllLink || "/digital-products";
+            const buyHref = slug ? `/digital-products/${slug}` : detailHref;
+
             return (
               <div
                 key={isDb ? (product as Product).id : name}
-                className="group overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-100"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-100"
               >
-                <div
-                  className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br ${gradient}`}
-                >
+                <Link href={detailHref} className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br ${gradient}`}>
                   {cover ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={cover}
-                      alt={name}
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={cover} alt={name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                   ) : (
                     <i className={`${icon} text-5xl text-white/85`} />
                   )}
@@ -84,23 +92,24 @@ export function Products({
                       {tag}
                     </span>
                   )}
-                </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-zinc-900">{name}</h3>
-                  {description && (
-                    <p className="mt-1 line-clamp-2 text-sm text-zinc-500">
-                      {description}
-                    </p>
+                  {isOutOfStock && (
+                    <span className="absolute right-3 top-3 rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-bold text-white">Out of Stock</span>
                   )}
+                </Link>
+                <div className="flex flex-1 flex-col p-5">
+                  <Link href={detailHref}><h3 className="font-bold text-zinc-900 hover:text-brand-600">{name}</h3></Link>
+                  {description && <p className="mt-1 line-clamp-2 text-sm text-zinc-500">{description}</p>}
                   <div className="mt-2 flex items-baseline gap-2">
-                    <span className="text-xl font-extrabold text-brand-600">
-                      {price}
-                    </span>
-                    {oldPrice && (
-                      <span className="text-sm text-zinc-400 line-through">
-                        {oldPrice}
-                      </span>
+                    <span className="text-xl font-extrabold text-brand-600">{displayPrice}</span>
+                    {oldPrice && <span className="text-sm text-zinc-400 line-through">{oldPrice}</span>}
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    {isOutOfStock ? (
+                      <Link href={detailHref} className="flex flex-1 items-center justify-center rounded-full bg-zinc-100 px-4 py-2.5 text-sm font-semibold text-zinc-600">Waitlist</Link>
+                    ) : (
+                      <Link href={buyHref} className="flex flex-1 items-center justify-center rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">Buy Now</Link>
                     )}
+                    <Link href={detailHref} className="flex flex-1 items-center justify-center rounded-full border border-zinc-200 px-4 py-2.5 text-sm font-semibold text-zinc-700 hover:border-brand-300">Details</Link>
                   </div>
                 </div>
               </div>

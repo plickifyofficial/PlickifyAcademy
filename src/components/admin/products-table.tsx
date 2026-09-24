@@ -95,6 +95,10 @@ const emptyForm = {
   is_published: true,
   delivery_type: "download",
   variants: "[]",
+  stock_quantity: "",
+  allow_waitlist: true,
+  invite_link: "",
+  access_note: "",
 };
 
 type FormState = typeof emptyForm;
@@ -165,6 +169,10 @@ export function ProductsTable({ products }: { products: Product[] }) {
       is_published: p.is_published,
       delivery_type: (p.delivery_type as string) ?? "download",
       variants: JSON.stringify(p.variants ?? []),
+      stock_quantity: p.stock_quantity != null ? String(p.stock_quantity) : "",
+      allow_waitlist: p.allow_waitlist ?? true,
+      invite_link: (p as unknown as { invite_link?: string }).invite_link ?? "",
+      access_note: (p as unknown as { access_note?: string }).access_note ?? "",
     });
     setEditing(p);
     setCreating(false);
@@ -187,6 +195,10 @@ export function ProductsTable({ products }: { products: Product[] }) {
     fd.set("gradient", form.gradient);
     fd.set("delivery_type", form.delivery_type);
     fd.set("variants", form.variants);
+    fd.set("stock_quantity", form.stock_quantity);
+    fd.set("allow_waitlist", form.allow_waitlist ? "on" : "");
+    fd.set("invite_link", form.invite_link);
+    fd.set("access_note", form.access_note);
     fd.set("cover_image", form.cover_image);
     fd.set("file_url", form.file_url);
     fd.set("file_format", form.file_format);
@@ -481,7 +493,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
               <div className="sm:col-span-2">
                 <label className="wp-label">Variants (Pro/Plus/Ultra or 1m/6m/12m — each with own price)</label>
                 {(() => {
-                  let list: { id: string; name: string; price: string; old_price?: string }[] = [];
+                  let list: { id: string; name: string; price: string; old_price?: string; stock_quantity?: string }[] = [];
                   try { list = JSON.parse(form.variants || "[]"); if (!Array.isArray(list)) list = []; } catch { list = []; }
                   const update = (next: typeof list) => setForm({ ...form, variants: JSON.stringify(next) });
                   return (
@@ -492,21 +504,25 @@ export function ProductsTable({ products }: { products: Product[] }) {
                             <label className="text-xs font-semibold text-zinc-600">Name</label>
                             <input value={v.name} onChange={(e) => { const n = [...list]; n[idx] = { ...v, name: e.target.value }; update(n); }} placeholder="Pro / 1m" className="wp-input mt-1" />
                           </div>
-                          <div className="w-28">
+                          <div className="w-24">
                             <label className="text-xs font-semibold text-zinc-600">Price ৳</label>
                             <input type="number" value={v.price} onChange={(e) => { const n = [...list]; n[idx] = { ...v, price: e.target.value }; update(n); }} className="wp-input mt-1" />
                           </div>
-                          <div className="w-28">
+                          <div className="w-24">
                             <label className="text-xs font-semibold text-zinc-600">Old Price</label>
-                            <input type="number" value={v.old_price || ""} onChange={(e) => { const n = [...list]; n[idx] = { ...v, old_price: e.target.value }; update(n); }} className="wp-input mt-1" placeholder="optional" />
+                            <input type="number" value={v.old_price || ""} onChange={(e) => { const n = [...list]; n[idx] = { ...v, old_price: e.target.value }; update(n); }} className="wp-input mt-1" placeholder="opt" />
+                          </div>
+                          <div className="w-20">
+                            <label className="text-xs font-semibold text-zinc-600">Stock</label>
+                            <input type="number" value={v.stock_quantity || ""} onChange={(e) => { const n = [...list]; n[idx] = { ...v, stock_quantity: e.target.value }; update(n); }} className="wp-input mt-1" placeholder="∞" />
                           </div>
                           <button type="button" onClick={() => update(list.filter((_, i) => i !== idx))} className="wp-btn wp-btn-danger !py-2">Remove</button>
                         </div>
                       ))}
-                      <button type="button" onClick={() => update([...list, { id: Date.now().toString(36), name: "", price: "0" }])} className="wp-btn !py-2">
+                      <button type="button" onClick={() => update([...list, { id: Date.now().toString(36), name: "", price: "0", stock_quantity: "" }])} className="wp-btn !py-2">
                         <i className="fa-solid fa-plus" /> Add Variant
                       </button>
-                      {list.length > 0 && <p className="text-xs text-[#646970]">Base Price field is used if no variant selected; each variant has its own price.</p>}
+                      {list.length > 0 && <p className="text-xs text-[#646970]">Price display: 1 variant → that price, multi → min-max. Stock empty = unlimited.</p>}
                     </div>
                   );
                 })()}
@@ -596,67 +612,90 @@ export function ProductsTable({ products }: { products: Product[] }) {
                 </div>
               </div>
               <div className="sm:col-span-2">
-                <label className="wp-label">Download File</label>
-                <div className="flex gap-2">
-                  <input
-                    value={form.file_url}
-                    onChange={(e) => setForm({ ...form, file_url: e.target.value })}
-                    className="wp-input flex-1"
-                    placeholder="Upload a file OR paste https:// URL"
-                  />
-                  <label
-                    className="wp-btn cursor-pointer whitespace-nowrap"
-                    style={{ margin: 0 }}
-                  >
-                    <i className="fa-solid fa-upload" />{" "}
-                    {uploading ? "..." : "Upload"}
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileUpload}
-                      disabled={uploading}
-                    />
-                  </label>
-                </div>
+                <label className="wp-label">Product Link {form.delivery_type === "download" ? "(Download Link)" : form.delivery_type === "invitation" ? "(Invite Link)" : "(Access Link - optional)"}</label>
+                <input
+                  value={form.file_url}
+                  onChange={(e) => setForm({ ...form, file_url: e.target.value })}
+                  className="wp-input"
+                  placeholder="https://example.com/your-product-link"
+                />
                 <p className="mt-1 text-xs text-[#646970]">
-                  Files upload to secure private storage — buyers download through
-                  the protected download link only.
+                  {form.delivery_type === "download"
+                    ? "Download button will open this link"
+                    : form.delivery_type === "invitation"
+                      ? "Access button will open this invite link"
+                      : "For mail access, this link is optional"}
                 </p>
               </div>
+              {form.delivery_type === "download" && (
+                <>
+                  <div>
+                    <label className="wp-label">File Format</label>
+                    <input
+                      value={form.file_format}
+                      onChange={(e) =>
+                        setForm({ ...form, file_format: e.target.value })
+                      }
+                      className="wp-input"
+                      placeholder="PDF + TXT"
+                    />
+                  </div>
+                  <div>
+                    <label className="wp-label">File Size</label>
+                    <input
+                      value={form.file_size}
+                      onChange={(e) =>
+                        setForm({ ...form, file_size: e.target.value })
+                      }
+                      className="wp-input"
+                      placeholder="2 MB"
+                    />
+                  </div>
+                  <div>
+                    <label className="wp-label">File Count</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.file_count}
+                      onChange={(e) =>
+                        setForm({ ...form, file_count: e.target.value })
+                      }
+                      className="wp-input"
+                    />
+                  </div>
+                </>
+              )}
               <div>
-                <label className="wp-label">File Format</label>
-                <input
-                  value={form.file_format}
-                  onChange={(e) =>
-                    setForm({ ...form, file_format: e.target.value })
-                  }
-                  className="wp-input"
-                  placeholder="PDF + TXT"
-                />
-              </div>
-              <div>
-                <label className="wp-label">File Size</label>
-                <input
-                  value={form.file_size}
-                  onChange={(e) =>
-                    setForm({ ...form, file_size: e.target.value })
-                  }
-                  className="wp-input"
-                  placeholder="2 MB"
-                />
-              </div>
-              <div>
-                <label className="wp-label">File Count</label>
+                <label className="wp-label">Stock Quantity (empty = unlimited)</label>
                 <input
                   type="number"
                   min="0"
-                  value={form.file_count}
-                  onChange={(e) =>
-                    setForm({ ...form, file_count: e.target.value })
-                  }
+                  value={form.stock_quantity}
+                  onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
                   className="wp-input"
+                  placeholder="e.g. 100 or empty for unlimited"
                 />
+                <p className="mt-1 text-xs text-[#646970]">0 = out of stock → shows Waitlist</p>
               </div>
+              <div className="flex items-center gap-2 pt-6">
+                <label className="flex items-center gap-2 text-sm text-[#3c434a]">
+                  <input type="checkbox" checked={!!form.allow_waitlist} onChange={(e) => setForm({ ...form, allow_waitlist: e.target.checked })} className="h-4 w-4" />
+                  Allow Waitlist when out of stock
+                </label>
+              </div>
+              {form.delivery_type === "invitation" && (
+                <div className="sm:col-span-2">
+                  <label className="wp-label">Invite Link</label>
+                  <input value={form.invite_link} onChange={(e) => setForm({ ...form, invite_link: e.target.value })} className="wp-input" placeholder="https://... invite link" />
+                  <p className="mt-1 text-xs text-[#646970]">Order confirm → Access button opens this link</p>
+                </div>
+              )}
+              {form.delivery_type === "access" && (
+                <div className="sm:col-span-2">
+                  <label className="wp-label">Access Note (shown on View Detail)</label>
+                  <textarea value={form.access_note} onChange={(e) => setForm({ ...form, access_note: e.target.value })} className="wp-input min-h-[100px]" placeholder="Write anything — instructions, credentials, etc." />
+                </div>
+              )}
               <div>
                 <label className="wp-label">Rating</label>
                 <input

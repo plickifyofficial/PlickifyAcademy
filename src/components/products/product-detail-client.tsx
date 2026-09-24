@@ -15,7 +15,12 @@ export function ProductDetailClient({ product, owned }: { product: Product; owne
   const price = selected ? Number(selected.price) : Number(product.price);
   const oldPrice = selected?.old_price ? Number(selected.old_price) : Number(product.old_price);
   const discount = oldPrice > price ? Math.round((1 - price / oldPrice) * 100) : 0;
-  const isAccess = product.delivery_type === "access";
+  const delivery = (product.delivery_type as string) || "download";
+  const isAccess = delivery === "access";
+  const isInvitation = delivery === "invitation";
+  const stockQty = selected?.stock_quantity ?? (product as { stock_quantity?: number | null }).stock_quantity;
+  const isOutOfStock = stockQty != null && Number(stockQty) <= 0;
+  const allowWaitlist = (product as { allow_waitlist?: boolean }).allow_waitlist ?? true;
 
   return (
     <>
@@ -43,16 +48,32 @@ export function ProductDetailClient({ product, owned }: { product: Product; owne
           <span className="text-4xl font-extrabold text-brand-600">{price <= 0 ? "Free" : formatPrice(price)}</span>
           {oldPrice > price && <span className="text-xl text-zinc-400 line-through">{formatPrice(oldPrice)}</span>}
           {discount > 0 && <span className="rounded bg-red-600/10 px-2 py-1 text-xs font-bold text-red-600">{discount}% OFF</span>}
+          {isOutOfStock && <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white">Out of Stock</span>}
         </div>
         <p className="mt-1 text-sm text-zinc-400">
-          <i className="fa-solid fa-bolt mr-1 text-brand-500" />
-          {isAccess ? "Access via Email & WhatsApp · No Download" : "Instant Download · Lifetime Access"}
+          <i className={`fa-solid ${isAccess ? "fa-envelope" : isInvitation ? "fa-link" : "fa-bolt"} mr-1 text-brand-500`} />
+          {isAccess ? "Access via Email & WhatsApp · No Download" : isInvitation ? "Invitation Access · No Download" : "Instant Download · Lifetime Access"}
         </p>
-        {isAccess && <p className="mt-2 text-xs text-amber-600">Checkout will collect your email & WhatsApp for access</p>}
-        <div className="mt-5">
-          <BuyButton slug={product.slug} name={product.name} owned={owned} variantId={selectedId || undefined} />
-        </div>
-        <p className="mt-3 text-xs text-zinc-400">Variant: {selected?.name || "Default"} {hasVariants && `(${variants.length} options)`}</p>
+        {isOutOfStock ? (
+          <div className="mt-5">
+            {allowWaitlist ? <button onClick={() => alert("Added to waitlist — we will notify you when back in stock")} className="w-full rounded-full bg-amber-500 px-8 py-4 text-base font-bold text-white">Join Waitlist</button> : <p className="text-sm font-semibold text-red-600">Out of stock</p>}
+            <p className="mt-2 text-xs text-zinc-400">Stock: {stockQty} left</p>
+          </div>
+        ) : isAccess ? (
+          <div className="mt-5">
+            <Link href={`/digital-products/${product.slug}#access-note`} className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-4 text-base font-bold text-white">View Detail <i className="fa-solid fa-eye text-xs" /></Link>
+            <p className="mt-3 text-sm text-zinc-600">{(product as { access_note?: string }).access_note || "Admin will add access details after purchase."}</p>
+          </div>
+        ) : (
+          <>
+            {isAccess && <p className="mt-2 text-xs text-amber-600">Checkout will collect your email & WhatsApp for access</p>}
+            {isInvitation && <p className="mt-2 text-xs text-blue-600">After purchase, Access button will open your invite link</p>}
+            <div className="mt-5">
+              <BuyButton slug={product.slug} name={product.name} owned={owned} variantId={selectedId || undefined} />
+            </div>
+            <p className="mt-3 text-xs text-zinc-400">Variant: {selected?.name || "Default"} {hasVariants && `(${variants.length} options)`} {stockQty != null && `· Stock: ${stockQty}`}</p>
+          </>
+        )}
       </div>
 
       {/* Mobile sticky */}

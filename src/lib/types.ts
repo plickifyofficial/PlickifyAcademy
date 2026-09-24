@@ -37,6 +37,7 @@ export type ProductVariant = {
   price: number;
   old_price?: number | null;
   sku?: string | null;
+  stock_quantity?: number | null;
 };
 
 export type Product = {
@@ -64,8 +65,12 @@ export type Product = {
   is_featured: boolean;
   is_bestseller: boolean;
   is_published: boolean;
-  delivery_type?: "download" | "access" | null;
+  delivery_type?: "download" | "invitation" | "access" | null;
   variants?: ProductVariant[] | null;
+  stock_quantity?: number | null;
+  allow_waitlist?: boolean | null;
+  invite_link?: string | null;
+  access_note?: string | null;
   created_at: string;
   updated_at: string;
 };
