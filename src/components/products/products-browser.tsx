@@ -1318,21 +1318,49 @@ export function ProductsBrowser({
                 </div>
               )}
 
+              <div className="mt-2">
+                {(() => {
+                  const vs = (quickView.variants as unknown as { id: string; name: string; price: number }[] | null) ?? [];
+                  if (!Array.isArray(vs) || vs.length === 0) return null;
+                  return (
+                    <div className="mt-3">
+                      <p className="text-xs font-semibold text-zinc-700">Select Variant</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {vs.map((v) => (
+                          <span key={v.id} className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-700">
+                            {v.name} — {formatPrice(Number(v.price))}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
               <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-100 pt-6">
                 <div>
-                  <span className="text-3xl font-extrabold text-brand-600">
-                    {quickView.price <= 0 ? "Free" : formatPrice(quickView.price)}
-                  </span>
-                  {quickView.old_price > quickView.price && (
-                    <span className="ml-2 text-lg text-zinc-400 line-through">
-                      {formatPrice(quickView.old_price)}
-                    </span>
-                  )}
-                  {discountPercent(quickView) > 0 && (
-                    <span className="ml-3 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">
-                      {discountPercent(quickView)}% OFF
-                    </span>
-                  )}
+                  {(() => {
+                    const vs = (quickView.variants as unknown as { price: number }[] | null) ?? [];
+                    const hasVs = Array.isArray(vs) && vs.length > 0;
+                    let dp = formatPrice(quickView.price);
+                    let dop: string | null = quickView.old_price > quickView.price ? formatPrice(quickView.old_price) : null;
+                    if (hasVs) {
+                      const prices = vs.map((v) => Number(v.price)).filter((n) => Number.isFinite(n));
+                      if (prices.length === 1) dp = formatPrice(prices[0]);
+                      else if (prices.length > 1) dp = `${formatPrice(Math.min(...prices))} - ${formatPrice(Math.max(...prices))}`;
+                      dop = null;
+                    } else if (quickView.price <= 0) dp = "Free";
+                    return (
+                      <>
+                        <span className="text-3xl font-extrabold text-brand-600">{dp}</span>
+                        {dop && <span className="ml-2 text-lg text-zinc-400 line-through">{dop}</span>}
+                        {discountPercent(quickView) > 0 && !hasVs && (
+                          <span className="ml-3 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                            {discountPercent(quickView)}% OFF
+                          </span>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="flex gap-3">
                   <Link
