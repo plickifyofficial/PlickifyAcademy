@@ -15,16 +15,21 @@ type Order = {
   status: string;
   payment_method?: string | null;
   trx_id?: string | null;
+  variant_id?: string | null;
+  access_email?: string | null;
+  access_whatsapp?: string | null;
   courses: { title: string } | null;
-  products: { name: string } | null;
+  products: { name: string; delivery_type?: string; variants?: unknown } | null;
 };
 
 export function OrdersPanel({
   orders,
   emails,
+  profiles,
 }: {
   orders: Order[];
   emails: Record<string, string>;
+  profiles: Record<string, { full_name: string | null; email: string | null }>;
 }) {
   const [pendingId, setPendingId] = useState<string | null>(null);
   const { showToast } = useToast();
@@ -73,15 +78,27 @@ export function OrdersPanel({
               const meta = statusMeta(order.status);
               const pending = pendingId === order.id;
               const isProduct = !!order.products;
+              const profile = profiles[order.user_id];
+              const variantName = (() => {
+                if (!order.variant_id || !order.products?.variants) return null;
+                try {
+                  const list = order.products.variants as { id: string; name: string }[];
+                  return Array.isArray(list) ? list.find((v) => v.id === order.variant_id)?.name ?? order.variant_id : null;
+                } catch { return order.variant_id; }
+              })();
+              const delivery = (order.products as { delivery_type?: string } | null)?.delivery_type;
               return (
                 <tr key={order.id}>
                   <td className="font-semibold text-[#1d2327]">
-                    {isProduct
-                      ? `${order.products?.name ?? "Product"} (Product)`
-                      : order.courses?.title ?? "—"}
+                    <div>{isProduct ? `${order.products?.name ?? "Product"} (Product)` : order.courses?.title ?? "—"}</div>
+                    {variantName && <div className="text-xs font-normal text-[#646970]">Variant: {variantName}</div>}
+                    {delivery && <div className="text-xs font-normal capitalize text-[#646970]">{delivery}</div>}
+                    {order.access_email && <div className="text-xs font-mono text-[#2271b1]">{order.access_email} / {order.access_whatsapp}</div>}
                   </td>
                   <td className="text-[#3c434a]">
-                    {emails[order.user_id] ?? order.user_id.slice(0, 8)}
+                    <div className="font-medium">{profile?.full_name || emails[order.user_id] || order.user_id.slice(0, 8)}</div>
+                    <div className="text-xs text-[#646970]">{profile?.email || emails[order.user_id] || ""}</div>
+                    <div className="text-xs font-mono text-[#646970]">{order.user_id.slice(0, 8)}</div>
                   </td>
                   <td className="text-[#3c434a]">
                     {order.payment_method ? (

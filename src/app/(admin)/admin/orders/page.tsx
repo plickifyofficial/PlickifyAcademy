@@ -9,11 +9,12 @@ export default async function AdminOrdersPage() {
 
   const { data: orders } = await supabase
     .from("orders")
-    .select("*, courses(title), products(name)")
+    .select("*, courses(title), products(name, delivery_type, variants)")
     .order("created_at", { ascending: false });
 
   const userIds = [...new Set((orders ?? []).map((o) => o.user_id))];
   const emails: Record<string, string> = {};
+  const profiles: Record<string, { full_name: string | null; email: string | null }> = {};
   if (userIds.length > 0) {
     const admin = createAdminClient();
     const { data: authUsers } = await admin.auth.admin.listUsers({
@@ -21,6 +22,10 @@ export default async function AdminOrdersPage() {
     });
     for (const u of authUsers?.users ?? []) {
       emails[u.id] = u.email ?? "";
+    }
+    const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", userIds);
+    for (const p of profs ?? []) {
+      profiles[p.id] = { full_name: p.full_name, email: (p as { email?: string }).email ?? emails[p.id] ?? "" };
     }
   }
 
@@ -51,11 +56,15 @@ export default async function AdminOrdersPage() {
               status: string;
               payment_method?: string | null;
               trx_id?: string | null;
+              variant_id?: string | null;
+              access_email?: string | null;
+              access_whatsapp?: string | null;
               courses: { title: string } | null;
-              products: { name: string } | null;
+              products: { name: string; delivery_type?: string; variants?: unknown } | null;
             }[]
           }
           emails={emails}
+          profiles={profiles}
         />
       </div>
     </div>
