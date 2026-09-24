@@ -23,14 +23,32 @@ export default async function OrderDetailPage({
   } = await supabase.auth.getUser();
   if (!user) notFound();
 
-  const { data: order } = await supabase
+  const { data: order } = (await supabase
     .from("orders")
     .select(
       "id, amount, status, payment_method, trx_id, coupon_id, created_at, course_id, product_id, variant_id, access_email, access_whatsapp, admin_note, courses(title, slug, cover_image), products(name, slug, cover_image, gradient, delivery_type, invite_link)",
     )
     .eq("id", id)
     .eq("user_id", user.id)
-    .maybeSingle() as unknown as { data: (typeof order & { variant_id?: string; access_email?: string; access_whatsapp?: string; admin_note?: string; products: { name: string; slug: string; cover_image: string | null; gradient: string | null; delivery_type?: string; invite_link?: string } | null }) | null };
+    .maybeSingle()) as unknown as {
+    data: {
+      id: string;
+      amount: number;
+      status: string;
+      payment_method: string | null;
+      trx_id: string | null;
+      coupon_id: string | null;
+      created_at: string;
+      course_id: string | null;
+      product_id: string | null;
+      variant_id?: string | null;
+      access_email?: string | null;
+      access_whatsapp?: string | null;
+      admin_note?: string | null;
+      courses: { title: string; slug: string; cover_image: string | null } | null;
+      products: { name: string; slug: string; cover_image: string | null; gradient: string | null; delivery_type?: string; invite_link?: string } | null;
+    } | null;
+  };
   if (!order) notFound();
 
   const { data: profile } = await supabase
