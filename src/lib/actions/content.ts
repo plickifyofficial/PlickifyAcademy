@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/actions/admin";
 import { sanitizeHtml } from "@/lib/rte";
 
-const MAX_IMAGE = 2 * 1024 * 1024;
+const MAX_IMAGE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE = [
   "image/png",
   "image/jpeg",
@@ -273,11 +273,11 @@ export async function uploadContentImage(formData: FormData) {
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0)
-    throw new Error("Please select a file");
+    return { error: "Please select a file" };
 
-  if (file.size > MAX_IMAGE) throw new Error("Image must be within 2MB");
+  if (file.size > MAX_IMAGE) return { error: "Image must be within 5MB" };
   if (!ALLOWED_IMAGE.includes(file.type))
-    throw new Error("Please provide a PNG/JPG/WebP/SVG/GIF image");
+    return { error: "Please provide a PNG/JPG/WebP/SVG/GIF image" };
 
   const ext = (file.name.split(".").pop() || "png").toLowerCase();
   const path = `content-${Date.now()}.${ext}`;
@@ -287,7 +287,7 @@ export async function uploadContentImage(formData: FormData) {
     .from("site-assets")
     .upload(path, file, { upsert: true, contentType: file.type });
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   const { data } = admin.storage.from("site-assets").getPublicUrl(path);
   return { url: data.publicUrl };

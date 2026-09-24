@@ -138,17 +138,18 @@ export function PostEditor({
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await uploadContentImage(fd);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = (await uploadContentImage(fd)) as { url?: string; error?: string };
+    if (res?.error) {
+      showToast(res.error, "error");
+    } else if (res?.url) {
       setCover(res.url);
       showToast("Cover uploaded");
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : "Upload failed", "error");
-    } finally {
-      setUploading(false);
+    } else {
+      showToast("Upload failed", "error");
     }
+    setUploading(false);
   }
 
   function toggleProduct(id: string) {

@@ -176,12 +176,16 @@ export function ContentEditor({
     if (!file) return;
     const fd = new FormData();
     fd.append("file", file);
-    try {
-      const res = await uploadContentImage(fd);
+    const res = await uploadContentImage(fd) as { url?: string; error?: string };
+    if (res?.error) {
+      showToast(res.error, "error");
+      return;
+    }
+    if (res?.url) {
       change(sectionKey, path, res.url);
       showToast("Image uploaded");
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : "Image upload failed", "error");
+    } else {
+      showToast("Image upload failed", "error");
     }
   }
 
