@@ -52,7 +52,7 @@ export function ProductDetailClient({ product, owned }: { product: Product; owne
         </div>
         <p className="mt-1 text-sm text-zinc-400">
           <i className={`fa-solid ${isAccess ? "fa-envelope" : isInvitation ? "fa-link" : "fa-bolt"} mr-1 text-brand-500`} />
-          {isAccess ? "Access via Email & WhatsApp · No Download" : isInvitation ? "Invitation Access · No Download" : "Instant Download · Lifetime Access"}
+          {isAccess ? "Access via Email & WhatsApp · No Download" : isInvitation ? "Invitation Access · No Download" : `Instant Download${(product as { lifetime_access?: boolean }).lifetime_access ? " · Lifetime Access" : ""}`}
         </p>
         {isOutOfStock ? (
           <div className="mt-5">

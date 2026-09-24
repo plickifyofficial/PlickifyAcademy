@@ -70,6 +70,7 @@ export type Product = {
   stock_quantity?: number | null;
   allow_waitlist?: boolean | null;
   invite_link?: string | null;
+  lifetime_access?: boolean | null;
   created_at: string;
   updated_at: string;
 };

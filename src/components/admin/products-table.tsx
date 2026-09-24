@@ -95,6 +95,7 @@ const emptyForm = {
   is_published: true,
   delivery_type: "download",
   variants: "[]",
+  lifetime_access: false,
   stock_quantity: "",
   allow_waitlist: true,
   invite_link: "",
@@ -171,6 +172,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
       stock_quantity: p.stock_quantity != null ? String(p.stock_quantity) : "",
       allow_waitlist: p.allow_waitlist ?? true,
       invite_link: (p as unknown as { invite_link?: string }).invite_link ?? "",
+      lifetime_access: (p as unknown as { lifetime_access?: boolean }).lifetime_access ?? false,
     });
     setEditing(p);
     setCreating(false);
@@ -196,6 +198,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
     fd.set("stock_quantity", form.stock_quantity);
     fd.set("allow_waitlist", form.allow_waitlist ? "on" : "");
     fd.set("invite_link", form.invite_link);
+    fd.set("lifetime_access", form.lifetime_access ? "on" : "");
     fd.set("cover_image", form.cover_image);
     fd.set("file_url", form.file_url);
     fd.set("file_format", form.file_format);
@@ -734,6 +737,17 @@ export function ProductsTable({ products }: { products: Product[] }) {
                     className="h-4 w-4"
                   />
                   Published
+                </label>
+                <label className="flex items-center gap-2 text-sm text-[#3c434a]">
+                  <input
+                    type="checkbox"
+                    checked={!!form.lifetime_access}
+                    onChange={(e) =>
+                      setForm({ ...form, lifetime_access: e.target.checked })
+                    }
+                    className="h-4 w-4"
+                  />
+                  Lifetime Access
                 </label>
               </div>
               <div className="flex items-end justify-end gap-2">

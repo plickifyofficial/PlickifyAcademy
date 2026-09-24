@@ -109,11 +109,15 @@ export default async function ProductCheckoutPage({
                   </p>
                 )}
                 <p className="mt-2 text-xs font-medium text-zinc-500">
-                  <i className={`fa-solid ${deliveryType === "access" ? "fa-envelope" : "fa-bolt"} mr-1 text-brand-600`} />
-                  {deliveryType === "access" ? "Access via Email & WhatsApp" : "Instant download after verification"}
-                  <span className="mx-2 text-zinc-300">·</span>
-                  <i className="fa-solid fa-infinity mr-1 text-brand-600" />
-                  Lifetime access
+                  <i className="fa-solid fa-bolt mr-1 text-brand-600" />
+                  Instant download after verification
+                  {(product as { lifetime_access?: boolean }).lifetime_access && (
+                    <>
+                      <span className="mx-2 text-zinc-300">·</span>
+                      <i className="fa-solid fa-infinity mr-1 text-brand-600" />
+                      Lifetime access
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -162,7 +166,9 @@ export default async function ProductCheckoutPage({
             </div>
             <p className="mt-4 flex items-center gap-2 border-t border-zinc-100 pt-3 text-xs font-medium text-zinc-500">
               <i className="fa-solid fa-shield-halved text-green-600" />
-              {deliveryType === "access" ? "Secure Payment · Access via Email/WhatsApp" : "Secure Payment · Instant Download · Lifetime Access"}
+              {deliveryType === "access"
+                ? "Secure Payment · Access via Email/WhatsApp"
+                : `Secure Payment · Instant Download${(product as { lifetime_access?: boolean }).lifetime_access ? " · Lifetime Access" : ""}`}
             </p>
           </div>
         </div>

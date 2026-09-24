@@ -159,7 +159,7 @@ export async function createProduct(formData: FormData) {
   const stock_quantity = stockQuantityRaw ? parseInt(stockQuantityRaw) : null;
   const allow_waitlist = readBool(formData, "allow_waitlist");
   const invite_link = readString(formData, "invite_link") || null;
-  const access_note = readString(formData, "access_note") || null;
+  const lifetime_access = readBool(formData, "lifetime_access");
 
   const basePayload: Record<string, unknown> = {
     name,
@@ -186,7 +186,7 @@ export async function createProduct(formData: FormData) {
     is_published: readBool(formData, "is_published"),
   };
 
-  const newColumns: Record<string, unknown> = { delivery_type, variants, stock_quantity, allow_waitlist, invite_link, access_note };
+  const newColumns: Record<string, unknown> = { delivery_type, variants, stock_quantity, allow_waitlist, invite_link, lifetime_access };
 
   // Try with new columns, fallback without if columns don't exist yet (0 bug for existing DB)
   let { error } = await supabase.from("products").insert({ ...basePayload, ...newColumns } as never);
@@ -240,7 +240,7 @@ export async function updateProduct(productId: string, formData: FormData) {
   const stock_quantity = stockQuantityRaw ? parseInt(stockQuantityRaw) : null;
   const allow_waitlist = readBool(formData, "allow_waitlist");
   const invite_link = readString(formData, "invite_link") || null;
-  const access_note = readString(formData, "access_note") || null;
+  const lifetime_access = readBool(formData, "lifetime_access");
 
   const basePayload: Record<string, unknown> = {
     name,
@@ -266,7 +266,7 @@ export async function updateProduct(productId: string, formData: FormData) {
     is_published: readBool(formData, "is_published"),
     updated_at: new Date().toISOString(),
   };
-  const newColumns: Record<string, unknown> = { delivery_type, variants, stock_quantity, allow_waitlist, invite_link, access_note };
+  const newColumns: Record<string, unknown> = { delivery_type, variants, stock_quantity, allow_waitlist, invite_link, lifetime_access };
 
   let { error } = await supabase
     .from("products")
