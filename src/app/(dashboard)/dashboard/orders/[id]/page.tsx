@@ -26,11 +26,11 @@ export default async function OrderDetailPage({
   const { data: order } = await supabase
     .from("orders")
     .select(
-      "id, amount, status, payment_method, trx_id, coupon_id, created_at, course_id, product_id, courses(title, slug, cover_image), products(name, slug, cover_image, gradient)",
+      "id, amount, status, payment_method, trx_id, coupon_id, created_at, course_id, product_id, variant_id, access_email, access_whatsapp, admin_note, courses(title, slug, cover_image), products(name, slug, cover_image, gradient, delivery_type, invite_link)",
     )
     .eq("id", id)
     .eq("user_id", user.id)
-    .maybeSingle();
+    .maybeSingle() as unknown as { data: (typeof order & { variant_id?: string; access_email?: string; access_whatsapp?: string; admin_note?: string; products: { name: string; slug: string; cover_image: string | null; gradient: string | null; delivery_type?: string; invite_link?: string } | null }) | null };
   if (!order) notFound();
 
   const { data: profile } = await supabase
@@ -164,7 +164,15 @@ export default async function OrderDetailPage({
               <p className="font-bold text-zinc-900">{itemName}</p>
               <p className="text-xs text-zinc-500">
                 {isProduct ? "Digital Product" : "Online Course"}
+                {(order as { variant_id?: string }).variant_id ? ` · Variant: ${(order as { variant_id?: string }).variant_id}` : ""}
+                {(order.products as { delivery_type?: string } | null)?.delivery_type ? ` · ${(order.products as { delivery_type?: string }).delivery_type}` : ""}
               </p>
+              {(order as { admin_note?: string }).admin_note && (
+                <div className="mt-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+                  <p className="font-semibold">Admin Note:</p>
+                  <p className="mt-1 whitespace-pre-wrap">{(order as { admin_note?: string }).admin_note}</p>
+                </div>
+              )}
             </div>
             <div className="text-right">
               <p className="font-bold text-zinc-900">

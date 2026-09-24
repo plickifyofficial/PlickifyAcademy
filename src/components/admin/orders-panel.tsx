@@ -32,16 +32,17 @@ export function OrdersPanel({
   profiles: Record<string, { full_name: string | null; email: string | null }>;
 }) {
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [note, setNote] = useState<Record<string, string>>({});
   const { showToast } = useToast();
   const router = useRouter();
 
   async function run(
     id: string,
-    action: (id: string) => Promise<{ error?: string }>,
+    action: (id: string, note?: string) => Promise<{ error?: string }>,
     success: string,
   ) {
     setPendingId(id);
-    const result = await action(id);
+    const result = await action(id, note[id] || undefined);
     setPendingId(null);
     if (result.error) {
       showToast(result.error, "error");
@@ -130,34 +131,43 @@ export function OrdersPanel({
                     })}
                   </td>
                   <td>
-                    <div className="flex justify-end gap-2">
+                    <div className="flex flex-col items-end gap-2">
                       {order.status === "pending" && (
                         <>
-                          <button
-                            onClick={() =>
-                              run(
-                                order.id,
-                                verifyOrder,
-                                isProduct
-                                  ? "Payment confirmed — product unlocked"
-                                  : "Payment confirmed — course enrolled",
-                              )
-                            }
-                            disabled={pending}
-                            className="wp-btn wp-btn-primary"
-                          >
-                            <i className="fa-solid fa-check" />{" "}
-                            {pending ? "..." : "Verify"}
-                          </button>
-                          <button
-                            onClick={() =>
-                              run(order.id, rejectOrder, "Order has been marked as failed")
-                            }
-                            disabled={pending}
-                            className="wp-btn wp-btn-danger"
-                          >
-                            <i className="fa-solid fa-xmark" /> Cancel
-                          </button>
+                          <textarea
+                            placeholder="Admin note for user (e.g. Your order confirmed, check mail, credentials...)"
+                            value={note[order.id] || ""}
+                            onChange={(e) => setNote((prev) => ({ ...prev, [order.id]: e.target.value }))}
+                            className="w-64 rounded border border-zinc-300 px-2 py-1.5 text-xs"
+                            rows={2}
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() =>
+                                run(
+                                  order.id,
+                                  verifyOrder,
+                                  isProduct
+                                    ? "Payment confirmed — product unlocked"
+                                    : "Payment confirmed — course enrolled",
+                                )
+                              }
+                              disabled={pending}
+                              className="wp-btn wp-btn-primary"
+                            >
+                              <i className="fa-solid fa-check" />{" "}
+                              {pending ? "..." : "Verify"}
+                            </button>
+                            <button
+                              onClick={() =>
+                                run(order.id, rejectOrder, "Order has been marked as failed")
+                              }
+                              disabled={pending}
+                              className="wp-btn wp-btn-danger"
+                            >
+                              <i className="fa-solid fa-xmark" /> Cancel
+                            </button>
+                          </div>
                         </>
                       )}
                     </div>

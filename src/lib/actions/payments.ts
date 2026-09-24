@@ -240,6 +240,7 @@ export async function submitProductPayment(input: {
 
 export async function verifyOrder(
   orderId: string,
+  adminNote?: string,
 ): Promise<{ error?: string }> {
   await requireAdmin();
   const admin = createAdminClient();
@@ -255,9 +256,11 @@ export async function verifyOrder(
     return {};
   }
 
+  const updatePayload: Record<string, unknown> = { status: "paid" };
+  if (adminNote?.trim()) updatePayload.admin_note = adminNote.trim();
   const { error } = await admin
     .from("orders")
-    .update({ status: "paid" })
+    .update(updatePayload as never)
     .eq("id", orderId);
   if (error) return { error: error.message };
 
