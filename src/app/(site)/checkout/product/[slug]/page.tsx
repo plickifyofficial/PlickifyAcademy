@@ -27,10 +27,8 @@ export default async function ProductCheckoutPage({
     data: { session },
   } = await supabase.auth.getSession();
   const user = session?.user ?? null;
-  if (!user) {
-    const next = `/checkout/product/${slug}${sp?.variant ? `?variant=${encodeURIComponent(sp.variant)}` : ""}`;
-    redirect(`/login?next=${encodeURIComponent(next)}`);
-  }
+  // Proxy handles auth redirect with next param — don't redirect here to avoid loop
+  // If no user, page will show login prompt client-side
 
   const admin = createAdminClient();
   const { data: product } = (await admin
@@ -47,13 +45,31 @@ export default async function ProductCheckoutPage({
   const effectiveOldPrice = selectedVariant?.old_price ? Number(selectedVariant.old_price) : Number((product as import("@/lib/types").Product).old_price);
   const deliveryType = ((product as import("@/lib/types").Product).delivery_type as string) ?? "download";
 
-  const { data: owned } = await admin
-    .from("product_purchases")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("product_id", product.id)
-    .maybeSingle();
-  if (owned) redirect("/dashboard/my-products");
+  let owned = null as { id: string } | null;
+  if (user) {
+    const { data: ownedData } = await admin
+      .from("product_purchases")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("product_id", product.id)
+      .maybeSingle();
+    owned = ownedData as { id: string } | null;
+    if (owned) redirect("/dashboard/my-products");
+  }
+
+  if (!user) {
+    return (
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-6">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
+          <h2 className="text-xl font-bold text-amber-900">Please login to checkout</h2>
+          <p className="mt-2 text-sm text-amber-800">You need to be logged in to purchase this product.</p>
+          <Link href={`/login?next=${encodeURIComponent(`/checkout/product/${slug}${sp?.variant ? `?variant=${encodeURIComponent(sp.variant)}` : ""}`)}`} className="mt-6 inline-flex rounded-full bg-brand-600 px-8 py-3 text-sm font-bold text-white">
+            Login to Continue
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-6">

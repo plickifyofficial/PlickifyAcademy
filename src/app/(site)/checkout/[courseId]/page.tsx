@@ -23,7 +23,7 @@ export default async function CheckoutPage({
     data: { session },
   } = await supabase.auth.getSession();
   const user = session?.user ?? null;
-  if (!user) redirect(`/login?next=${encodeURIComponent(`/checkout/${courseId}`)}`);
+  // Proxy handles redirect with next param — don't redirect here to avoid loop, show login prompt below
 
   const { data: course } = await supabase
     .from("courses")
