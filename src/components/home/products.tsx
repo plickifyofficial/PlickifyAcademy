@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ProductsContent } from "@/lib/content-schema";
 import type { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
+import { VariantPopup } from "@/components/products/variant-popup";
 
 export function Products({
   content,
@@ -106,6 +107,8 @@ export function Products({
                   <div className="mt-4 flex gap-2">
                     {isOutOfStock ? (
                       <Link href={detailHref} className="flex flex-1 items-center justify-center rounded-full bg-zinc-100 px-4 py-2.5 text-sm font-semibold text-zinc-600">Waitlist</Link>
+                    ) : hasVariants ? (
+                      <VariantPopup product={{ name, slug: slug! }} variants={variants as unknown as import("@/lib/types").ProductVariant[]} slug={slug!} />
                     ) : (
                       <Link href={buyHref} className="flex flex-1 items-center justify-center rounded-full bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">Buy Now</Link>
                     )}
