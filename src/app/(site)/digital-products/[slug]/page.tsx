@@ -60,12 +60,16 @@ export default async function ProductDetailPage({
       ? Math.round((1 - product.price / product.old_price) * 100)
       : 0;
 
-  const stats = [
-    { icon: "fa-solid fa-box", label: "Resources", value: `${product.file_count || 0}+` },
-    { icon: "fa-solid fa-file", label: "Format", value: product.file_format || "—" },
-    { icon: "fa-solid fa-hard-drive", label: "Size", value: product.file_size || "—" },
-    { icon: "fa-solid fa-download", label: "Downloads", value: `${product.download_count || 0}+` },
-  ];
+  const delivery = (product as { delivery_type?: string }).delivery_type || "download";
+  const isDownloadable = delivery === "download";
+  const stats = isDownloadable
+    ? [
+        { icon: "fa-solid fa-box", label: "Resources", value: `${product.file_count || 0}+` },
+        { icon: "fa-solid fa-file", label: "Format", value: product.file_format || "—" },
+        { icon: "fa-solid fa-hard-drive", label: "Size", value: product.file_size || "—" },
+        { icon: "fa-solid fa-download", label: "Downloads", value: `${product.download_count || 0}+` },
+      ]
+    : [];
 
   return (
     <main className="bg-[#f6f9ff]">
@@ -140,20 +144,39 @@ export default async function ProductDetailPage({
               <ProseContent html={renderContent(product.description)} />
             </p>
 
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {stats.map((m) => (
-                  <div
-                    key={m.label}
-                    className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 text-center"
-                  >
-                    <i className={`${m.icon} text-brand-500`} />
-                    <p className="mt-1 truncate text-sm font-bold text-zinc-900">
-                      {m.value}
-                    </p>
-                    <p className="text-xs text-zinc-400">{m.label}</p>
+              {isDownloadable ? (
+                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {stats.map((m) => (
+                    <div
+                      key={m.label}
+                      className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 text-center"
+                    >
+                      <i className={`${m.icon} text-brand-500`} />
+                      <p className="mt-1 truncate text-sm font-bold text-zinc-900">
+                        {m.value}
+                      </p>
+                      <p className="text-xs text-zinc-400">{m.label}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-zinc-100 bg-brand-50/50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-brand-600">Features</p>
+                    <p className="mt-1 text-sm text-zinc-700">{product.product_type || delivery}</p>
                   </div>
-                ))}
-              </div>
+                  <div className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">Delivery</p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-900 capitalize">{delivery}</p>
+                  </div>
+                  {(product as { invite_link?: string }).invite_link && delivery === "invitation" && (
+                    <div className="rounded-xl border border-zinc-100 bg-blue-50/50 p-4 sm:col-span-2">
+                      <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Invite</p>
+                      <a href={(product as { invite_link?: string }).invite_link!} target="_blank" className="mt-1 block truncate text-sm font-semibold text-blue-700 underline">Open Invite Link</a>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {(product.tags?.length ?? 0) > 0 && (
                 <div className="mt-5 flex flex-wrap gap-2">
