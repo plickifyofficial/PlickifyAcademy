@@ -9,6 +9,8 @@ import { OrderSummary } from "@/components/checkout/order-summary";
 
 export const metadata = { title: "Checkout" };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductCheckoutPage({
   params,
   searchParams,
