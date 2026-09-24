@@ -33,6 +33,20 @@ export default async function CheckoutPage({
     .single();
   if (!course) notFound();
 
+  if (!user) {
+    return (
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-6">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
+          <h2 className="text-xl font-bold text-amber-900">Please login to checkout</h2>
+          <p className="mt-2 text-sm text-amber-800">You need to be logged in to purchase this course.</p>
+          <a href={`/login?next=${encodeURIComponent(`/checkout/${courseId}`)}`} className="mt-6 inline-flex rounded-full bg-brand-600 px-8 py-3 text-sm font-bold text-white">
+            Login to Continue
+          </a>
+        </div>
+      </main>
+    );
+  }
+
   const { data: enrolled } = await supabase
     .from("enrollments")
     .select("id")
