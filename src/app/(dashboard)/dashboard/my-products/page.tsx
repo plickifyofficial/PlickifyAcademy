@@ -15,9 +15,18 @@ export default async function MyProductsPage() {
 
   const { data: purchases } = await supabase
     .from("product_purchases")
-    .select("id, price, created_at, products(id, name, slug, cover_image, gradient, file_format, file_size, delivery_type, invite_link)")
+    .select("id, price, created_at, order_id, products(id, name, slug, cover_image, gradient, file_format, file_size, delivery_type, invite_link)")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
+  const orderIds = (purchases ?? []).map((p) => (p as { order_id?: string | null }).order_id).filter(Boolean) as string[];
+  let orderNotes: Record<string, string> = {};
+  if (orderIds.length > 0) {
+    const { data: orders } = await supabase.from("orders").select("id, admin_note").in("id", orderIds);
+    for (const o of orders ?? []) {
+      if ((o as { admin_note?: string | null }).admin_note) orderNotes[o.id] = (o as { admin_note: string }).admin_note;
+    }
+  }
 
   const items = (purchases ?? []).map((p) => {
     const product = p.products as unknown as {
@@ -119,12 +128,19 @@ export default async function MyProductsPage() {
                   </p>
                   <div className="mt-4 flex flex-1 items-end gap-2">
                     {p.isAccess ? (
-                      <Link
-                        href={`/dashboard/my-products`}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white"
-                      >
-                        <i className="fa-solid fa-eye" /> View Detail
-                      </Link>
+                      (() => {
+                        const oid = (p as { order_id?: string | null }).order_id;
+                        const note = oid ? orderNotes[oid] : null;
+                        return (
+                          <Link
+                            href={oid ? `/orders/${oid}` : `/dashboard/orders`}
+                            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white"
+                            title={note || "View access details"}
+                          >
+                            <i className="fa-solid fa-eye" /> View Detail
+                          </Link>
+                        );
+                      })()
                     ) : p.isInvitation ? (
                       p.inviteUrl ? (
                         <a
