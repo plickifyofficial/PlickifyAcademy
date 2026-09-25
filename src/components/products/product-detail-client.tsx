@@ -18,8 +18,8 @@ export function ProductDetailClient({ product, owned }: { product: Product; owne
   const delivery = (product.delivery_type as string) || "download";
   const isAccess = delivery === "access";
   const isInvitation = delivery === "invitation";
-  const rawStock = selected?.stock_quantity ?? (product as { stock_quantity?: number | null }).stock_quantity;
-  const stockQty = rawStock === "" || rawStock == null ? null : Number(rawStock);
+  const rawStock = (selected as { stock_quantity?: string | number | null } | null)?.stock_quantity ?? (product as { stock_quantity?: string | number | null }).stock_quantity;
+  const stockQty = rawStock === "" || rawStock == null ? null : Number(rawStock as string | number);
   const isOutOfStock = stockQty != null && Number.isFinite(stockQty) && stockQty <= 0;
   const allowWaitlist = (product as { allow_waitlist?: boolean }).allow_waitlist ?? true;
 
