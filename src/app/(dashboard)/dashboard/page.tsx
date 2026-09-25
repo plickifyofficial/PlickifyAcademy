@@ -36,7 +36,7 @@ export default async function DashboardPage() {
     getRecommendedCourses(user.id, courseIds),
     supabase
       .from("product_purchases")
-      .select("id, created_at, products(id, name, slug, cover_image, gradient, price)")
+      .select("id, created_at, products(id, name, slug, cover_image, gradient, price, delivery_type, invite_link)")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(3),
@@ -44,15 +44,33 @@ export default async function DashboardPage() {
   const { data: purchases } = purchasesRes;
 
   const recentProducts = (purchases ?? [])
-    .map((p) => p.products as unknown as {
+    .map((p) => {
+      const prod = p.products as unknown as {
+        id: string;
+        name: string;
+        slug: string;
+        cover_image: string | null;
+        gradient: string | null;
+        price: number;
+        delivery_type?: string | null;
+        invite_link?: string | null;
+      } | null;
+      if (!prod) return null;
+      const delivery = (prod as { delivery_type?: string }).delivery_type || "download";
+      return { ...prod, delivery, isAccess: delivery === "access", isInvitation: delivery === "invitation" } as typeof prod & { delivery: string; isAccess: boolean; isInvitation: boolean };
+    })
+    .filter(Boolean) as unknown as Array<{
       id: string;
       name: string;
       slug: string;
       cover_image: string | null;
       gradient: string | null;
       price: number;
-    } | null)
-    .filter(Boolean);
+      delivery: string;
+      isAccess: boolean;
+      isInvitation: boolean;
+      invite_link?: string | null;
+    }>;
 
   const isNewStudent = courses.length === 0;
   const overallDone = courses.reduce((s, c) => s + c.doneLessons, 0);
@@ -491,12 +509,19 @@ export default async function DashboardPage() {
                     {formatPrice(product!.price)}
                   </p>
                 </div>
-                <Link
-                  href="/dashboard/my-products"
-                  className="rounded-lg bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-700 hover:bg-brand-100"
-                >
-                  Download
-                </Link>
+                {product.isAccess ? (
+                  <Link href="/dashboard/my-products" className="rounded-lg bg-zinc-900 px-3 py-2 text-xs font-semibold text-white">View Detail</Link>
+                ) : product.isInvitation ? (
+                  product.invite_link ? (
+                    <a href={product.invite_link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white">Access</a>
+                  ) : (
+                    <span className="rounded-lg bg-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-500">Invite pending</span>
+                  )
+                ) : (
+                  <Link href="/dashboard/my-products" className="rounded-lg bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-700 hover:bg-brand-100">
+                    Download
+                  </Link>
+                )}
               </div>
             ))}
           </div>
