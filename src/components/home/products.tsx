@@ -63,10 +63,22 @@ export function Products({
               : null;
 
             const slug = isDb ? (product as Product).slug : null;
-            const stockQty = isDb ? (product as Product).stock_quantity : null;
-            const isOutOfStock = isDb && stockQty != null && stockQty <= 0;
-            const variants = isDb ? ((product as Product).variants as unknown as { price: number }[] | null) : null;
-            const hasVariants = Array.isArray(variants) && variants.length > 0;
+            const rawVariants = isDb ? ((product as Product).variants as unknown as { price: number; stock_quantity?: string | number | null }[] | null) : null;
+            const hasVariants = Array.isArray(rawVariants) && rawVariants.length > 0;
+            let isOutOfStock = false;
+            if (isDb) {
+              if (hasVariants) {
+                const hasUnlimited = rawVariants!.some((v) => v.stock_quantity === "" || v.stock_quantity == null);
+                const stocks = rawVariants!.map((v) => v.stock_quantity).map((s) => (s === "" || s == null ? null : Number(s))).filter((s): s is number => s != null && Number.isFinite(s));
+                const hasPositive = stocks.some((s) => s > 0);
+                const allZero = stocks.length > 0 && stocks.every((s) => s <= 0);
+                isOutOfStock = !hasUnlimited && !hasPositive && allZero;
+              } else {
+                const sq = (product as Product).stock_quantity;
+                isOutOfStock = sq != null && Number(sq) <= 0;
+              }
+            }
+            const variants = rawVariants as unknown as { price: number }[] | null;
             let displayPrice = price;
             if (isDb && hasVariants) {
               const prices = variants!.map((v) => Number(v.price)).filter((n) => Number.isFinite(n));

@@ -305,14 +305,24 @@ function ProductCard({
   categoryOf: (p: Product) => string;
 }) {
   const badge = badgeOf(p);
-  const variants = (p.variants as unknown as { price: number }[] | null) ?? [];
-  const hasVariants = Array.isArray(variants) && variants.length > 0;
-  const stockQty = (p as { stock_quantity?: number | null }).stock_quantity;
-  const isOutOfStock = stockQty != null && Number(stockQty) <= 0;
+  const rawVariants = (p.variants as unknown as { price: number; stock_quantity?: string | number | null }[] | null) ?? [];
+  const hasVariants = Array.isArray(rawVariants) && rawVariants.length > 0;
+  let isOutOfStock = false;
+  if (hasVariants) {
+    const hasUnlimited = rawVariants.some((v) => v.stock_quantity === "" || v.stock_quantity == null);
+    const stocks = rawVariants.map((v) => v.stock_quantity).map((s) => (s === "" || s == null ? null : Number(s))).filter((s): s is number => s != null && Number.isFinite(s));
+    const hasPositive = stocks.some((s) => s > 0);
+    const allZero = stocks.length > 0 && stocks.every((s) => s <= 0);
+    isOutOfStock = !hasUnlimited && !hasPositive && allZero;
+  } else {
+    const sq = (p as { stock_quantity?: number | null | string }).stock_quantity;
+    isOutOfStock = sq != null && sq !== "" && Number(sq) <= 0;
+  }
+  const variants = rawVariants as unknown as { price: number }[] | null;
   let displayPrice = formatPrice(p.price);
   let displayOldPrice: string | null = p.old_price > p.price ? formatPrice(p.old_price) : null;
   if (hasVariants) {
-    const prices = variants.map((v) => Number(v.price)).filter((n) => Number.isFinite(n));
+    const prices = variants!.map((v) => Number(v.price)).filter((n) => Number.isFinite(n));
     if (prices.length === 1) displayPrice = formatPrice(prices[0]);
     else if (prices.length > 1) displayPrice = `${formatPrice(Math.min(...prices))} - ${formatPrice(Math.max(...prices))}`;
     displayOldPrice = null;
