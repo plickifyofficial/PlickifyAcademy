@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   CourseCurriculum,
@@ -34,7 +34,7 @@ export default async function DashboardCoursePage({
   const { data: enrollment } = await supabase
     .from("enrollments")
     .select("id, created_at")
-    .eq("user_id", user.id)
+    .eq("user_id", user!.id)
     .eq("course_id", courseId)
     .maybeSingle();
   if (!enrollment) notFound();
@@ -62,11 +62,11 @@ export default async function DashboardCoursePage({
       supabase
         .from("lesson_progress")
         .select("lesson_id, completed_at")
-        .eq("user_id", user.id),
+        .eq("user_id", user!.id),
       supabase
         .from("user_course_state")
         .select("last_lesson_id")
-        .eq("user_id", user.id)
+        .eq("user_id", user!.id)
         .eq("course_id", courseId)
         .maybeSingle(),
     ]);
@@ -119,7 +119,7 @@ export default async function DashboardCoursePage({
   const { data: certificate } = await supabase
     .from("certificates")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", user!.id)
     .eq("course_id", courseId)
     .maybeSingle();
 

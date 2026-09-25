@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PlayerShell } from "@/components/dashboard/player-shell";
 import { PlayerContent } from "@/components/lessons/player-content";
@@ -35,7 +35,7 @@ export default async function LearnLessonPage({
   const { data: enrollment } = await supabase
     .from("enrollments")
     .select("id, created_at")
-    .eq("user_id", user.id)
+    .eq("user_id", user!.id)
     .eq("course_id", courseId)
     .maybeSingle();
   if (!enrollment) notFound();
@@ -70,11 +70,11 @@ export default async function LearnLessonPage({
     supabase
       .from("lesson_progress")
       .select("lesson_id, completed, position_seconds")
-      .eq("user_id", user.id),
+      .eq("user_id", user!.id),
     supabase
       .from("user_course_state")
       .select("last_lesson_id")
-      .eq("user_id", user.id)
+      .eq("user_id", user!.id)
       .eq("course_id", courseId)
       .maybeSingle(),
     supabase
@@ -85,7 +85,7 @@ export default async function LearnLessonPage({
     supabase
       .from("lesson_notes")
       .select("note")
-      .eq("user_id", user.id)
+      .eq("user_id", user!.id)
       .eq("lesson_id", lessonId)
       .maybeSingle(),
     supabase
@@ -238,7 +238,7 @@ export default async function LearnLessonPage({
       supabase
         .from("assignment_submissions")
         .select("submission_text, submitted_at, grade, feedback")
-        .eq("user_id", user.id)
+        .eq("user_id", user!.id)
         .eq("lesson_id", lesson.id)
         .maybeSingle(),
     ]);

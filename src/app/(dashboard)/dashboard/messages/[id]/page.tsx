@@ -21,7 +21,7 @@ export default async function ConversationPage({
       .from("conversations")
       .select("id, subject, course_id, courses(title)")
       .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", user!.id)
       .maybeSingle(),
     supabase
       .from("messages")
@@ -40,7 +40,7 @@ export default async function ConversationPage({
       body: m.body,
       createdAt: m.created_at,
       author: p?.full_name || "User",
-      own: m.sender_id === user.id,
+      own: m.sender_id === user!.id,
     };
   });
 

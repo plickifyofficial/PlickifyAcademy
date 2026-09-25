@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Order" };
@@ -28,14 +28,14 @@ export default async function OrderDetailPage({
     .from("orders")
     .select("*, courses(title, slug, cover_image), products(*)")
     .eq("id", id)
-    .eq("user_id", user.id)
+    .eq("user_id", user!.id)
     .maybeSingle();
   if (orderData.error) {
     const fallback = await supabase
       .from("orders")
       .select("id, amount, status, payment_method, trx_id, coupon_id, created_at, course_id, product_id, courses(title, slug, cover_image), products(name, slug, cover_image, gradient)")
       .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", user!.id)
       .maybeSingle();
     if (fallback.error || !fallback.data) notFound();
     order = fallback.data;
@@ -65,7 +65,7 @@ export default async function OrderDetailPage({
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, email")
-    .eq("id", user.id)
+    .eq("id", user!.id)
     .single();
 
   const course = typedOrder.courses as unknown as {
@@ -73,7 +73,7 @@ export default async function OrderDetailPage({
     slug: string;
     cover_image: string | null;
   } | null;
-  const product = typedOrder.products as unknown as {
+  const product = typedtypedOrder.products as unknown as {
     name: string;
     slug: string;
     cover_image: string | null;
@@ -89,7 +89,7 @@ export default async function OrderDetailPage({
   const gradient = product?.gradient ?? "linear-gradient(135deg,#4f46e5,#7c3aed)";
   const orderNumber = `PLK-${typedOrder.id.slice(0, 8).toUpperCase()}`;
   const total = Number(typedOrder.amount);
-  const discounted = typedOrder.coupon_id ? total * 1.15 : null;
+  const discounted = typedtypedOrder.coupon_id ? total * 1.15 : null;
   // Use typedOrder for all order fields below
 
   return (
@@ -107,7 +107,7 @@ export default async function OrderDetailPage({
           <h1 className="text-2xl font-extrabold text-zinc-900">Invoice</h1>
           <p className="mt-1 text-sm text-zinc-500">
             Order {orderNumber} ·{" "}
-            {new Date(order.created_at).toLocaleDateString("en-US", {
+            {new Date(typedOrder.created_at).toLocaleDateString("en-US", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -139,7 +139,7 @@ export default async function OrderDetailPage({
           <div className="text-right">
             <p className="text-sm font-bold">{orderNumber}</p>
             <p className="text-[11px] text-zinc-300">
-              {new Date(order.created_at).toLocaleString("en-US", {
+              {new Date(typedOrder.created_at).toLocaleString("en-US", {
                 dateStyle: "medium",
                 timeStyle: "short",
               })}
@@ -168,7 +168,7 @@ export default async function OrderDetailPage({
               <p className="mt-1 text-xs text-zinc-400">
                 Payment:{" "}
                 <span className="capitalize">
-                  {order.payment_method === "nagad" ? "Nagad" : order.payment_method ?? "—"}
+                  {typedOrder.payment_method === "nagad" ? "Nagad" : typedOrder.payment_method ?? "—"}
                 </span>
               </p>
             </div>
@@ -195,7 +195,7 @@ export default async function OrderDetailPage({
               <p className="text-xs text-zinc-500">
                 {isProduct ? "Digital Product" : "Online Course"}
                 {(order as { variant_id?: string }).variant_id ? ` · Variant: ${(order as { variant_id?: string }).variant_id}` : ""}
-                {(order.products as { delivery_type?: string } | null)?.delivery_type ? ` · ${(order.products as { delivery_type?: string }).delivery_type}` : ""}
+                {(typedOrder.products as { delivery_type?: string } | null)?.delivery_type ? ` · ${(typedOrder.products as { delivery_type?: string }).delivery_type}` : ""}
               </p>
               {(order as { admin_note?: string }).admin_note && (
                 <div className="mt-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
@@ -208,9 +208,9 @@ export default async function OrderDetailPage({
               <p className="font-bold text-zinc-900">
                 ৳{total.toLocaleString("en-IN")}
               </p>
-              {order.trx_id && (
+              {typedOrder.trx_id && (
                 <p className="text-[11px] text-zinc-400">
-                  TrxID: <span className="font-mono">{order.trx_id}</span>
+                  TrxID: <span className="font-mono">{typedOrder.trx_id}</span>
                 </p>
               )}
             </div>
@@ -224,7 +224,7 @@ export default async function OrderDetailPage({
                   <span>৳{discounted.toLocaleString("en-IN")}</span>
                 </p>
               )}
-              {order.coupon_id && (
+              {typedOrder.coupon_id && (
                 <p className="flex justify-between gap-8">
                   <span>Coupon discount</span>
                   <span className="text-green-600">
