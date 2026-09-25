@@ -60,19 +60,18 @@ export function ProductDetailClient({ product, owned }: { product: Product; owne
             {allowWaitlist ? <button onClick={() => alert("Added to waitlist — we will notify you when back in stock")} className="w-full rounded-full bg-amber-500 px-8 py-4 text-base font-bold text-white">Join Waitlist</button> : <p className="text-sm font-semibold text-red-600">Out of stock</p>}
             <p className="mt-2 text-xs text-zinc-400">Stock: {stockQty} left</p>
           </div>
-        ) : isAccess ? (
-          <div className="mt-5">
-            <Link href={`/digital-products/${product.slug}#access-note`} className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-4 text-base font-bold text-white">View Detail <i className="fa-solid fa-eye text-xs" /></Link>
-            <p className="mt-3 text-sm text-zinc-600">{(product as { access_note?: string }).access_note || "Admin will add access details after purchase."}</p>
-          </div>
         ) : (
           <>
-            {isAccess && <p className="mt-2 text-xs text-amber-600">Checkout will collect your email & WhatsApp for access</p>}
-            {isInvitation && <p className="mt-2 text-xs text-blue-600">After purchase, Access button will open your invite link</p>}
+            <p className="mt-2 text-xs text-zinc-500">
+              {isAccess ? "Checkout will collect your email & WhatsApp for access" : isInvitation ? "After purchase, Access button will open your invite link" : ""}
+            </p>
             <div className="mt-5">
               <BuyButton slug={product.slug} name={product.name} owned={owned} variantId={selectedId || undefined} />
             </div>
-            <p className="mt-3 text-xs text-zinc-400">Variant: {selected?.name || "Default"} {hasVariants && `(${variants.length} options)`} {stockQty != null && `· Stock: ${stockQty}`}</p>
+            <p className="mt-3 text-xs text-zinc-400">
+              Variant: {selected?.name || "Default"} {hasVariants && `(${variants.length} options)`} {stockQty != null && `· Stock: ${stockQty}`}
+              {isAccess && " · View Detail shows access note after purchase"}
+            </p>
           </>
         )}
       </div>
