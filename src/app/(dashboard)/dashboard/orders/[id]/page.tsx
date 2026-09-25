@@ -73,7 +73,7 @@ export default async function OrderDetailPage({
     slug: string;
     cover_image: string | null;
   } | null;
-  const product = typedtypedOrder.products as unknown as {
+  const product = typedOrder.products as unknown as {
     name: string;
     slug: string;
     cover_image: string | null;
@@ -89,7 +89,7 @@ export default async function OrderDetailPage({
   const gradient = product?.gradient ?? "linear-gradient(135deg,#4f46e5,#7c3aed)";
   const orderNumber = `PLK-${typedOrder.id.slice(0, 8).toUpperCase()}`;
   const total = Number(typedOrder.amount);
-  const discounted = typedtypedOrder.coupon_id ? total * 1.15 : null;
+  const discounted = typedOrder.coupon_id ? total * 1.15 : null;
   // Use typedOrder for all order fields below
 
   return (
