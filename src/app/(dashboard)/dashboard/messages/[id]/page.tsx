@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MessageThread } from "@/components/dashboard/message-thread";
 
@@ -16,19 +16,21 @@ export default async function ConversationPage({
   const user = session?.user ?? null;
   if (!user) redirect("/login");
 
-  const { data: conversation } = await supabase
-    .from("conversations")
-    .select("id, subject, course_id, courses(title)")
-    .eq("id", id)
-    .maybeSingle();
+  const [{ data: conversation }, { data: messagesRaw }] = await Promise.all([
+    supabase
+      .from("conversations")
+      .select("id, subject, course_id, courses(title)")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("messages")
+      .select("id, sender_id, body, is_read, created_at, profiles(full_name)")
+      .eq("conversation_id", id)
+      .order("created_at", { ascending: true })
+      .limit(500),
+  ]);
   if (!conversation) notFound();
-
-  const { data: messagesRaw } = await supabase
-    .from("messages")
-    .select("id, sender_id, body, is_read, created_at, profiles(full_name)")
-    .eq("conversation_id", id)
-    .order("created_at", { ascending: true })
-    .limit(500);
 
   const messages = (messagesRaw ?? []).map((m) => {
     const p = m.profiles as unknown as { full_name: string | null } | null;

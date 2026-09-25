@@ -63,7 +63,7 @@ export default async function DashboardSearchPage({
     );
 
     if (enrolledIds.length > 0) {
-      const [{ data: rows }, { data: resRows }] = await Promise.all([
+      const [{ data: rows }, { data: resRows }, { data: purchasesData }] = await Promise.all([
         supabase
           .from("lessons")
           .select("id, title, course_id")
@@ -74,6 +74,12 @@ export default async function DashboardSearchPage({
           .from("lesson_resources")
           .select("id, title, lesson_id, lessons(course_id)")
           .ilike("title", pattern)
+          .limit(20),
+        supabase
+          .from("product_purchases")
+          .select("id, products(id, name, slug, cover_image)")
+          .eq("user_id", user.id)
+          .ilike("products.name", pattern)
           .limit(20),
       ]);
 
@@ -99,18 +105,21 @@ export default async function DashboardSearchPage({
           course_title: courseTitles.get(r.lessons?.course_id ?? "") ?? "",
         }))
         .filter((r) => r.course_id && courseTitles.has(r.course_id));
+
+      products = (purchasesData ?? [])
+        .map((p) => (p as { products: unknown }).products as unknown as (typeof products)[number] | null)
+        .filter((p): p is (typeof products)[number] => Boolean(p));
+    } else {
+      const { data: purchasesData } = await supabase
+        .from("product_purchases")
+        .select("id, products(id, name, slug, cover_image)")
+        .eq("user_id", user.id)
+        .ilike("products.name", pattern)
+        .limit(20);
+      products = (purchasesData ?? [])
+        .map((p) => (p as { products: unknown }).products as unknown as (typeof products)[number] | null)
+        .filter((p): p is (typeof products)[number] => Boolean(p));
     }
-
-    const { data: purchases } = await supabase
-      .from("product_purchases")
-      .select("id, products(id, name, slug, cover_image)")
-      .eq("user_id", user.id)
-      .ilike("products.name", pattern)
-      .limit(20);
-
-    products = (purchases ?? [])
-      .map((p) => p.products as unknown as (typeof products)[number] | null)
-      .filter((p): p is (typeof products)[number] => Boolean(p));
   }
 
   const allCounts = {
@@ -192,7 +201,7 @@ export default async function DashboardSearchPage({
           </p>
 
           <div className="mt-6 space-y-8">
-            {activeTab !== "courses" && matchedCourses.length > 0 && (
+            {(activeTab === "all" || activeTab === "courses") && matchedCourses.length > 0 && (
               <section>
                 <h2 className="text-base font-bold text-zinc-900">
                   Courses <span className="text-zinc-400">({matchedCourses.length})</span>
@@ -229,7 +238,7 @@ export default async function DashboardSearchPage({
               </section>
             )}
 
-            {activeTab !== "lessons" && lessons.length > 0 && (
+            {(activeTab === "all" || activeTab === "lessons") && lessons.length > 0 && (
               <section>
                 <h2 className="text-base font-bold text-zinc-900">
                   Lessons <span className="text-zinc-400">({lessons.length})</span>
@@ -255,7 +264,7 @@ export default async function DashboardSearchPage({
               </section>
             )}
 
-            {activeTab !== "resources" && resources.length > 0 && (
+            {(activeTab === "all" || activeTab === "resources") && resources.length > 0 && (
               <section>
                 <h2 className="text-base font-bold text-zinc-900">
                   Resources <span className="text-zinc-400">({resources.length})</span>
@@ -281,7 +290,7 @@ export default async function DashboardSearchPage({
               </section>
             )}
 
-            {activeTab !== "products" && products.length > 0 && (
+            {(activeTab === "all" || activeTab === "products") && products.length > 0 && (
               <section>
                 <h2 className="text-base font-bold text-zinc-900">
                   Digital Products <span className="text-zinc-400">({products.length})</span>

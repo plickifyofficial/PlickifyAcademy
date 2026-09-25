@@ -17,19 +17,15 @@ export default async function MessagesPage({
   const user = session?.user ?? null;
   if (!user) redirect("/login");
 
-  const { data: conversationsRaw } = await supabase
-    .from("conversations")
-    .select(
-      "id, subject, last_message_at, created_at, course_id, courses(title), messages(count)",
-    )
-    .eq("user_id", user.id)
-    .order("last_message_at", { ascending: false });
-
-  const { data: messagesRaw } = await supabase
-    .from("messages")
-    .select("conversation_id, id")
-    .neq("sender_id", user.id)
-    .eq("is_read", false);
+  const [{ data: conversationsRaw }, { data: messagesRaw }, courses] = await Promise.all([
+    supabase
+      .from("conversations")
+      .select("id, subject, last_message_at, created_at, course_id, courses(title), messages(count)")
+      .eq("user_id", user.id)
+      .order("last_message_at", { ascending: false }),
+    supabase.from("messages").select("conversation_id, id").neq("sender_id", user.id).eq("is_read", false),
+    getEnrolledCourses(user.id),
+  ]);
 
   const conversations = (conversationsRaw ?? []) as unknown as Array<{
     id: string;
@@ -40,8 +36,6 @@ export default async function MessagesPage({
     courses: { title: string } | null;
   }>;
   const unreadIds = new Set((messagesRaw ?? []).map((m) => m.conversation_id));
-
-  const courses = await getEnrolledCourses(user.id);
 
   return (
     <div className="space-y-6">
