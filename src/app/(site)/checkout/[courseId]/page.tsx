@@ -42,10 +42,8 @@ export default async function CheckoutPage({
       .eq("course_id", courseId)
       .maybeSingle();
     enrolled = enrolledData as { id: string } | null;
+    if (enrolled) redirect(`/courses/${course.slug}`);
   }
-    .eq("course_id", courseId)
-    .maybeSingle();
-  if (enrolled) redirect(`/courses/${course.slug}`);
 
   const originalPrice =
     (course.original_price ?? 0) > course.price
