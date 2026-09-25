@@ -6,9 +6,8 @@ export const metadata = { title: "Download History" };
 
 export default async function DownloadsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
   if (!user) redirect("/login");
 
   const { data: logsRaw } = await supabase

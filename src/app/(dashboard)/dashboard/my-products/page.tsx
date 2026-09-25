@@ -8,15 +8,14 @@ export const metadata = { title: "My Digital Products" };
 
 export default async function MyProductsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   if (!user) redirect("/login");
 
   const { data: purchases } = await supabase
     .from("product_purchases")
-    .select("id, price, created_at, products(id, name, slug, cover_image, gradient, file_format, file_size)")
+    .select("id, price, created_at, products(id, name, slug, cover_image, gradient, file_format, file_size, delivery_type, invite_link)")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -29,12 +28,21 @@ export default async function MyProductsPage() {
       gradient: string | null;
       file_format: string | null;
       file_size: string | null;
+      delivery_type?: string | null;
+      invite_link?: string | null;
     } | null;
+    const delivery = (product as { delivery_type?: string } | null)?.delivery_type || "download";
     const token = product ? signDownloadToken(product.id) : "";
+    const isAccess = delivery === "access";
+    const isInvitation = delivery === "invitation";
     return {
       ...p,
       product,
-      downloadUrl: product ? `/api/download/${product.id}?t=${token}` : null,
+      delivery,
+      isAccess,
+      isInvitation,
+      downloadUrl: product && delivery === "download" ? `/api/download/${product.id}?t=${token}` : null,
+      inviteUrl: product && isInvitation ? (product.invite_link || null) : null,
     };
   });
 
@@ -110,11 +118,33 @@ export default async function MyProductsPage() {
                     })}
                   </p>
                   <div className="mt-4 flex flex-1 items-end gap-2">
-                    {p.downloadUrl ? (
+                    {p.isAccess ? (
+                      <Link
+                        href={`/dashboard/my-products`}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white"
+                      >
+                        <i className="fa-solid fa-eye" /> View Detail
+                      </Link>
+                    ) : p.isInvitation ? (
+                      p.inviteUrl ? (
+                        <a
+                          href={p.inviteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+                        >
+                          <i className="fa-solid fa-link" /> Access
+                        </a>
+                      ) : (
+                        <span className="flex flex-1 items-center justify-center rounded-lg bg-zinc-100 px-4 py-2.5 text-sm font-semibold text-zinc-500">
+                          Invite pending
+                        </span>
+                      )
+                    ) : p.downloadUrl ? (
                       <a
                         href={p.downloadUrl}
                         download
-                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
                       >
                         <i className="fa-solid fa-download" /> Download
                       </a>
@@ -123,6 +153,12 @@ export default async function MyProductsPage() {
                         File pending
                       </span>
                     )}
+                    <Link
+                      href={`/digital-products/${product.slug}`}
+                      className="flex items-center justify-center rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50"
+                    >
+                      Details
+                    </Link>
                   </div>
                 </div>
               </div>

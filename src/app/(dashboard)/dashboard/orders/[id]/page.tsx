@@ -18,38 +18,49 @@ export default async function OrderDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) notFound();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
+  if (!user) redirect("/login");
 
-  const { data: order } = (await supabase
+  // Use * for resilience if new columns not yet migrated
+  let order: unknown = null;
+  let orderData = await supabase
     .from("orders")
-    .select(
-      "id, amount, status, payment_method, trx_id, coupon_id, created_at, course_id, product_id, variant_id, access_email, access_whatsapp, admin_note, courses(title, slug, cover_image), products(name, slug, cover_image, gradient, delivery_type, invite_link)",
-    )
+    .select("*, courses(title, slug, cover_image), products(*)")
     .eq("id", id)
     .eq("user_id", user.id)
-    .maybeSingle()) as unknown as {
-    data: {
-      id: string;
-      amount: number;
-      status: string;
-      payment_method: string | null;
-      trx_id: string | null;
-      coupon_id: string | null;
-      created_at: string;
-      course_id: string | null;
-      product_id: string | null;
-      variant_id?: string | null;
-      access_email?: string | null;
-      access_whatsapp?: string | null;
-      admin_note?: string | null;
-      courses: { title: string; slug: string; cover_image: string | null } | null;
-      products: { name: string; slug: string; cover_image: string | null; gradient: string | null; delivery_type?: string; invite_link?: string } | null;
-    } | null;
-  };
+    .maybeSingle();
+  if (orderData.error) {
+    const fallback = await supabase
+      .from("orders")
+      .select("id, amount, status, payment_method, trx_id, coupon_id, created_at, course_id, product_id, courses(title, slug, cover_image), products(name, slug, cover_image, gradient)")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (fallback.error || !fallback.data) notFound();
+    order = fallback.data;
+  } else {
+    if (!orderData.data) notFound();
+    order = orderData.data;
+  }
   if (!order) notFound();
+  const typedOrder = order as unknown as {
+    id: string;
+    amount: number;
+    status: string;
+    payment_method: string | null;
+    trx_id: string | null;
+    coupon_id: string | null;
+    created_at: string;
+    course_id: string | null;
+    product_id: string | null;
+    variant_id?: string | null;
+    access_email?: string | null;
+    access_whatsapp?: string | null;
+    admin_note?: string | null;
+    courses: { title: string; slug: string; cover_image: string | null } | null;
+    products: { name: string; slug: string; cover_image: string | null; gradient: string | null; delivery_type?: string; invite_link?: string; variants?: unknown } | null;
+  };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -57,28 +68,29 @@ export default async function OrderDetailPage({
     .eq("id", user.id)
     .single();
 
-  const course = order.courses as unknown as {
+  const course = typedOrder.courses as unknown as {
     title: string;
     slug: string;
     cover_image: string | null;
   } | null;
-  const product = order.products as unknown as {
+  const product = typedOrder.products as unknown as {
     name: string;
     slug: string;
     cover_image: string | null;
     gradient: string | null;
   } | null;
   const isProduct = Boolean(product);
-  const meta = statusMeta(order.status);
+  const meta = statusMeta(typedOrder.status);
   const itemName = isProduct ? product?.name ?? "Product" : course?.title ?? "Course";
   const itemLink = isProduct
     ? `/digital-products/${product?.slug ?? ""}`
     : `/courses/${course?.slug ?? ""}`;
   const cover = isProduct ? product?.cover_image : course?.cover_image;
   const gradient = product?.gradient ?? "linear-gradient(135deg,#4f46e5,#7c3aed)";
-  const orderNumber = `PLK-${order.id.slice(0, 8).toUpperCase()}`;
-  const total = Number(order.amount);
-  const discounted = order.coupon_id ? total * 1.15 : null;
+  const orderNumber = `PLK-${typedOrder.id.slice(0, 8).toUpperCase()}`;
+  const total = Number(typedOrder.amount);
+  const discounted = typedOrder.coupon_id ? total * 1.15 : null;
+  // Use typedOrder for all order fields below
 
   return (
     <div className="space-y-6">
