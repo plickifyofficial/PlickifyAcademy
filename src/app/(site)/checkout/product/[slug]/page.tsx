@@ -122,7 +122,6 @@ export default async function ProductCheckoutPage({
                     Lifetime access
                   </p>
                 ) : null}
-                </p>
               </div>
             </div>
 
