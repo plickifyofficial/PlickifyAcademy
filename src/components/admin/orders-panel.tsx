@@ -15,6 +15,7 @@ type Order = {
   status: string;
   payment_method?: string | null;
   trx_id?: string | null;
+  sender_number?: string | null;
   variant_id?: string | null;
   access_email?: string | null;
   access_whatsapp?: string | null;
@@ -107,9 +108,14 @@ export function OrdersPanel({
                         <span className="font-medium capitalize">
                           {order.payment_method === "nagad" ? "Nagad" : "bKash"}
                         </span>
+                        {order.sender_number && (
+                          <span className="block font-mono text-xs text-[#646970]">
+                            📱 {order.sender_number}
+                          </span>
+                        )}
                         {order.trx_id && (
                           <span className="block font-mono text-xs text-[#646970]">
-                            {order.trx_id}
+                            TrxID: {order.trx_id}
                           </span>
                         )}
                       </div>

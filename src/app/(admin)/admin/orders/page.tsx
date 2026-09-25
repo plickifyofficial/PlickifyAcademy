@@ -10,7 +10,7 @@ export default async function AdminOrdersPage() {
   const { data: orders } = await supabase
     .from("orders")
     .select("*, courses(title), products(name, delivery_type, variants)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }) as unknown as { data: Array<import("@/lib/types").Order & { courses: { title: string } | null; products: { name: string } | null }> | null };
 
   const userIds = [...new Set((orders ?? []).map((o) => o.user_id))];
   const emails: Record<string, string> = {};

@@ -85,6 +85,7 @@ export type Order = {
   status: "pending" | "paid" | "failed";
   payment_method: string | null;
   trx_id: string | null;
+  sender_number?: string | null;
   coupon_id: string | null;
   variant_id?: string | null;
   access_email?: string | null;

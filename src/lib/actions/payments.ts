@@ -205,6 +205,7 @@ export async function submitProductPayment(input: {
     status: "pending",
     payment_method: method,
     trx_id: trxId,
+    sender_number: senderNumber,
   };
   if (input.variantId) orderPayload.variant_id = input.variantId;
   if (deliveryType === "access") {
@@ -221,7 +222,8 @@ export async function submitProductPayment(input: {
         amount,
         status: "pending",
         payment_method: method,
-        trx_id: trxId + (deliveryType === "access" ? ` | access:${input.accessEmail}/${input.accessWhatsapp}` : "") + (input.variantId ? ` | variant:${input.variantId}` : ""),
+        trx_id: trxId,
+        sender_number: senderNumber,
       } as never)
       .select("id")
       .single() as { data: { id: string } | null; error: { message: string } | null };
