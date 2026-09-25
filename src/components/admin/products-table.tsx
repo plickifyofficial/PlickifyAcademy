@@ -640,18 +640,6 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   </div>
                 </>
               )}
-              <div>
-                <label className="wp-label">Stock Quantity (empty = unlimited)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={form.stock_quantity}
-                  onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
-                  className="wp-input"
-                  placeholder="e.g. 100 or empty for unlimited"
-                />
-                <p className="mt-1 text-xs text-[#646970]">0 = out of stock → shows Waitlist</p>
-              </div>
               <div className="flex items-center gap-2 pt-6">
                 <label className="flex items-center gap-2 text-sm text-[#3c434a]">
                   <input type="checkbox" checked={!!form.allow_waitlist} onChange={(e) => setForm({ ...form, allow_waitlist: e.target.checked })} className="h-4 w-4" />
