@@ -132,11 +132,16 @@ export async function submitProductPayment(input: {
     .single()) as { data: import("@/lib/types").Product | null };
   if (!product) return { error: "Product not found" };
 
-  // Handle variant pricing
+  // Handle variant pricing + stock
   let amount = Number((product as import("@/lib/types").Product).price);
   if (input.variantId && Array.isArray((product as import("@/lib/types").Product).variants)) {
-    const v = ((product as import("@/lib/types").Product).variants as { id: string; price: number }[]).find((x) => x.id === input.variantId);
-    if (v) amount = Number(v.price);
+    const v = ((product as import("@/lib/types").Product).variants as { id: string; price: number; stock_quantity?: string | number | null }[]).find((x) => x.id === input.variantId);
+    if (v) {
+      amount = Number(v.price);
+      const vs = (v as { stock_quantity?: string | number | null }).stock_quantity;
+      const vn = vs === "" || vs == null ? null : Number(vs);
+      if (vn != null && Number.isFinite(vn) && vn <= 0) return { error: "Selected variant is out of stock" };
+    }
   }
 
   // Handle access type extra fields
