@@ -33,11 +33,11 @@ export default async function AdminLayout({
   const adminName = profile?.full_name || user.email;
 
   return (
-    <div className="flex min-h-screen bg-[#f0f0f1]">
+    <div className="flex h-screen overflow-hidden bg-[#f0f0f1]">
       <AdminSidebar isInstructor={isInstructor} />
 
-      <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-30 flex h-12 items-center gap-3 border-b border-black/10 bg-[#1d2327] px-4">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-3 border-b border-black/10 bg-[#1d2327] px-4">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-bold text-zinc-800">
               P
@@ -72,7 +72,7 @@ export default async function AdminLayout({
           </div>
         </header>
 
-        <main className="px-4 py-6 md:px-8">{children}</main>
+        <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8">{children}</main>
       </div>
     </div>
   );

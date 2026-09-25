@@ -144,7 +144,7 @@ export function AdminSidebar({ isInstructor = false }: Props) {
 
       <aside
         className={cn(
-          "wp-sidebar fixed inset-y-0 left-0 z-50 flex w-[200px] flex-col overflow-y-auto transition-transform lg:static lg:z-auto lg:translate-x-0 lg:overflow-visible",
+          "wp-sidebar fixed inset-y-0 left-0 z-50 flex w-[200px] flex-col overflow-y-auto transition-transform lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0 lg:overflow-y-auto",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
