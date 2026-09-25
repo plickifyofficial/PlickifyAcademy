@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PrintButton } from "@/components/orders/print-button";
 
 export const metadata = { title: "Order" };
 
@@ -115,12 +116,7 @@ export default async function OrderDetailPage({
           </p>
         </div>
         <div className="flex gap-2 print:hidden">
-          <button
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
-          >
-            <i className="fa-solid fa-print" /> Print / PDF
-          </button>
+          <PrintButton />
           <a
             href={itemLink}
             className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 px-5 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
@@ -194,13 +190,13 @@ export default async function OrderDetailPage({
               <p className="font-bold text-zinc-900">{itemName}</p>
               <p className="text-xs text-zinc-500">
                 {isProduct ? "Digital Product" : "Online Course"}
-                {(order as { variant_id?: string }).variant_id ? ` · Variant: ${(order as { variant_id?: string }).variant_id}` : ""}
+                {(typedOrder as { variant_id?: string }).variant_id ? ` · Variant: ${(typedOrder as { variant_id?: string }).variant_id}` : ""}
                 {(typedOrder.products as { delivery_type?: string } | null)?.delivery_type ? ` · ${(typedOrder.products as { delivery_type?: string }).delivery_type}` : ""}
               </p>
-              {(order as { admin_note?: string }).admin_note && (
+              {(typedOrder as { admin_note?: string }).admin_note && (
                 <div className="mt-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
                   <p className="font-semibold">Admin Note:</p>
-                  <p className="mt-1 whitespace-pre-wrap">{(order as { admin_note?: string }).admin_note}</p>
+                  <p className="mt-1 whitespace-pre-wrap">{(typedOrder as { admin_note?: string }).admin_note}</p>
                 </div>
               )}
             </div>

@@ -20,10 +20,9 @@ export default async function CheckoutPage({
   const settings = await getSiteSettings();
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const user = session?.user ?? null;
-  // Proxy handles redirect with next param — don't redirect here to avoid loop, show login prompt below
+    data: { user },
+  } = await supabase.auth.getUser();
+  // Proxy handles redirect, but keep server check for security — use getUser for checkout (needs validation)
 
   const { data: course } = await supabase
     .from("courses")
@@ -50,7 +49,7 @@ export default async function CheckoutPage({
   const { data: enrolled } = await supabase
     .from("enrollments")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", user!.id)
     .eq("course_id", courseId)
     .maybeSingle();
   if (enrolled) redirect(`/courses/${course.slug}`);

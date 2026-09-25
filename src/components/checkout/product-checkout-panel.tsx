@@ -63,7 +63,7 @@ export function ProductCheckoutPanel({
     }
 
     if ((result as { orderId?: string }).orderId) {
-      router.push(`/dashboard/orders/${(result as { orderId: string }).orderId}`);
+      router.push(`/orders/${(result as { orderId: string }).orderId}`);
       return;
     }
     setDone(true);
