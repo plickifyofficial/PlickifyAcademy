@@ -30,17 +30,13 @@ const GROUPS: Group[] = [
     title: "My Store",
     items: [
       { href: "/dashboard/my-products", label: "Digital Products", icon: "fa-solid fa-box-open" },
-      { href: "/dashboard/downloads", label: "Downloads", icon: "fa-solid fa-download" },
       { href: "/dashboard/orders", label: "Orders", icon: "fa-solid fa-receipt" },
       { href: "/dashboard/wishlist", label: "Wishlist", icon: "fa-solid fa-heart" },
     ],
   },
   {
     title: "Communication",
-    items: [
-      { href: "/dashboard/messages", label: "Messages", icon: "fa-solid fa-comment-dots" },
-      { href: "/dashboard/notifications", label: "Notifications", icon: "fa-solid fa-bell" },
-    ],
+    items: [{ href: "/dashboard/messages", label: "Messages", icon: "fa-solid fa-comment-dots" }],
   },
   {
     title: "Account",
@@ -356,8 +352,8 @@ export function StudentShell({
           [
             { href: "/dashboard", label: "Home", icon: "fa-solid fa-house" },
             { href: "/dashboard/courses", label: "Courses", icon: "fa-solid fa-graduation-cap" },
-            { href: "/dashboard/live-classes", label: "Live", icon: "fa-solid fa-video" },
-            { href: "/dashboard/notifications", label: "Bell", icon: "fa-solid fa-bell" },
+            { href: "/dashboard/wishlist", label: "Wishlist", icon: "fa-solid fa-heart" },
+            { href: "/dashboard/messages", label: "Messages", icon: "fa-solid fa-comment-dots" },
             { href: "/dashboard/profile", label: "Me", icon: "fa-solid fa-user" },
           ] as const
         ).map((item) => {
