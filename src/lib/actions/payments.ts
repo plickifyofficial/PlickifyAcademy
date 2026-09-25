@@ -214,6 +214,7 @@ export async function submitProductPayment(input: {
   }
   let { data: inserted, error } = await admin.from("orders").insert(orderPayload as never).select("id").single() as { data: { id: string } | null; error: { code: string; message: string } | null };
   if (error && error.code === "42703") {
+    // Fallback without new columns (sender_number, variant, access) if migration not run
     const fallbackRes = await admin
       .from("orders")
       .insert({
@@ -222,8 +223,7 @@ export async function submitProductPayment(input: {
         amount,
         status: "pending",
         payment_method: method,
-        trx_id: trxId,
-        sender_number: senderNumber,
+        trx_id: `${trxId} | sender:${senderNumber}${input.variantId ? ` | variant:${input.variantId}` : ""}${deliveryType === "access" ? ` | access:${input.accessEmail}/${input.accessWhatsapp}` : ""}`,
       } as never)
       .select("id")
       .single() as { data: { id: string } | null; error: { message: string } | null };

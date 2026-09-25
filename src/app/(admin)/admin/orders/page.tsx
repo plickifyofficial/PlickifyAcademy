@@ -14,7 +14,7 @@ export default async function AdminOrdersPage() {
 
   const userIds = [...new Set((orders ?? []).map((o) => o.user_id))];
   const emails: Record<string, string> = {};
-  const profiles: Record<string, { full_name: string | null; email: string | null }> = {};
+  const profiles: Record<string, { full_name: string | null; email: string | null; avatar_url: string | null }> = {};
   if (userIds.length > 0) {
     const admin = createAdminClient();
     const { data: authUsers } = await admin.auth.admin.listUsers({
@@ -23,9 +23,9 @@ export default async function AdminOrdersPage() {
     for (const u of authUsers?.users ?? []) {
       emails[u.id] = u.email ?? "";
     }
-    const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", userIds);
+    const { data: profs } = await supabase.from("profiles").select("id, full_name, email, avatar_url").in("id", userIds);
     for (const p of profs ?? []) {
-      profiles[p.id] = { full_name: p.full_name, email: (p as { email?: string }).email ?? emails[p.id] ?? "" };
+      profiles[p.id] = { full_name: p.full_name, email: (p as { email?: string }).email ?? emails[p.id] ?? "", avatar_url: (p as { avatar_url?: string | null }).avatar_url ?? null };
     }
   }
 

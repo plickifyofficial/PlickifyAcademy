@@ -30,7 +30,7 @@ export function OrdersPanel({
 }: {
   orders: Order[];
   emails: Record<string, string>;
-  profiles: Record<string, { full_name: string | null; email: string | null }>;
+  profiles: Record<string, { full_name: string | null; email: string | null; avatar_url: string | null }>;
 }) {
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [note, setNote] = useState<Record<string, string>>({});
@@ -98,9 +98,21 @@ export function OrdersPanel({
                     {order.access_email && <div className="text-xs font-mono text-[#2271b1]">{order.access_email} / {order.access_whatsapp}</div>}
                   </td>
                   <td className="text-[#3c434a]">
-                    <div className="font-medium">{profile?.full_name || emails[order.user_id] || order.user_id.slice(0, 8)}</div>
-                    <div className="text-xs text-[#646970]">{profile?.email || emails[order.user_id] || ""}</div>
-                    <div className="text-xs font-mono text-[#646970]">{order.user_id.slice(0, 8)}</div>
+                    <div className="flex items-center gap-2">
+                      {profile?.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={profile.avatar_url} alt={profile.full_name || ""} className="h-8 w-8 rounded-full object-cover" />
+                      ) : (
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-200 text-xs font-bold text-zinc-600">
+                          {(profile?.full_name || emails[order.user_id] || "U").charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                      <div>
+                        <div className="font-medium">{profile?.full_name || emails[order.user_id] || order.user_id.slice(0, 8)}</div>
+                        <div className="text-xs text-[#646970]">{profile?.email || emails[order.user_id] || ""}</div>
+                      </div>
+                    </div>
+                    <div className="mt-1 text-xs font-mono text-[#646970]">{order.user_id.slice(0, 8)}</div>
                   </td>
                   <td className="text-[#3c434a]">
                     {order.payment_method ? (
