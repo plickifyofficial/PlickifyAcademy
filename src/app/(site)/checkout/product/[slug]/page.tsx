@@ -112,16 +112,16 @@ export default async function ProductCheckoutPage({
                     {product.description}
                   </p>
                 )}
-                <p className="mt-2 text-xs font-medium text-zinc-500">
-                  <i className="fa-solid fa-bolt mr-1 text-brand-600" />
-                  Instant download after verification
-                  {(product as { lifetime_access?: boolean }).lifetime_access && (
-                    <>
-                      <span className="mx-2 text-zinc-300">·</span>
-                      <i className="fa-solid fa-infinity mr-1 text-brand-600" />
-                      Lifetime access
-                    </>
-                  )}
+                {(product as { checkout_note?: string }).checkout_note ? (
+                  <p className="mt-2 text-xs font-medium text-zinc-500">
+                    {(product as { checkout_note?: string }).checkout_note}
+                  </p>
+                ) : (product as { lifetime_access?: boolean }).lifetime_access ? (
+                  <p className="mt-2 text-xs font-medium text-zinc-500">
+                    <i className="fa-solid fa-infinity mr-1 text-brand-600" />
+                    Lifetime access
+                  </p>
+                ) : null}
                 </p>
               </div>
             </div>
