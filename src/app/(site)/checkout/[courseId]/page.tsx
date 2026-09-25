@@ -19,10 +19,11 @@ export default async function CheckoutPage({
   const supabase = await createClient();
   const settings = await getSiteSettings();
 
+  // Don't block render on auth — proxy handles redirect, client will show login if needed
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  // Proxy handles redirect, but keep server check for security — use getUser for checkout (needs validation)
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   const { data: course } = await supabase
     .from("courses")
@@ -32,24 +33,16 @@ export default async function CheckoutPage({
     .single();
   if (!course) notFound();
 
-  if (!user) {
-    return (
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-6">
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
-          <h2 className="text-xl font-bold text-amber-900">Please login to checkout</h2>
-          <p className="mt-2 text-sm text-amber-800">You need to be logged in to purchase this course.</p>
-          <a href={`/login?next=${encodeURIComponent(`/checkout/${courseId}`)}`} className="mt-6 inline-flex rounded-full bg-brand-600 px-8 py-3 text-sm font-bold text-white">
-            Login to Continue
-          </a>
-        </div>
-      </main>
-    );
+  let enrolled = null as { id: string } | null;
+  if (user) {
+    const { data: enrolledData } = await supabase
+      .from("enrollments")
+      .select("id")
+      .eq("user_id", user!.id)
+      .eq("course_id", courseId)
+      .maybeSingle();
+    enrolled = enrolledData as { id: string } | null;
   }
-
-  const { data: enrolled } = await supabase
-    .from("enrollments")
-    .select("id")
-    .eq("user_id", user!.id)
     .eq("course_id", courseId)
     .maybeSingle();
   if (enrolled) redirect(`/courses/${course.slug}`);
