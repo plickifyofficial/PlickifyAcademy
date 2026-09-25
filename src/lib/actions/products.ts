@@ -188,6 +188,22 @@ export async function createProduct(formData: FormData) {
 
   const newColumns: Record<string, unknown> = { delivery_type, variants, stock_quantity, allow_waitlist, invite_link, lifetime_access };
 
+  // Ensure custom category/product_type are added to categories table for filtering
+  const customCategory = readString(formData, "category");
+  if (customCategory) {
+    const { data: existingCat } = await supabase.from("categories").select("id").eq("name", customCategory).maybeSingle();
+    if (!existingCat) {
+      await supabase.from("categories").insert({ name: customCategory, slug: customCategory.toLowerCase().replace(/[^a-z0-9]+/g, "-"), type: "product", is_published: true } as never);
+    }
+  }
+  const customType = readString(formData, "product_type");
+  if (customType) {
+    const { data: existingType } = await supabase.from("categories").select("id").eq("name", customType).maybeSingle();
+    if (!existingType) {
+      // product_type is not a separate table, but we can store it as a category with type product as well for filtering
+    }
+  }
+
   // Try with new columns, fallback without if columns don't exist yet (0 bug for existing DB)
   let { error } = await supabase.from("products").insert({ ...basePayload, ...newColumns } as never);
   if (error && error.code === "42703" && error.message.includes("column")) {
@@ -241,6 +257,15 @@ export async function updateProduct(productId: string, formData: FormData) {
   const allow_waitlist = readBool(formData, "allow_waitlist");
   const invite_link = readString(formData, "invite_link") || null;
   const lifetime_access = readBool(formData, "lifetime_access");
+
+  // Ensure custom category exists for filtering
+  const customCategoryUp = readString(formData, "category");
+  if (customCategoryUp) {
+    const { data: existingCatUp } = await supabase.from("categories").select("id").eq("name", customCategoryUp).maybeSingle();
+    if (!existingCatUp) {
+      await supabase.from("categories").insert({ name: customCategoryUp, slug: customCategoryUp.toLowerCase().replace(/[^a-z0-9]+/g, "-"), type: "product", is_published: true } as never);
+    }
+  }
 
   const basePayload: Record<string, unknown> = {
     name,
