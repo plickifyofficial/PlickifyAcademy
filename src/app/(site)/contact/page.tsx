@@ -1,9 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Faq } from "@/components/home/faq";
 import { ContactForm } from "@/components/contact/contact-form";
 import { getSiteContent } from "@/lib/site-content";
-import { getPublishedFaqs } from "@/lib/content-modules";
 import { contactDefaults, type ContactContent } from "@/lib/content-schema";
 import { pageMetadata } from "@/lib/seo";
 
@@ -26,10 +24,7 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 export default async function ContactPage() {
-  const [content, dbFaqs] = await Promise.all([
-    getSiteContent("contact", contactDefaults) as Promise<ContactContent>,
-    getPublishedFaqs("contact"),
-  ]);
+  const content = (await getSiteContent("contact", contactDefaults)) as ContactContent;
 
   return (
     <main className="bg-white">
@@ -199,15 +194,6 @@ export default async function ContactPage() {
           </div>
         </div>
       </section>
-
-      {/* FAQ */}
-      <Faq
-        content={{
-          title: content.faqTitle,
-          items: (content.faqItems ?? []).map((f) => ({ q: f.q, a: f.a })),
-        }}
-        items={dbFaqs.map((f) => ({ q: f.question, a: f.answer }))}
-      />
 
       {/* Map */}
       <section id="map" className="bg-[#F5F9FF] px-4 py-16 sm:px-6">
